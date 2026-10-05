@@ -16,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
-  Minus,
   Search,
   ExternalLink,
 } from "lucide-react";
@@ -63,35 +62,35 @@ export function WeeklyView({
 
   return (
     <div className="space-y-4">
-      {/* Top Header & Navigation Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
+      {/* Header & Navigation */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-zinc-100 tracking-tight">
-            Weekly View
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+            Weekly
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Pantau konsistensi pengerjaan seluruh akun tuyul per minggu
+          <p className="text-xs text-gray-500">
+            Monitor daily completion consistency across the week
           </p>
         </div>
 
         {/* Week Navigator */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md p-0.5 shadow-xs">
+          <div className="flex items-center bg-white border border-gray-200 rounded-md p-0.5 shadow-2xs">
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2"
+              className="h-7 px-1.5"
               onClick={() => handleWeekNav(-7)}
               disabled={isPending}
               title="Previous Week"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-3 text-xs font-semibold"
+              className="h-7 px-2.5 text-xs font-medium text-gray-700"
               onClick={handleThisWeek}
               disabled={isPending}
             >
@@ -101,124 +100,144 @@ export function WeeklyView({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 px-2"
+              className="h-7 px-1.5"
               onClick={() => handleWeekNav(7)}
               disabled={isPending}
               title="Next Week"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </Button>
           </div>
 
-          <div className="text-xs font-medium text-zinc-300 font-mono bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-md">
-            {formatDateShort(initialWeekDays[0].dateStr)} -{" "}
-            {formatDateShort(initialWeekDays[6].dateStr)}
-          </div>
+          <span className="text-xs font-medium text-gray-600 font-mono bg-white border border-gray-200 px-2.5 py-1 rounded-md shadow-2xs">
+            {formatDateShort(initialWeekDays[0].dateStr)} – {formatDateShort(initialWeekDays[6].dateStr)}
+          </span>
         </div>
       </div>
 
-      {/* Legend & Search Bar */}
-      <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+      {/* Flat Toolbar: Search & Legend */}
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-1">
         {/* Search */}
-        <div className="relative min-w-[220px] max-w-sm">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+        <div className="relative min-w-[200px] max-w-xs">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Cari akun tuyul..."
+            placeholder="Search accounts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-md pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+            className="w-full bg-white border border-gray-200 rounded-md pl-8 pr-3 py-1.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 h-8 shadow-2xs"
           />
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 text-xs text-zinc-400">
+        <div className="flex items-center gap-3 text-xs text-gray-500">
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded bg-emerald-500/20 border border-emerald-500/60 text-emerald-400 flex items-center justify-center font-bold text-xs">
+            <span className="w-4 h-4 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px]">
               ✓
             </span>
-            <span>Semua Selesai</span>
+            <span>Completed</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded bg-amber-500/20 border border-amber-500/60 text-amber-400 flex items-center justify-center font-bold text-xs">
+            <span className="w-4 h-4 rounded bg-amber-100 text-amber-700 flex items-center justify-center text-[10px] font-mono font-medium">
               •
             </span>
-            <span>Sebagian</span>
+            <span>Partial</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 flex items-center justify-center font-bold text-xs">
-              ✕
+            <span className="w-4 h-4 rounded bg-gray-100 text-gray-400 flex items-center justify-center text-[10px]">
+              —
             </span>
-            <span>Belum Dikerjakan</span>
+            <span>Not Started</span>
           </div>
         </div>
       </div>
 
-      {/* Weekly Matrix Table */}
-      <div className="bg-zinc-900/80 border border-zinc-800 rounded-lg overflow-hidden shadow-sm">
+      {/* Main Weekly Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950 text-zinc-400 text-xs font-semibold">
-                <th className="py-3 px-4 sticky left-0 z-20 bg-zinc-950 min-w-[200px] border-r border-zinc-800">
+              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold">
+                <th className="py-2.5 px-3.5 sticky left-0 z-20 bg-gray-50 min-w-[190px] border-r border-gray-200">
                   Account ({filteredAccounts.length})
                 </th>
-                {initialWeekDays.map((day) => (
-                  <th
-                    key={day.dateStr}
-                    className={cn(
-                      "py-3 px-3 text-center min-w-[90px] border-r border-zinc-800/60",
-                      day.isToday && "bg-blue-950/20 text-blue-400"
-                    )}
-                  >
-                    <div className="font-semibold text-zinc-200">
-                      {day.dayName}
-                    </div>
-                    <div className="text-[10px] font-mono text-zinc-400">
-                      {day.dateStr.slice(5)}
-                    </div>
-                  </th>
-                ))}
+
+                {initialWeekDays.map((day) => {
+                  const isToday = day.dateStr === todayStr;
+                  return (
+                    <th
+                      key={day.dateStr}
+                      className={cn(
+                        "py-2.5 px-2 text-center min-w-[70px] border-r border-gray-100",
+                        isToday && "bg-blue-50/60"
+                      )}
+                    >
+                      <Link
+                        href={`/tracker?date=${day.dateStr}`}
+                        className="group inline-flex flex-col items-center hover:text-blue-600 transition-colors"
+                        title={`Jump to Daily Tracker on ${day.dateStr}`}
+                      >
+                        <span className="font-semibold text-gray-800 group-hover:text-blue-600">
+                          {day.dayShort}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-[11px] font-mono",
+                            isToday ? "text-blue-600 font-bold" : "text-gray-400 group-hover:text-blue-500"
+                          )}
+                        >
+                          {day.dateNumber}
+                        </span>
+                      </Link>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-zinc-800/60 text-xs">
+            <tbody className="divide-y divide-gray-100 text-xs">
               {filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-10 text-center text-zinc-500">
-                    Tidak ada data akun.
+                  <td
+                    colSpan={8}
+                    className="py-10 text-center text-gray-400"
+                  >
+                    No accounts found.
                   </td>
                 </tr>
               ) : (
                 filteredAccounts.map((acc) => (
                   <tr
                     key={acc.id}
-                    className="hover:bg-zinc-800/30 transition-colors"
+                    className="hover:bg-gray-50/80 transition-colors"
                   >
-                    {/* Sticky Account Col */}
-                    <td className="py-2.5 px-4 sticky left-0 z-10 bg-zinc-900 border-r border-zinc-800">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0">
+                    {/* Sticky Account Column */}
+                    <td className="py-2 px-3.5 sticky left-0 z-10 border-r border-gray-200 bg-white">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
                           <Link
                             href={`/accounts/${acc.id}`}
-                            className="font-semibold text-zinc-100 hover:text-blue-400 truncate flex items-center gap-1 group"
+                            className="font-semibold text-gray-900 hover:text-blue-600 flex items-center gap-1 group truncate"
                           >
                             <span>{acc.nickname}</span>
-                            <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-zinc-500" />
+                            <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-gray-400" />
                           </Link>
-                          <p className="text-[11px] text-zinc-400 truncate">
-                            {acc.job} • {acc.server}
-                          </p>
+                          {acc.status !== "Active" && (
+                            <Badge
+                              variant={acc.status === "Paused" ? "warning" : "neutral"}
+                              size="sm"
+                            >
+                              {acc.status}
+                            </Badge>
+                          )}
                         </div>
-                        {acc.status !== "Active" && (
-                          <Badge variant="neutral" size="sm">
-                            {acc.status}
-                          </Badge>
-                        )}
+                        <div className="text-[11px] text-gray-500 truncate mt-0.5">
+                          {acc.job} · {acc.server} {acc.groupName && `· ${acc.groupName}`}
+                        </div>
                       </div>
                     </td>
 
-                    {/* 7 Days Matrix Cells (Clickable to jump to daily tracker) */}
+                    {/* Day Cells */}
                     {acc.dailyStatus.map((day) => {
                       const isToday = day.dateStr === todayStr;
 
@@ -226,33 +245,36 @@ export function WeeklyView({
                         <td
                           key={day.dateStr}
                           className={cn(
-                            "py-2 px-2 text-center border-r border-zinc-800/40",
-                            isToday && "bg-blue-950/10"
+                            "py-2 px-2 text-center border-r border-gray-100",
+                            isToday && "bg-blue-50/20"
                           )}
                         >
                           <Link
                             href={`/tracker?date=${day.dateStr}`}
-                            title={`Buka Tracker ${acc.nickname} untuk tanggal ${day.dateStr} (${day.completedCount}/${day.totalAssigned})`}
-                            className="inline-flex flex-col items-center justify-center p-1.5 rounded-md hover:bg-zinc-800/80 transition-all group"
+                            className="inline-flex items-center justify-center p-1 rounded hover:bg-gray-100 transition-colors"
+                            title={`${acc.nickname} (${day.dateStr}): ${day.completedCount}/${day.totalAssigned} tasks`}
                           >
                             {day.status === "COMPLETED" && (
-                              <span className="w-7 h-7 rounded-md bg-emerald-950/80 border border-emerald-600/80 text-emerald-400 flex items-center justify-center font-bold text-sm shadow-xs group-hover:scale-105 transition-transform">
-                                <Check className="w-4 h-4 stroke-[3]" />
+                              <span className="w-5 h-5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold text-[10px]">
+                                <Check className="w-3 h-3 stroke-[2.5]" />
                               </span>
                             )}
+
                             {day.status === "PARTIAL" && (
-                              <span className="w-7 h-7 rounded-md bg-amber-950/80 border border-amber-600/80 text-amber-400 flex items-center justify-center font-bold text-xs font-mono shadow-xs group-hover:scale-105 transition-transform">
+                              <span className="px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-mono font-medium">
                                 {day.completedCount}/{day.totalAssigned}
                               </span>
                             )}
+
                             {day.status === "NOT_STARTED" && (
-                              <span className="w-7 h-7 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-600 flex items-center justify-center font-medium text-xs group-hover:border-zinc-600 transition-colors">
-                                ✕
+                              <span className="text-gray-300 font-mono text-xs select-none">
+                                —
                               </span>
                             )}
+
                             {day.status === "NO_TASKS" && (
-                              <span className="w-7 h-7 rounded-md text-zinc-700 flex items-center justify-center">
-                                <Minus className="w-3.5 h-3.5" />
+                              <span className="text-gray-200 font-mono text-xs select-none">
+                                ·
                               </span>
                             )}
                           </Link>

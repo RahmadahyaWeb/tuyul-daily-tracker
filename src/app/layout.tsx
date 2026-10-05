@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | Tuyul Tracker",
   },
   description:
-    "Aplikasi pelacak checklist aktivitas harian akun tuyul Ragnarok secara cepat, presisi, dan terstruktur.",
+    "Fast, precision daily checklist and activity management system for Ragnarok accounts.",
 };
 
 export default function RootLayout({
@@ -28,10 +28,10 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 selection:bg-blue-600/30 selection:text-blue-200">
+      <body className="min-h-full flex flex-col bg-[#F8F9FA] text-gray-900 selection:bg-blue-100 selection:text-blue-900">
         {children}
       </body>
     </html>

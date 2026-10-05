@@ -32,16 +32,16 @@ export function addDays(dateStr: string, days: number): string {
 
 /**
  * Format a YYYY-MM-DD string into a human readable label
- * e.g. "Senin, 05 Okt 2026"
+ * e.g. "Monday, Oct 5, 2026"
  */
-export function formatDateDisplay(dateStr: string, locale: string = "id-ID"): string {
+export function formatDateDisplay(dateStr: string, locale: string = "en-US"): string {
   if (!dateStr || !isValidDateString(dateStr)) return dateStr;
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
 
   return new Intl.DateTimeFormat(locale, {
     timeZone: "UTC",
-    weekday: "short",
+    weekday: "long",
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -49,9 +49,9 @@ export function formatDateDisplay(dateStr: string, locale: string = "id-ID"): st
 }
 
 /**
- * Format a date string into a compact format e.g. "05 Okt"
+ * Format a date string into a compact format e.g. "Oct 5"
  */
-export function formatDateShort(dateStr: string, locale: string = "id-ID"): string {
+export function formatDateShort(dateStr: string, locale: string = "en-US"): string {
   if (!dateStr || !isValidDateString(dateStr)) return dateStr;
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
@@ -65,9 +65,9 @@ export function formatDateShort(dateStr: string, locale: string = "id-ID"): stri
 
 export interface WeekDayInfo {
   dateStr: string; // YYYY-MM-DD
-  dayName: string; // Senin, Selasa...
-  dayShort: string; // Mon, Tue... / Sen, Sel...
-  dayNumber: number; // 1-31
+  dayName: string; // Monday, Tuesday...
+  dayShort: string; // Mon, Tue...
+  dateNumber: number; // 1-31
   isToday: boolean;
 }
 
@@ -90,8 +90,16 @@ export function getWeekDays(dateStr: string): WeekDayInfo[] {
   const todayStr = getTodayMakassar();
   const weekDays: WeekDayInfo[] = [];
 
-  const shortNames = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
-  const longNames = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+  const shortNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const longNames = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
 
   for (let i = 0; i < 7; i++) {
     const current = new Date(monday);
@@ -102,7 +110,7 @@ export function getWeekDays(dateStr: string): WeekDayInfo[] {
       dateStr: currentDateStr,
       dayName: longNames[i],
       dayShort: shortNames[i],
-      dayNumber: current.getUTCDate(),
+      dateNumber: current.getUTCDate(),
       isToday: currentDateStr === todayStr,
     });
   }

@@ -1,68 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #090a0f;
-  --bg-secondary: #11131a;
-  --bg-card: #151821;
-  --bg-card-hover: #1a1e2a;
-  --bg-input: #1a1e2a;
-  --border-color: #242938;
-  --border-color-subtle: #1e2230;
+  --bg-app: #F8F9FA;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F3F4F6;
+  --bg-hover: #F9FAFB;
   
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --border-subtle: #F3F4F6;
+  --border-default: #E5E7EB;
+  --border-strong: #D1D5DB;
 
-  --status-green: #10b981;
-  --status-green-bg: rgba(16, 185, 129, 0.15);
-  --status-yellow: #f59e0b;
-  --status-yellow-bg: rgba(245, 158, 11, 0.15);
-  --status-gray: #6b7280;
-  --status-gray-bg: rgba(107, 114, 128, 0.15);
-  --status-red: #ef4444;
-  --status-red-bg: rgba(239, 68, 68, 0.15);
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #6B7280;
+  --text-faint: #9CA3AF;
 
-  --accent-primary: #3b82f6;
-  --accent-hover: #2563eb;
+  --accent-primary: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-subtle: #EFF6FF;
+
+  --status-green: #16A34A;
+  --status-green-bg: #DCFCE7;
+  --status-green-border: #BBF7D0;
+
+  --status-amber: #D97706;
+  --status-amber-bg: #FEF3C7;
+  --status-amber-border: #FDE68A;
+
+  --status-red: #DC2626;
+  --status-red-bg: #FEE2E2;
+  --status-red-border: #FECACA;
 }
 
 body {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-app);
   color: var(--text-primary);
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbars for clean compact matrix tables */
+/* Crisp minimal scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: #F3F4F6;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-color);
+  background: #D1D5DB;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #9CA3AF;
 }
 
-/* Sticky styles for table */
+/* Table sticky positioning utilities */
 .sticky-col {
   position: sticky;
   left: 0;
   z-index: 10;
-  background-color: var(--bg-secondary);
+  background-color: #FFFFFF;
 }
 
 .sticky-header {
   position: sticky;
   top: 0;
   z-index: 20;
-  background-color: var(--bg-secondary);
+  background-color: #F9FAFB;
 }

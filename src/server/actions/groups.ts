@@ -20,7 +20,7 @@ export async function createGroup(data: { name: string }) {
     });
 
     if (existing) {
-      return { success: false, error: `Group "${parsed.data.name}" sudah ada.` };
+      return { success: false, error: `Group "${parsed.data.name}" already exists.` };
     }
 
     await prisma.group.create({
@@ -54,7 +54,7 @@ export async function updateGroup(data: { id: string; name: string }) {
     });
 
     if (existing && existing.id !== data.id) {
-      return { success: false, error: `Group "${parsed.data.name}" sudah ada.` };
+      return { success: false, error: `Group "${parsed.data.name}" already exists.` };
     }
 
     await prisma.group.update({

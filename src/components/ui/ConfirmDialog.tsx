@@ -23,8 +23,8 @@ export function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText = "Konfirmasi",
-  cancelText = "Batal",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   variant = "danger",
   isLoading = false,
 }: ConfirmDialogProps) {
@@ -35,19 +35,19 @@ export function ConfirmDialog({
           <div
             className={`p-2 rounded-full shrink-0 ${
               variant === "danger"
-                ? "bg-red-500/10 text-red-400"
-                : "bg-blue-500/10 text-blue-400"
+                ? "bg-red-50 text-red-600 border border-red-100"
+                : "bg-blue-50 text-blue-600 border border-blue-100"
             }`}
           >
             <AlertTriangle className="w-5 h-5" />
           </div>
-          <p className="text-sm text-zinc-300 pt-0.5">{message}</p>
+          <p className="text-sm text-gray-600 pt-0.5 leading-relaxed">{message}</p>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-800">
+        <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             size="sm"
             onClick={onClose}
             disabled={isLoading}

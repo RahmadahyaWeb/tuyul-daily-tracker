@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Dashboard — Tuyul Tracker",
-  description: "Ringkasan progres aktivitas harian tuyul",
+  description: "Overview of daily tuyul activity progress",
 };
 
 export const dynamic = "force-dynamic";

@@ -6,38 +6,37 @@ export const loginSchema = z.object({
 });
 
 export const groupSchema = z.object({
-  name: z.string().trim().min(1, "Nama group wajib diisi").max(50, "Maksimal 50 karakter"),
+  name: z.string().trim().min(1, "Group name is required").max(50, "Maximum 50 characters"),
 });
 
 export const activitySchema = z.object({
-  name: z.string().trim().min(1, "Nama activity wajib diisi").max(50, "Maksimal 50 karakter"),
+  name: z.string().trim().min(1, "Activity name is required").max(50, "Maximum 50 characters"),
   code: z
     .string()
     .trim()
-    .min(1, "Kode activity wajib diisi")
-    .max(20, "Maksimal 20 karakter")
+    .min(1, "Activity code is required")
+    .max(20, "Maximum 20 characters")
     .toUpperCase(),
   sortOrder: z.coerce.number().int().default(0),
   isActive: z.boolean().default(true),
 });
 
 export const accountSchema = z.object({
-  nickname: z.string().trim().min(1, "Nickname wajib diisi"),
-  username: z.string().trim().min(1, "Username login wajib diisi"),
-  password: z.string().min(1, "Password wajib diisi"),
-  server: z.string().trim().min(1, "Server wajib diisi"),
-  owner: z.string().trim().min(1, "Owner wajib diisi"),
-  job: z.string().trim().min(1, "Job / Class wajib diisi"),
+  nickname: z.string().trim().min(1, "Nickname is required"),
+  username: z.string().trim().min(1, "Login username is required"),
+  password: z.string().min(1, "Password is required"),
+  server: z.string().trim().min(1, "Server is required"),
+  owner: z.string().trim().min(1, "Owner is required"),
+  job: z.string().trim().min(1, "Job / Class is required"),
   level: z.coerce.number().int().min(1).max(999).default(1),
-  startDate: z.string().min(1, "Start date wajib diisi"),
+  startDate: z.string().min(1, "Start date is required"),
   status: z.enum(["Active", "Paused", "Finished"]).default("Active"),
   notes: z.string().optional().nullable(),
   groupId: z.string().optional().nullable(),
-  activityIds: z.array(z.string()).min(1, "Pilih minimal 1 aktivitas untuk akun ini"),
+  activityIds: z.array(z.string()).min(1, "Select at least 1 assigned activity"),
 });
 
 export const accountUpdateSchema = accountSchema.partial().extend({
   id: z.string().min(1),
-  // Password is optional during edit: if empty, keeps existing password
   password: z.string().optional(),
 });

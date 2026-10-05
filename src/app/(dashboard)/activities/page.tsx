@@ -3,8 +3,8 @@ import { getMasterActivities } from "@/server/db/queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Activities Master — Tuyul Tracker",
-  description: "Manajemen master checklist aktivitas harian",
+  title: "Activities — Tuyul Tracker",
+  description: "Master daily repeatable checklist activities management",
 };
 
 export const dynamic = "force-dynamic";

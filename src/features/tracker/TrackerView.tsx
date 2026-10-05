@@ -17,21 +17,16 @@ import {
   getTodayMakassar,
 } from "@/lib/date-utils";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Badge } from "@/components/ui/Badge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar,
   Check,
   RotateCcw,
-  CheckCheck,
   Search,
-  SlidersHorizontal,
   ExternalLink,
-  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +35,12 @@ interface TrackerViewProps {
 }
 
 type SortOption =
-  | "default"
-  | "name-asc"
-  | "name-desc"
   | "least-progress"
   | "most-progress"
-  | "group";
+  | "name-asc"
+  | "name-desc"
+  | "group"
+  | "default";
 
 type CompletionFilter = "all" | "completed" | "in-progress" | "not-started";
 
@@ -53,7 +48,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // Local date state
   const currentDate = initialData.dateStr;
   const todayDate = getTodayMakassar();
   const isViewingToday = currentDate === todayDate;
@@ -63,7 +57,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     initialData.accounts
   );
 
-  // Sync state when initialData changes (e.g. on date change)
   React.useEffect(() => {
     setAccounts(initialData.accounts);
   }, [initialData]);
@@ -75,9 +68,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const [completionFilter, setCompletionFilter] =
     useState<CompletionFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("least-progress");
-
-  // Track pending activity IDs for subtle inline loaders
-  const [pendingChecks, setPendingChecks] = useState<Record<string, boolean>>({});
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -93,23 +83,22 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const [dialogLoading, setDialogLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Date Navigation Handlers
+  // Date Navigation
   const handleDateChange = (newDate: string) => {
     startTransition(() => {
       router.push(`/tracker?date=${newDate}`);
     });
   };
 
-  // Optimistic Checkbox Toggle Handler
+  // Instant Optimistic Checkbox Toggle Handler
   const handleToggle = async (
     accountId: string,
     activityId: string,
     currentCompleted: boolean
   ) => {
     const nextCompleted = !currentCompleted;
-    const checkKey = `${accountId}-${activityId}`;
 
-    // 1. Optimistic update
+    // 1. Instant local state update
     setAccounts((prevAccounts) =>
       prevAccounts.map((acc) => {
         if (acc.id !== accountId) return acc;
@@ -134,8 +123,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       })
     );
 
-    // 2. Background server action
-    setPendingChecks((prev) => ({ ...prev, [checkKey]: true }));
+    // 2. Non-blocking background server update
     try {
       const res = await toggleActivityLog(
         accountId,
@@ -149,21 +137,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     } catch (err) {
       console.error(err);
       setErrorMessage("Failed to update activity. Changes rolled back.");
-      setTimeout(() => setErrorMessage(null), 4000);
-      // Rollback
-      setAccounts(initialData.accounts);
-    } finally {
-      setPendingChecks((prev) => {
-        const next = { ...prev };
-        delete next[checkKey];
-        return next;
-      });
+      setTimeout(() => setErrorMessage(null), 3000);
+      setAccounts(initialData.accounts); // rollback
     }
   };
 
   // Quick Complete Account
   const handleCompleteAccount = async (accountId: string) => {
-    // Optimistic
     setAccounts((prev) =>
       prev.map((acc) => {
         if (acc.id !== accountId) return acc;
@@ -181,7 +161,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       if (!res.success) throw new Error(res.error);
     } catch {
       setErrorMessage("Failed to complete account.");
-      setTimeout(() => setErrorMessage(null), 4000);
+      setTimeout(() => setErrorMessage(null), 3000);
       setAccounts(initialData.accounts);
     }
   };
@@ -192,7 +172,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     setDialogLoading(true);
     const accountId = confirmDialog.accountId;
 
-    // Optimistic
     setAccounts((prev) =>
       prev.map((acc) => {
         if (acc.id !== accountId) return acc;
@@ -210,7 +189,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       if (!res.success) throw new Error(res.error);
     } catch {
       setErrorMessage("Failed to reset account.");
-      setTimeout(() => setErrorMessage(null), 4000);
+      setTimeout(() => setErrorMessage(null), 3000);
       setAccounts(initialData.accounts);
     } finally {
       setDialogLoading(false);
@@ -220,7 +199,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
 
   // Quick Complete All
   const handleCompleteAll = async () => {
-    // Optimistic
     setAccounts((prev) =>
       prev.map((acc) => {
         if (acc.status !== "Active") return acc;
@@ -238,7 +216,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       if (!res.success) throw new Error(res.error);
     } catch {
       setErrorMessage("Failed to complete all.");
-      setTimeout(() => setErrorMessage(null), 4000);
+      setTimeout(() => setErrorMessage(null), 3000);
       setAccounts(initialData.accounts);
     }
   };
@@ -246,7 +224,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   // Quick Reset All
   const handleConfirmResetAll = async () => {
     setDialogLoading(true);
-    // Optimistic
     setAccounts((prev) =>
       prev.map((acc) => ({
         ...acc,
@@ -261,7 +238,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       if (!res.success) throw new Error(res.error);
     } catch {
       setErrorMessage("Failed to reset all.");
-      setTimeout(() => setErrorMessage(null), 4000);
+      setTimeout(() => setErrorMessage(null), 3000);
       setAccounts(initialData.accounts);
     } finally {
       setDialogLoading(false);
@@ -272,7 +249,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   // Filter and Sort Processing
   const filteredAccounts = useMemo(() => {
     return accounts.filter((acc) => {
-      // Search
       if (search.trim()) {
         const query = search.toLowerCase();
         const matchesNickname = acc.nickname.toLowerCase().includes(query);
@@ -281,17 +257,14 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         if (!matchesNickname && !matchesUsername && !matchesOwner) return false;
       }
 
-      // Group
       if (selectedGroup !== "all" && acc.groupId !== selectedGroup) {
         return false;
       }
 
-      // Status
       if (selectedStatus !== "all" && acc.status !== selectedStatus) {
         return false;
       }
 
-      // Completion Status
       if (completionFilter === "completed" && acc.progressPercent < 100)
         return false;
       if (
@@ -336,7 +309,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     }
   }, [filteredAccounts, sortBy]);
 
-  // Recalculate summary metrics based on current interactive state
+  // Recalculate summary metrics locally
   const activeList = accounts.filter((a) => a.status === "Active");
   const totalTasks = activeList.reduce((acc, a) => acc + a.totalAssigned, 0);
   const completedTasks = activeList.reduce(
@@ -351,65 +324,70 @@ export function TrackerView({ initialData }: TrackerViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Error Alert if any */}
+      {/* Error Alert */}
       {errorMessage && (
-        <div className="p-3 rounded-md bg-red-950/80 border border-red-800 text-red-300 text-xs flex items-center justify-between animate-in fade-in">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-red-400" />
-            <span>{errorMessage}</span>
-          </div>
+        <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between">
+          <span>{errorMessage}</span>
           <button
             onClick={() => setErrorMessage(null)}
-            className="text-red-400 hover:text-white"
+            className="text-red-500 hover:text-red-800 font-bold ml-2"
           >
             ×
           </button>
         </div>
       )}
 
-      {/* Date Navigation & Top Action Toolbar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
-        {/* Date Navigation */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-md p-0.5 shadow-xs">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => handleDateChange(addDays(currentDate, -1))}
-              disabled={isPending}
-              title="Previous Day"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-
-            <Button
-              variant={isViewingToday ? "secondary" : "ghost"}
-              size="sm"
-              className={cn(
-                "h-8 px-3 text-xs font-semibold",
-                isViewingToday && "bg-zinc-800 text-blue-400 border border-blue-500/20"
-              )}
-              onClick={() => handleDateChange(todayDate)}
-              disabled={isPending || isViewingToday}
-            >
-              Today
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => handleDateChange(addDays(currentDate, 1))}
-              disabled={isPending}
-              title="Next Day"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+      {/* Page Header: Title, Date Navigation & Progress Summary */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        {/* Left: Title & Date Controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+              Tracker
+            </h1>
+            <p className="text-xs text-gray-500">
+              {formatDateDisplay(currentDate)}
+            </p>
           </div>
 
-          {/* Date Picker Input */}
-          <div className="relative flex items-center">
+          <div className="flex items-center gap-1.5 ml-0 sm:ml-2">
+            <div className="flex items-center bg-white border border-gray-200 rounded-md p-0.5 shadow-2xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-1.5"
+                onClick={() => handleDateChange(addDays(currentDate, -1))}
+                disabled={isPending}
+                title="Previous Day"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </Button>
+
+              <Button
+                variant={isViewingToday ? "secondary" : "ghost"}
+                size="sm"
+                className={cn(
+                  "h-7 px-2.5 text-xs font-medium",
+                  isViewingToday && "bg-blue-50 text-blue-700 border border-blue-200"
+                )}
+                onClick={() => handleDateChange(todayDate)}
+                disabled={isPending || isViewingToday}
+              >
+                Today
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-1.5"
+                onClick={() => handleDateChange(addDays(currentDate, 1))}
+                disabled={isPending}
+                title="Next Day"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+
             <input
               type="date"
               value={currentDate}
@@ -417,244 +395,227 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 if (e.target.value) handleDateChange(e.target.value);
               }}
               disabled={isPending}
-              className="bg-zinc-900 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500 font-mono h-9"
+              className="bg-white border border-gray-200 rounded-md px-2 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
             />
-          </div>
-
-          <div className="hidden sm:flex items-center text-xs text-zinc-300 font-medium pl-1">
-            <span>{formatDateDisplay(currentDate)}</span>
           </div>
         </div>
 
-        {/* Quick Batch Actions & Progress summary */}
-        <div className="flex items-center gap-2.5">
-          {/* Quick Stats Pill */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-zinc-900/80 border border-zinc-800 rounded-md text-xs">
-            <span className="text-zinc-400">Progress:</span>
-            <span className="font-mono font-bold text-emerald-400">
-              {completedCountAcc}/{activeList.length} Akun
+        {/* Right: Progress Metric & Bulk Actions */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Natural Progress Summary */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-500">
+              <span className="font-semibold text-gray-900">
+                {completedCountAcc} of {activeList.length}
+              </span>{" "}
+              accounts completed
             </span>
-            <span className="text-zinc-400 font-mono">({overallPercent}%)</span>
+            <div className="w-20">
+              <ProgressBar value={overallPercent} size="sm" />
+            </div>
+            <span className="font-mono font-medium text-gray-700">
+              {overallPercent}%
+            </span>
           </div>
 
-          {/* Complete All */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={handleCompleteAll}
-            disabled={isPending || sortedAccounts.length === 0}
-            className="text-xs gap-1.5 hover:text-emerald-400"
-            title="Selesaikan seluruh checklist untuk hari ini"
-          >
-            <CheckCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Complete All</span>
-          </Button>
+          <div className="h-4 w-px bg-gray-200 hidden sm:block" />
 
-          {/* Reset All */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() =>
-              setConfirmDialog({
-                isOpen: true,
-                type: "reset-all",
-              })
-            }
-            disabled={isPending || sortedAccounts.length === 0}
-            className="text-xs gap-1.5 hover:text-red-400"
-            title="Reset seluruh checklist untuk hari ini"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-red-400" />
-            <span>Reset All</span>
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleCompleteAll}
+              disabled={isPending || sortedAccounts.length === 0}
+              className="h-8 text-xs font-medium text-gray-700"
+              title="Complete all accounts for today"
+            >
+              Complete All
+            </Button>
+
+            <Button
+              variant="ghost-danger"
+              size="sm"
+              onClick={() =>
+                setConfirmDialog({
+                  isOpen: true,
+                  type: "reset-all",
+                })
+              }
+              disabled={isPending || sortedAccounts.length === 0}
+              className="h-8 text-xs font-medium"
+              title="Reset all checklists for today"
+            >
+              Reset All
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Filter and Search Single Toolbar */}
-      <div className="bg-zinc-900/90 border border-zinc-800/90 rounded-lg p-3 flex flex-wrap items-center gap-2.5 text-xs">
+      {/* Flat Single Toolbar (Directly above table without big card wrapper) */}
+      <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
         {/* Search */}
-        <div className="relative flex-1 min-w-[180px] max-w-xs">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Cari nickname, username, owner..."
+            placeholder="Search accounts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-md pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+            className="w-full bg-white border border-gray-200 rounded-md pl-8 pr-3 py-1.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 h-8 shadow-2xs"
           />
         </div>
 
         {/* Group Filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400 text-[11px] hidden sm:inline">Group:</span>
-          <select
-            value={selectedGroup}
-            onChange={(e) => setSelectedGroup(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500 cursor-pointer"
-          >
-            <option value="all">Semua Group</option>
-            {initialData.groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={selectedGroup}
+          onChange={(e) => setSelectedGroup(e.target.value)}
+          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+        >
+          <option value="all">All Groups</option>
+          {initialData.groups.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
 
         {/* Status Filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400 text-[11px] hidden sm:inline">Status:</span>
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500 cursor-pointer"
-          >
-            <option value="Active">Active</option>
-            <option value="Paused">Paused</option>
-            <option value="Finished">Finished</option>
-            <option value="all">Semua Status</option>
-          </select>
-        </div>
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+        >
+          <option value="Active">Active</option>
+          <option value="Paused">Paused</option>
+          <option value="Finished">Finished</option>
+          <option value="all">All Status</option>
+        </select>
 
-        {/* Completion Status Filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400 text-[11px] hidden sm:inline">Checklist:</span>
-          <select
-            value={completionFilter}
-            onChange={(e) => setCompletionFilter(e.target.value as CompletionFilter)}
-            className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500 cursor-pointer"
-          >
-            <option value="all">Semua Progres</option>
-            <option value="not-started">Not Started (0%)</option>
-            <option value="in-progress">In Progress (1-99%)</option>
-            <option value="completed">Completed (100%)</option>
-          </select>
-        </div>
+        {/* Progress Filter */}
+        <select
+          value={completionFilter}
+          onChange={(e) => setCompletionFilter(e.target.value as CompletionFilter)}
+          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+        >
+          <option value="all">All Progress</option>
+          <option value="not-started">Not Started (0%)</option>
+          <option value="in-progress">In Progress (1-99%)</option>
+          <option value="completed">Completed (100%)</option>
+        </select>
 
-        {/* Sort By */}
-        <div className="flex items-center gap-1.5 ml-auto">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 hidden sm:inline" />
-          <span className="text-zinc-400 text-[11px] hidden sm:inline">Sort:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500 cursor-pointer font-medium"
-          >
-            <option value="least-progress">Least Progress (Prioritas)</option>
-            <option value="most-progress">Most Progress</option>
-            <option value="name-asc">Nickname A-Z</option>
-            <option value="name-desc">Nickname Z-A</option>
-            <option value="group">Group</option>
-            <option value="default">Default</option>
-          </select>
-        </div>
+        {/* Sort */}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortOption)}
+          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer font-medium"
+        >
+          <option value="least-progress">Least Progress</option>
+          <option value="most-progress">Most Progress</option>
+          <option value="name-asc">Nickname A-Z</option>
+          <option value="name-desc">Nickname Z-A</option>
+          <option value="group">Group</option>
+        </select>
       </div>
 
-      {/* Main Daily Matrix Table */}
-      <div className="bg-zinc-900/80 border border-zinc-800 rounded-lg overflow-hidden shadow-sm">
+      {/* Main Table Container */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-left border-collapse min-w-[760px]">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950/90 text-zinc-400 text-xs font-semibold sticky top-0 z-20">
-                {/* Sticky Account Column */}
-                <th className="py-3 px-4 sticky left-0 z-30 bg-zinc-950 min-w-[200px] border-r border-zinc-800/80">
+              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold sticky top-0 z-20">
+                {/* Sticky Account Header */}
+                <th className="py-2.5 px-3.5 sticky left-0 z-30 bg-gray-50 min-w-[190px] border-r border-gray-200">
                   Account ({sortedAccounts.length})
                 </th>
 
-                {/* Dynamic Master Activities Columns */}
+                {/* Master Activities Columns */}
                 {initialData.activities.map((act) => (
                   <th
                     key={act.id}
-                    className="py-3 px-3 text-center min-w-[100px] border-r border-zinc-800/50"
+                    className="py-2.5 px-2 text-center min-w-[80px]"
                   >
-                    <div className="truncate font-medium text-zinc-200" title={act.name}>
+                    <div className="truncate font-medium text-gray-800" title={act.name}>
                       {act.name}
                     </div>
-                    <span className="text-[10px] text-zinc-500 font-mono uppercase">
-                      {act.code}
-                    </span>
                   </th>
                 ))}
 
                 {/* Progress Column */}
-                <th className="py-3 px-4 text-center min-w-[140px] border-r border-zinc-800/50">
+                <th className="py-2.5 px-3 text-center min-w-[120px]">
                   Progress
                 </th>
 
-                {/* Quick Row Actions */}
-                <th className="py-3 px-3 text-center min-w-[120px]">Aksi</th>
+                {/* Actions Column */}
+                <th className="py-2.5 px-2 text-center w-16">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-zinc-800/60 text-xs">
+            <tbody className="divide-y divide-gray-100 text-xs">
               {sortedAccounts.length === 0 ? (
                 <tr>
                   <td
                     colSpan={initialData.activities.length + 3}
-                    className="py-12 text-center text-zinc-500"
+                    className="py-10 text-center text-gray-400"
                   >
-                    Tidak ada akun yang sesuai dengan filter.
+                    No accounts matching the selected filters.
                   </td>
                 </tr>
               ) : (
                 sortedAccounts.map((acc) => {
                   const is100 = acc.progressPercent === 100;
-                  const isStarted = acc.completedCount > 0;
 
                   return (
                     <tr
                       key={acc.id}
                       className={cn(
-                        "transition-colors hover:bg-zinc-800/30",
-                        is100 && "bg-emerald-950/15"
+                        "transition-colors hover:bg-gray-50/80",
+                        is100 && "bg-emerald-50/20"
                       )}
                     >
-                      {/* Sticky Account Cell */}
+                      {/* Sticky Account Column */}
                       <td
                         className={cn(
-                          "py-2.5 px-4 sticky left-0 z-10 border-r border-zinc-800/80",
-                          is100 ? "bg-zinc-950/95" : "bg-zinc-900/95"
+                          "py-2 px-3.5 sticky left-0 z-10 border-r border-gray-200 bg-white transition-colors",
+                          is100 && "bg-emerald-50/30"
                         )}
                       >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <Link
-                                href={`/accounts/${acc.id}`}
-                                className="font-semibold text-zinc-100 hover:text-blue-400 truncate flex items-center gap-1 group"
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <Link
+                              href={`/accounts/${acc.id}`}
+                              className="font-semibold text-gray-900 hover:text-blue-600 truncate flex items-center gap-1 group"
+                            >
+                              <span>{acc.nickname}</span>
+                              <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-gray-400" />
+                            </Link>
+                            {acc.status !== "Active" && (
+                              <Badge
+                                variant={acc.status === "Paused" ? "warning" : "neutral"}
+                                size="sm"
                               >
-                                <span>{acc.nickname}</span>
-                                <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-zinc-500" />
-                              </Link>
-                              {acc.status !== "Active" && (
-                                <Badge
-                                  variant={acc.status === "Paused" ? "warning" : "neutral"}
-                                  size="sm"
-                                >
-                                  {acc.status}
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="text-[11px] text-zinc-400 truncate">
-                              {acc.job} • {acc.server} {acc.groupName && `• ${acc.groupName}`}
-                            </div>
+                                {acc.status}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-gray-500 truncate mt-0.5">
+                            {acc.job} · {acc.server} {acc.groupName && `· ${acc.groupName}`}
                           </div>
                         </div>
                       </td>
 
-                      {/* Interactive Activity Checkboxes */}
+                      {/* Clean Modern Activity Checkboxes */}
                       {initialData.activities.map((act) => {
                         const isAssigned = acc.assignedActivityIds.includes(act.id);
                         const isCompleted = acc.completedActivityIds.includes(act.id);
-                        const isCheckPending = pendingChecks[`${acc.id}-${act.id}`];
 
                         if (!isAssigned) {
                           return (
                             <td
                               key={act.id}
-                              className="py-2.5 px-3 text-center border-r border-zinc-800/40 text-zinc-600 select-none"
+                              className="py-2 px-2 text-center text-gray-300 select-none"
                             >
-                              <span className="text-zinc-600 font-mono text-sm">—</span>
+                              <span>—</span>
                             </td>
                           );
                         }
@@ -662,48 +623,39 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                         return (
                           <td
                             key={act.id}
-                            className="py-2.5 px-3 text-center border-r border-zinc-800/40"
+                            className="py-2 px-2 text-center"
                           >
-                            <button
-                              type="button"
-                              onClick={() => handleToggle(acc.id, act.id, isCompleted)}
-                              disabled={isCheckPending}
-                              title={`${acc.nickname}: ${act.name} (${isCompleted ? "Completed" : "Uncompleted"})`}
-                              className={cn(
-                                "w-7 h-7 rounded-md inline-flex items-center justify-center transition-all transform active:scale-90 cursor-pointer border",
-                                isCompleted
-                                  ? "bg-emerald-600/20 border-emerald-500/80 text-emerald-400 hover:bg-emerald-600/30"
-                                  : "bg-zinc-800/60 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:bg-zinc-700/50",
-                                isCheckPending && "opacity-50 cursor-wait animate-pulse"
-                              )}
-                            >
-                              {isCompleted ? (
-                                <Check className="w-4 h-4 stroke-[3]" />
-                              ) : (
-                                <span className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                              )}
-                            </button>
+                            <div className="flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={() => handleToggle(acc.id, act.id, isCompleted)}
+                                title={`${acc.nickname}: ${act.name} (${isCompleted ? "Completed" : "Incomplete"})`}
+                                className={cn(
+                                  "w-5 h-5 rounded flex items-center justify-center transition-all cursor-pointer border",
+                                  isCompleted
+                                    ? "bg-blue-600 border-blue-600 text-white shadow-2xs hover:bg-blue-700"
+                                    : "bg-white border-gray-300 text-transparent hover:border-gray-400 hover:bg-gray-50"
+                                )}
+                              >
+                                <Check className={cn("w-3.5 h-3.5 stroke-[2.5]", isCompleted ? "opacity-100" : "opacity-0")} />
+                              </button>
+                            </div>
                           </td>
                         );
                       })}
 
-                      {/* Progress Cell */}
-                      <td className="py-2.5 px-4 text-center border-r border-zinc-800/40">
-                        <div className="flex flex-col items-center gap-1">
-                          <div className="flex items-center justify-between w-full text-[11px] font-mono">
-                            <span
-                              className={cn(
-                                "font-bold",
-                                is100
-                                  ? "text-emerald-400"
-                                  : isStarted
-                                  ? "text-amber-400"
-                                  : "text-zinc-500"
-                              )}
-                            >
-                              {acc.completedCount}/{acc.totalAssigned}
+                      {/* Compact Progress Cell */}
+                      <td className="py-2 px-3 text-center">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div className="flex items-center justify-between w-full text-[11px] text-gray-600 font-mono">
+                            <span>
+                              {acc.completedCount} / {acc.totalAssigned}
                             </span>
-                            <span className="text-zinc-400">{acc.progressPercent}%</span>
+                            {is100 ? (
+                              <span className="text-emerald-700 font-bold">✓ 100%</span>
+                            ) : (
+                              <span>{acc.progressPercent}%</span>
+                            )}
                           </div>
                           <ProgressBar
                             value={acc.progressPercent}
@@ -713,15 +665,15 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                         </div>
                       </td>
 
-                      {/* Row Quick Action Buttons */}
-                      <td className="py-2.5 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                      {/* Action Cell */}
+                      <td className="py-2 px-2 text-center">
+                        <div className="flex items-center justify-center gap-0.5">
                           <button
                             type="button"
                             onClick={() => handleCompleteAccount(acc.id)}
                             disabled={is100 || acc.totalAssigned === 0}
-                            title="Complete Account (Centang Semua)"
-                            className="p-1.5 rounded text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                            title="Complete Account"
+                            className="p-1 rounded text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                           >
                             <Check className="w-3.5 h-3.5" />
                           </button>
@@ -736,8 +688,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                               })
                             }
                             disabled={acc.completedCount === 0}
-                            title="Reset Account (Hapus Seluruh Checklist)"
-                            className="p-1.5 rounded text-zinc-400 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
+                            title="Reset Account"
+                            className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                           </button>
@@ -752,7 +704,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         </div>
       </div>
 
-      {/* Confirmation Dialog for Reset */}
+      {/* Confirmation Dialog */}
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
         onClose={() => setConfirmDialog({ isOpen: false, type: "reset-account" })}
@@ -763,20 +715,20 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         }
         title={
           confirmDialog.type === "reset-all"
-            ? "Reset Seluruh Checklist Hari Ini?"
-            : `Reset Checklist ${confirmDialog.accountName}?`
+            ? "Reset All Checklists Today?"
+            : `Reset Checklist for ${confirmDialog.accountName}?`
         }
         message={
           confirmDialog.type === "reset-all"
-            ? `Apakah Anda yakin ingin menghapus seluruh centang aktivitas untuk SEMUA akun pada tanggal ${formatDateDisplay(
+            ? `Are you sure you want to reset all activity checks for ALL accounts on ${formatDateDisplay(
                 currentDate
               )}?`
-            : `Apakah Anda yakin ingin menghapus checklist untuk akun ${confirmDialog.accountName} pada tanggal ${formatDateDisplay(
+            : `Are you sure you want to reset all activity checks for ${confirmDialog.accountName} on ${formatDateDisplay(
                 currentDate
               )}?`
         }
-        confirmText="Ya, Reset Checklist"
-        cancelText="Batal"
+        confirmText="Reset"
+        cancelText="Cancel"
         variant="danger"
         isLoading={dialogLoading}
       />

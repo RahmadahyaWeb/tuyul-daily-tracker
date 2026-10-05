@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { Plus, Edit2, Trash2, FolderKanban, Users } from "lucide-react";
+import { formatDateShort } from "@/lib/date-utils";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 
 interface GroupItem {
   id: string;
@@ -32,7 +33,6 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Delete dialog
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     groupId?: string;
@@ -56,7 +56,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError("Nama group tidak boleh kosong");
+      setError("Group name cannot be empty");
       return;
     }
 
@@ -71,7 +71,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
       }
       setModalOpen(false);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Gagal menyimpan group");
+      setError(err instanceof Error ? err.message : "Failed to save group");
     } finally {
       setIsSubmitting(false);
     }
@@ -87,114 +87,137 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
+    <div className="space-y-4 text-gray-900">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-zinc-100 tracking-tight">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
             Account Groups
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Kelola pengelompokan akun tuyul (Personal, Client A, Farm Card, dll)
+          <p className="text-xs text-gray-500">
+            Categorize tuyul accounts (e.g. Personal, Client A, Farm Card)
           </p>
         </div>
-
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleOpenCreate}
-          className="gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Group</span>
-        </Button>
+        <div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleOpenCreate}
+            className="gap-1.5 font-medium"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Group</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Groups Grid / Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {initialGroups.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-zinc-500 bg-zinc-900/60 rounded-lg border border-zinc-800">
-            <FolderKanban className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-            <p className="text-sm font-medium text-zinc-400">
-              Belum ada account group.
-            </p>
-          </div>
-        ) : (
-          initialGroups.map((g) => (
-            <div
-              key={g.id}
-              className="p-4 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700/80 transition-colors flex flex-col justify-between gap-3"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center text-blue-400">
-                    <FolderKanban className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm text-zinc-100">
+      {/* Main Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[500px]">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold">
+                <th className="py-2.5 px-3.5">Group Name</th>
+                <th className="py-2.5 px-3 text-center">Assigned Accounts</th>
+                <th className="py-2.5 px-3">Created Date</th>
+                <th className="py-2.5 px-3 text-center w-24">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100 text-xs">
+              {initialGroups.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-10 text-center text-gray-400">
+                    No groups found. Click &quot;Add Group&quot; to create one.
+                  </td>
+                </tr>
+              ) : (
+                initialGroups.map((g) => (
+                  <tr
+                    key={g.id}
+                    className="hover:bg-gray-50/80 transition-colors"
+                  >
+                    {/* Name */}
+                    <td className="py-2.5 px-3.5 font-semibold text-gray-900">
                       {g.name}
-                    </h3>
-                    <p className="text-xs text-zinc-400 flex items-center gap-1 font-mono">
-                      <Users className="w-3 h-3 text-zinc-500" />
-                      <span>{g._count?.accounts || 0} Akun Terdaftar</span>
-                    </p>
-                  </div>
-                </div>
+                    </td>
 
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(g)}
-                    title="Edit Group"
-                    className="p-1.5 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setDeleteDialog({
-                        isOpen: true,
-                        groupId: g.id,
-                        groupName: g.name,
-                      })
-                    }
-                    title="Delete Group"
-                    className="p-1.5 rounded text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+                    {/* Count */}
+                    <td className="py-2.5 px-3 text-center text-gray-700 font-mono">
+                      {g._count?.accounts ?? 0}
+                    </td>
+
+                    {/* Created */}
+                    <td className="py-2.5 px-3 text-gray-500">
+                      {formatDateShort(new Date(g.createdAt).toISOString().split("T")[0])}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-2.5 px-3 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(g)}
+                          title="Edit Group"
+                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDeleteDialog({
+                              isOpen: true,
+                              groupId: g.id,
+                              groupName: g.name,
+                            })
+                          }
+                          title="Delete Group"
+                          className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* Add / Edit Group Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingGroup ? "Edit Group" : "Tambah Group Baru"}
+        title={editingGroup ? `Edit Group: ${editingGroup.name}` : "Add New Group"}
         maxWidth="sm"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+          {error && (
+            <div className="p-2 rounded bg-red-50 border border-red-200 text-red-600">
+              {error}
+            </div>
+          )}
+
           <Input
-            label="Nama Group *"
+            label="Group Name"
+            required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            error={error || undefined}
-            placeholder="e.g. Personal, Client A, Farm Card"
+            placeholder="e.g. Farm Card / Client A"
           />
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => setModalOpen(false)}
+              disabled={isSubmitting}
             >
-              Batal
+              Cancel
             </Button>
             <Button
               type="submit"
@@ -202,7 +225,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
               size="sm"
               isLoading={isSubmitting}
             >
-              {editingGroup ? "Simpan" : "Tambah"}
+              {editingGroup ? "Save Changes" : "Create Group"}
             </Button>
           </div>
         </form>
@@ -213,9 +236,10 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false })}
         onConfirm={handleConfirmDelete}
-        title="Hapus Group?"
-        message={`Apakah Anda yakin ingin menghapus group "${deleteDialog.groupName}"? Akun yang ada di dalam group ini tidak akan terhapus, hanya status group-nya menjadi kosong.`}
-        confirmText="Ya, Hapus Group"
+        title={`Delete Group: ${deleteDialog.groupName}?`}
+        message="Are you sure you want to delete this group? Accounts assigned to this group will become unassigned."
+        confirmText="Delete"
+        cancelText="Cancel"
         variant="danger"
       />
     </div>

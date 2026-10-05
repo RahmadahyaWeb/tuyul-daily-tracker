@@ -18,7 +18,7 @@ export async function generateMetadata({
 
   return {
     title: `${data.account.nickname} — Tuyul Tracker`,
-    description: `Detail dan progres pengerjaan akun ${data.account.nickname}`,
+    description: `Details, credentials, and 30-day activity history for ${data.account.nickname}`,
   };
 }
 

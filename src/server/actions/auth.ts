@@ -16,7 +16,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
   if (!parsed.success) {
     return {
       success: false,
-      error: parsed.error.issues[0]?.message || "Input tidak valid",
+      error: parsed.error.issues[0]?.message || "Invalid input",
     };
   }
 
@@ -30,7 +30,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     if (!user) {
       return {
         success: false,
-        error: "Username atau password salah",
+        error: "Invalid username or password",
       };
     }
 
@@ -38,7 +38,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     if (!isMatch) {
       return {
         success: false,
-        error: "Username atau password salah",
+        error: "Invalid username or password",
       };
     }
 
@@ -51,7 +51,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     console.error("Login error:", err);
     return {
       success: false,
-      error: "Terjadi kesalahan pada server saat login",
+      error: "Server error during authentication",
     };
   }
 

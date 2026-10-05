@@ -21,7 +21,6 @@ import {
   ArrowDown,
   Check,
   X,
-  ListTodo,
 } from "lucide-react";
 
 interface ActivityItem {
@@ -47,7 +46,6 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
     setActivities(initialActivities);
   }, [initialActivities]);
 
-  // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState<ActivityItem | null>(null);
 
@@ -60,14 +58,12 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Delete modal
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     activityId?: string;
     activityName?: string;
   }>({ isOpen: false });
 
-  // Open Create
   const handleOpenCreate = () => {
     setEditingActivity(null);
     setFormData({
@@ -80,7 +76,6 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
     setModalOpen(true);
   };
 
-  // Open Edit
   const handleOpenEdit = (act: ActivityItem) => {
     setEditingActivity(act);
     setFormData({
@@ -93,17 +88,16 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
     setModalOpen(true);
   };
 
-  // Submit Form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
 
-    if (!formData.name.trim()) {
-      setFormErrors({ name: "Nama aktivitas wajib diisi" });
-      return;
-    }
-    if (!formData.code.trim()) {
-      setFormErrors({ code: "Kode aktivitas wajib diisi" });
+    const errors: Record<string, string> = {};
+    if (!formData.name.trim()) errors.name = "Name is required";
+    if (!formData.code.trim()) errors.code = "Code is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
@@ -113,7 +107,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
         const res = await updateActivity({
           id: editingActivity.id,
           name: formData.name,
-          code: formData.code.toUpperCase(),
+          code: formData.code,
           sortOrder: Number(formData.sortOrder),
           isActive: formData.isActive,
         });
@@ -121,7 +115,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
       } else {
         const res = await createActivity({
           name: formData.name,
-          code: formData.code.toUpperCase(),
+          code: formData.code,
           sortOrder: Number(formData.sortOrder),
           isActive: formData.isActive,
         });
@@ -129,34 +123,38 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
       }
       setModalOpen(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal menyimpan activity";
-      setFormErrors({ form: msg });
+      setFormErrors({
+        form: err instanceof Error ? err.message : "Failed to save activity",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Toggle Active
-  const handleToggle = (act: ActivityItem) => {
+  const handleToggleStatus = (id: string, currentStatus: boolean) => {
     startTransition(async () => {
-      await toggleActivityStatus(act.id, !act.isActive);
+      await toggleActivityStatus(id, !currentStatus);
     });
   };
 
-  // Move Sort Order Up / Down
-  const handleMove = async (index: number, direction: "up" | "down") => {
+  const handleMove = (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= activities.length) return;
 
-    const newActivities = [...activities];
-    const [moved] = newActivities.splice(index, 1);
-    newActivities.splice(targetIndex, 0, moved);
+    const newOrder = [...activities];
+    const temp = newOrder[index];
+    newOrder[index] = newOrder[targetIndex];
+    newOrder[targetIndex] = temp;
 
-    setActivities(newActivities);
-    await reorderActivities(newActivities.map((a) => a.id));
+    setActivities(newOrder);
+
+    startTransition(async () => {
+      await reorderActivities(
+        newOrder.map((a, i) => ({ id: a.id, sortOrder: i }))
+      );
+    });
   };
 
-  // Confirm Delete
   const handleConfirmDelete = async () => {
     if (!deleteDialog.activityId) return;
     try {
@@ -167,136 +165,124 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
+    <div className="space-y-4 text-gray-900">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-zinc-100 tracking-tight">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
             Master Activities
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Kelola master checklist aktivitas harian yang tersedia untuk semua akun
+          <p className="text-xs text-gray-500">
+            Define daily repeatable checklist activities and display order
           </p>
         </div>
-
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleOpenCreate}
-          className="gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tambah Activity</span>
-        </Button>
+        <div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleOpenCreate}
+            className="gap-1.5 font-medium"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Activity</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Activities Table */}
-      <div className="bg-zinc-900/80 border border-zinc-800 rounded-lg overflow-hidden shadow-sm">
+      {/* Main Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[650px] text-xs">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950 text-zinc-400 font-semibold">
-                <th className="py-3 px-4 w-16 text-center">Urutan</th>
-                <th className="py-3 px-4">Nama Activity</th>
-                <th className="py-3 px-3">Kode</th>
-                <th className="py-3 px-3 text-center">Digunakan Oleh</th>
-                <th className="py-3 px-3 text-center">Status</th>
-                <th className="py-3 px-4 text-center">Aksi</th>
+              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold">
+                <th className="py-2.5 px-3.5 w-16 text-center">Order</th>
+                <th className="py-2.5 px-3">Activity Name</th>
+                <th className="py-2.5 px-3">Code</th>
+                <th className="py-2.5 px-3 text-center">Assigned Accounts</th>
+                <th className="py-2.5 px-3 text-center">Status</th>
+                <th className="py-2.5 px-3 text-center w-28">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-zinc-800/60">
+            <tbody className="divide-y divide-gray-100 text-xs">
               {activities.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-zinc-500">
-                    <ListTodo className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-zinc-400">
-                      Belum ada master activity.
-                    </p>
+                  <td colSpan={6} className="py-10 text-center text-gray-400">
+                    No activities defined. Click &quot;Add Activity&quot; to create one.
                   </td>
                 </tr>
               ) : (
                 activities.map((act, idx) => (
                   <tr
                     key={act.id}
-                    className="hover:bg-zinc-800/30 transition-colors"
+                    className="hover:bg-gray-50/80 transition-colors"
                   >
                     {/* Reorder Buttons */}
-                    <td className="py-2.5 px-3 text-center">
+                    <td className="py-2 px-3 text-center">
                       <div className="flex items-center justify-center gap-0.5">
                         <button
                           type="button"
                           onClick={() => handleMove(idx, "up")}
                           disabled={idx === 0}
-                          className="p-1 text-zinc-400 hover:text-zinc-100 disabled:opacity-20 transition-colors cursor-pointer"
-                          title="Geser ke Atas"
+                          title="Move Up"
+                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 cursor-pointer"
                         >
-                          <ArrowUp className="w-3.5 h-3.5" />
+                          <ArrowUp className="w-3 h-3" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleMove(idx, "down")}
                           disabled={idx === activities.length - 1}
-                          className="p-1 text-zinc-400 hover:text-zinc-100 disabled:opacity-20 transition-colors cursor-pointer"
-                          title="Geser ke Bawah"
+                          title="Move Down"
+                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 cursor-pointer"
                         >
-                          <ArrowDown className="w-3.5 h-3.5" />
+                          <ArrowDown className="w-3 h-3" />
                         </button>
                       </div>
                     </td>
 
                     {/* Name */}
-                    <td className="py-2.5 px-4 font-semibold text-zinc-200">
+                    <td className="py-2.5 px-3 font-semibold text-gray-900">
                       {act.name}
                     </td>
 
                     {/* Code */}
-                    <td className="py-2.5 px-3 font-mono font-bold text-zinc-400">
+                    <td className="py-2.5 px-3 font-mono text-gray-600">
                       {act.code}
                     </td>
 
-                    {/* Usage count */}
-                    <td className="py-2.5 px-3 text-center text-zinc-400 font-mono">
-                      {act._count?.accountActivities || 0} Akun
+                    {/* Count */}
+                    <td className="py-2.5 px-3 text-center text-gray-600 font-mono">
+                      {act._count?.accountActivities ?? 0}
                     </td>
 
                     {/* Status Toggle */}
                     <td className="py-2.5 px-3 text-center">
                       <button
                         type="button"
-                        onClick={() => handleToggle(act)}
-                        className="cursor-pointer inline-flex items-center"
-                        title={act.isActive ? "Nonaktifkan" : "Aktifkan"}
+                        onClick={() => handleToggleStatus(act.id, act.isActive)}
+                        className="cursor-pointer"
                       >
                         <Badge
                           variant={act.isActive ? "success" : "neutral"}
                           size="sm"
                         >
-                          {act.isActive ? (
-                            <span className="flex items-center gap-1">
-                              <Check className="w-3 h-3" /> Active
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <X className="w-3 h-3" /> Inactive
-                            </span>
-                          )}
+                          {act.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </button>
                     </td>
 
                     {/* Actions */}
-                    <td className="py-2.5 px-4 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(act)}
                           title="Edit Activity"
-                          className="p-1.5 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-
                         <button
                           type="button"
                           onClick={() =>
@@ -307,7 +293,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                             })
                           }
                           title="Delete Activity"
-                          className="p-1.5 rounded text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -325,18 +311,19 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingActivity ? "Edit Activity" : "Tambah Activity Baru"}
+        title={editingActivity ? `Edit Activity: ${editingActivity.name}` : "Add Activity"}
         maxWidth="sm"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
           {formErrors.form && (
-            <div className="p-2.5 rounded bg-red-950/80 border border-red-800 text-red-300 text-xs">
+            <div className="p-2 rounded bg-red-50 border border-red-200 text-red-600">
               {formErrors.form}
             </div>
           )}
 
           <Input
-            label="Nama Activity *"
+            label="Activity Name"
+            required
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             error={formErrors.name}
@@ -344,41 +331,44 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           />
 
           <Input
-            label="Kode Singkat (Unique) *"
+            label="Short Code"
+            required
             value={formData.code}
-            onChange={(e) =>
-              setFormData({ ...formData, code: e.target.value.toUpperCase() })
-            }
+            onChange={(e) => setFormData({ ...formData, code: e.target.value })}
             error={formErrors.code}
             placeholder="e.g. MH600"
           />
 
-          <div className="flex items-center gap-2 pt-2">
+          <Input
+            label="Sort Order"
+            type="number"
+            value={formData.sortOrder}
+            onChange={(e) =>
+              setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })
+            }
+          />
+
+          <label className="flex items-center gap-2 pt-1 cursor-pointer select-none">
             <input
               type="checkbox"
-              id="isActiveCheck"
               checked={formData.isActive}
               onChange={(e) =>
                 setFormData({ ...formData, isActive: e.target.checked })
               }
-              className="rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-0"
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <label
-              htmlFor="isActiveCheck"
-              className="text-xs text-zinc-300 cursor-pointer select-none"
-            >
-              Aktifkan untuk Daily Tracker
-            </label>
-          </div>
+            <span className="font-medium text-gray-700">Active Activity</span>
+          </label>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-800">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => setModalOpen(false)}
+              disabled={isSubmitting}
             >
-              Batal
+              Cancel
             </Button>
             <Button
               type="submit"
@@ -386,7 +376,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
               size="sm"
               isLoading={isSubmitting}
             >
-              {editingActivity ? "Simpan" : "Tambah"}
+              {editingActivity ? "Save Changes" : "Create Activity"}
             </Button>
           </div>
         </form>
@@ -397,9 +387,10 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false })}
         onConfirm={handleConfirmDelete}
-        title="Hapus Master Activity?"
-        message={`Apakah Anda yakin ingin menghapus activity "${deleteDialog.activityName}"? Aktivitas ini akan dihapus dari seluruh akun dan checklist terkait.`}
-        confirmText="Ya, Hapus"
+        title={`Delete Activity: ${deleteDialog.activityName}?`}
+        message="Are you sure you want to delete this activity? It will be removed from all account checklists and historical logs."
+        confirmText="Delete"
+        cancelText="Cancel"
         variant="danger"
       />
     </div>

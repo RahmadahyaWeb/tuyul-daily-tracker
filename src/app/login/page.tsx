@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login — Tuyul Tracker",
-  description: "Masuk ke Tuyul Tracker Dashboard",
+  title: "Sign In — Tuyul Tracker",
+  description: "Sign in to Tuyul Tracker Dashboard",
 };
 
 export default async function LoginPage() {

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { formatDateShort } from "@/lib/date-utils";
+import { cn } from "@/lib/utils";
 import {
   Plus,
   Search,
@@ -73,12 +74,10 @@ export function AccountsView({
 }: AccountsViewProps) {
   const [, startTransition] = useTransition();
 
-  // Search & Filter state
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("all");
 
-  // Modal states
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountItem | null>(null);
 
@@ -109,7 +108,7 @@ export function AccountsView({
     nickname?: string;
   }>({ isOpen: false });
 
-  // Form inputs state
+  // Form state
   const [formData, setFormData] = useState({
     nickname: "",
     username: "",
@@ -122,13 +121,12 @@ export function AccountsView({
     status: "Active" as "Active" | "Paused" | "Finished",
     notes: "",
     groupId: "",
-    selectedActivityIds: activities.map((a) => a.id), // default check all
+    selectedActivityIds: activities.map((a) => a.id),
   });
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Open Create Form
   const handleOpenCreate = () => {
     setEditingAccount(null);
     setFormData({
@@ -149,13 +147,12 @@ export function AccountsView({
     setFormModalOpen(true);
   };
 
-  // Open Edit Form
   const handleOpenEdit = (acc: AccountItem) => {
     setEditingAccount(acc);
     setFormData({
       nickname: acc.nickname,
       username: acc.username,
-      password: "", // leave empty to keep unchanged
+      password: "", // blank unless updating
       server: acc.server,
       owner: acc.owner,
       job: acc.job,
@@ -170,39 +167,30 @@ export function AccountsView({
     setFormModalOpen(true);
   };
 
-  // Handle Form Submit
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormErrors({});
 
-    if (!formData.nickname.trim()) {
-      setFormErrors((prev) => ({ ...prev, nickname: "Nickname wajib diisi" }));
-      return;
-    }
-    if (!formData.username.trim()) {
-      setFormErrors((prev) => ({ ...prev, username: "Username wajib diisi" }));
-      return;
-    }
-    if (!editingAccount && !formData.password.trim()) {
-      setFormErrors((prev) => ({ ...prev, password: "Password wajib diisi" }));
-      return;
-    }
-    if (formData.selectedActivityIds.length === 0) {
-      setFormErrors((prev) => ({
-        ...prev,
-        activities: "Pilih minimal 1 aktivitas",
-      }));
+    const errors: Record<string, string> = {};
+    if (!formData.nickname.trim()) errors.nickname = "Nickname is required";
+    if (!formData.username.trim()) errors.username = "Username is required";
+    if (!editingAccount && !formData.password) errors.password = "Password is required";
+    if (!formData.server.trim()) errors.server = "Server is required";
+    if (!formData.owner.trim()) errors.owner = "Owner is required";
+    if (!formData.job.trim()) errors.job = "Job is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
     setIsSubmitting(true);
     try {
       if (editingAccount) {
-        const res = await updateAccount({
+        const payload: Parameters<typeof updateAccount>[0] = {
           id: editingAccount.id,
           nickname: formData.nickname,
           username: formData.username,
-          password: formData.password || undefined,
           server: formData.server,
           owner: formData.owner,
           job: formData.job,
@@ -212,7 +200,12 @@ export function AccountsView({
           notes: formData.notes,
           groupId: formData.groupId || null,
           activityIds: formData.selectedActivityIds,
-        });
+        };
+        if (formData.password.trim()) {
+          payload.password = formData.password.trim();
+        }
+
+        const res = await updateAccount(payload);
         if (!res.success) throw new Error(res.error);
       } else {
         const res = await createAccount({
@@ -233,15 +226,22 @@ export function AccountsView({
       }
       setFormModalOpen(false);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Gagal menyimpan akun";
-      setFormErrors({ form: msg });
+      setFormErrors({
+        form: err instanceof Error ? err.message : "Failed to save account",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Open Credentials Modal
-  const handleOpenCredentials = async (acc: AccountItem) => {
+  const handleToggleStatus = (id: string, currentStatus: string) => {
+    const nextStatus = currentStatus === "Active" ? "Paused" : "Active";
+    startTransition(async () => {
+      await toggleAccountStatus(id, nextStatus as "Active" | "Paused");
+    });
+  };
+
+  const handleViewCredentials = async (acc: AccountItem) => {
     setShowPassword(false);
     setCredModal({
       isOpen: true,
@@ -252,224 +252,186 @@ export function AccountsView({
       isLoading: true,
     });
 
-    try {
-      const res = await getAccountCredentials(acc.id);
-      if (res.success && res.data) {
-        setCredModal((prev) => ({
-          ...prev,
-          password: res.data.password,
-          isLoading: false,
-        }));
-      } else {
-        throw new Error(res.error);
-      }
-    } catch {
-      setCredModal((prev) => ({
-        ...prev,
-        password: "Error loading password",
+    const res = await getAccountCredentials(acc.id);
+    if (res.success && res.data) {
+      setCredModal({
+        isOpen: true,
+        nickname: acc.nickname,
+        username: res.data.username,
+        password: res.data.password,
+        server: res.data.server,
         isLoading: false,
-      }));
+      });
+    } else {
+      setCredModal((prev) => ({ ...prev, isLoading: false }));
     }
   };
 
-  // Copy to clipboard helper
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  // Quick Toggle Status
-  const handleToggleStatus = (acc: AccountItem) => {
-    const nextStatus = acc.status === "Active" ? "Paused" : "Active";
-    startTransition(async () => {
-      await toggleAccountStatus(acc.id, nextStatus);
-    });
-  };
-
-  // Handle Delete
   const handleConfirmDelete = async () => {
     if (!deleteDialog.accountId) return;
     try {
       await deleteAccount(deleteDialog.accountId);
-    } catch (err) {
-      console.error(err);
     } finally {
       setDeleteDialog({ isOpen: false });
     }
   };
 
-  // Filtered Accounts
   const filteredAccounts = initialAccounts.filter((acc) => {
     if (search.trim()) {
       const q = search.toLowerCase();
       const match =
         acc.nickname.toLowerCase().includes(q) ||
         acc.username.toLowerCase().includes(q) ||
-        acc.owner.toLowerCase().includes(q);
+        acc.owner.toLowerCase().includes(q) ||
+        acc.job.toLowerCase().includes(q) ||
+        acc.server.toLowerCase().includes(q);
       if (!match) return false;
     }
+
     if (statusFilter !== "all" && acc.status !== statusFilter) return false;
     if (groupFilter !== "all" && acc.groupId !== groupFilter) return false;
+
     return true;
   });
 
   return (
     <div className="space-y-4">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-800">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-zinc-100 tracking-tight">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
             Accounts
           </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Kelola data dan konfigurasi seluruh akun tuyul Ragnarok
+          <p className="text-xs text-gray-500">
+            Manage Ragnarok tuyul accounts and custom activities
           </p>
         </div>
-
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleOpenCreate}
-          className="gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add Account</span>
-        </Button>
+        <div>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleOpenCreate}
+            className="gap-1.5 font-medium"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Account</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-zinc-900/90 border border-zinc-800 rounded-lg p-3 flex flex-wrap items-center gap-3 text-xs">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+      {/* Flat Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Cari nickname, username, owner..."
+            placeholder="Search accounts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-md pl-8 pr-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+            className="w-full bg-white border border-gray-200 rounded-md pl-8 pr-3 py-1.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 h-8 shadow-2xs"
           />
         </div>
 
-        {/* Status Filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400">Status:</span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
-          >
-            <option value="all">Semua Status</option>
-            <option value="Active">Active</option>
-            <option value="Paused">Paused</option>
-            <option value="Finished">Finished</option>
-          </select>
-        </div>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+        >
+          <option value="all">All Status</option>
+          <option value="Active">Active</option>
+          <option value="Paused">Paused</option>
+          <option value="Finished">Finished</option>
+        </select>
 
-        {/* Group Filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-400">Group:</span>
-          <select
-            value={groupFilter}
-            onChange={(e) => setGroupFilter(e.target.value)}
-            className="bg-zinc-950 border border-zinc-800 rounded-md px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-blue-500"
-          >
-            <option value="all">Semua Group</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <span className="text-zinc-500 text-xs ml-auto font-mono">
-          Total: {filteredAccounts.length} Akun
-        </span>
+        <select
+          value={groupFilter}
+          onChange={(e) => setGroupFilter(e.target.value)}
+          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+        >
+          <option value="all">All Groups</option>
+          {groups.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Accounts Compact Table */}
-      <div className="bg-zinc-900/80 border border-zinc-800 rounded-lg overflow-hidden shadow-sm">
+      {/* Main Accounts Table */}
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[900px]">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950 text-zinc-400 text-xs font-semibold">
-                <th className="py-3 px-4">Nickname</th>
-                <th className="py-3 px-3">Username</th>
-                <th className="py-3 px-3">Server</th>
-                <th className="py-3 px-3">Owner</th>
-                <th className="py-3 px-3">Job / Class</th>
-                <th className="py-3 px-3 text-center">Level</th>
-                <th className="py-3 px-3">Group</th>
-                <th className="py-3 px-3">Start Date</th>
-                <th className="py-3 px-3 text-center">Status</th>
-                <th className="py-3 px-4 text-center">Aksi</th>
+              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold">
+                <th className="py-2.5 px-3.5">Nickname</th>
+                <th className="py-2.5 px-3">Username</th>
+                <th className="py-2.5 px-3">Server</th>
+                <th className="py-2.5 px-3">Owner</th>
+                <th className="py-2.5 px-3">Job / Level</th>
+                <th className="py-2.5 px-3">Group</th>
+                <th className="py-2.5 px-3 text-center">Status</th>
+                <th className="py-2.5 px-3 text-center">Activities</th>
+                <th className="py-2.5 px-3 text-center w-28">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-zinc-800/60 text-xs">
+            <tbody className="divide-y divide-gray-100 text-xs">
               {filteredAccounts.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-zinc-500">
-                    <p className="text-sm font-medium text-zinc-400">
-                      No accounts yet.
-                    </p>
-                    <p className="text-xs text-zinc-600 mt-1">
-                      Klik tombol &quot;Add Account&quot; untuk menambahkan akun tuyul.
-                    </p>
+                  <td colSpan={9} className="py-10 text-center text-gray-400">
+                    No accounts found.
                   </td>
                 </tr>
               ) : (
                 filteredAccounts.map((acc) => (
                   <tr
                     key={acc.id}
-                    className="hover:bg-zinc-800/30 transition-colors"
+                    className="hover:bg-gray-50/80 transition-colors"
                   >
                     {/* Nickname */}
-                    <td className="py-2.5 px-4 font-semibold text-zinc-100">
+                    <td className="py-2.5 px-3.5">
                       <Link
                         href={`/accounts/${acc.id}`}
-                        className="hover:text-blue-400 flex items-center gap-1 group"
+                        className="font-semibold text-gray-900 hover:text-blue-600 flex items-center gap-1 group"
                       >
                         <span>{acc.nickname}</span>
-                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 text-zinc-500" />
+                        <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-gray-400" />
                       </Link>
                     </td>
 
                     {/* Username */}
-                    <td className="py-2.5 px-3 font-mono text-zinc-300">
+                    <td className="py-2.5 px-3 font-mono text-gray-600">
                       {acc.username}
                     </td>
 
                     {/* Server */}
-                    <td className="py-2.5 px-3 text-zinc-300">{acc.server}</td>
+                    <td className="py-2.5 px-3 text-gray-700">{acc.server}</td>
 
                     {/* Owner */}
-                    <td className="py-2.5 px-3 text-zinc-300">{acc.owner}</td>
+                    <td className="py-2.5 px-3 text-gray-700">{acc.owner}</td>
 
-                    {/* Job */}
-                    <td className="py-2.5 px-3 text-zinc-300">{acc.job}</td>
-
-                    {/* Level */}
-                    <td className="py-2.5 px-3 text-center font-mono font-bold text-zinc-200">
-                      {acc.level}
+                    {/* Job & Level */}
+                    <td className="py-2.5 px-3 text-gray-700">
+                      <span>{acc.job}</span>
+                      <span className="text-gray-400 text-[11px] ml-1">
+                        (Lv.{acc.level})
+                      </span>
                     </td>
 
                     {/* Group */}
-                    <td className="py-2.5 px-3 text-zinc-400">
-                      {acc.group?.name ? (
-                        <span className="bg-zinc-800 px-1.5 py-0.5 rounded text-[11px]">
+                    <td className="py-2.5 px-3">
+                      {acc.group ? (
+                        <span className="text-gray-700 font-medium">
                           {acc.group.name}
                         </span>
                       ) : (
-                        "—"
-                      )}
-                    </td>
-
-                    {/* Start Date */}
-                    <td className="py-2.5 px-3 text-zinc-400 font-mono text-[11px]">
-                      {formatDateShort(
-                        new Date(acc.startDate).toISOString().split("T")[0]
+                        <span className="text-gray-400">—</span>
                       )}
                     </td>
 
@@ -489,29 +451,31 @@ export function AccountsView({
                       </Badge>
                     </td>
 
+                    {/* Activities */}
+                    <td className="py-2.5 px-3 text-center">
+                      <span className="text-xs text-gray-600 font-mono">
+                        {acc.accountActivities.length} assigned
+                      </span>
+                    </td>
+
                     {/* Actions */}
-                    <td className="py-2.5 px-4 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        {/* Show Credentials */}
                         <button
                           type="button"
-                          onClick={() => handleOpenCredentials(acc)}
-                          title="Lihat & Copy Password"
-                          className="p-1.5 rounded text-zinc-400 hover:text-blue-400 hover:bg-blue-500/10 transition-colors cursor-pointer"
+                          onClick={() => handleViewCredentials(acc)}
+                          title="Show Credentials"
+                          className="p-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
                         >
                           <KeyRound className="w-3.5 h-3.5" />
                         </button>
-
-                        {/* Quick Pause / Play */}
                         <button
                           type="button"
-                          onClick={() => handleToggleStatus(acc)}
+                          onClick={() => handleToggleStatus(acc.id, acc.status)}
                           title={
-                            acc.status === "Active"
-                              ? "Pause Account"
-                              : "Activate Account"
+                            acc.status === "Active" ? "Pause Account" : "Activate Account"
                           }
-                          className="p-1.5 rounded text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                          className="p-1 rounded text-gray-400 hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
                         >
                           {acc.status === "Active" ? (
                             <Pause className="w-3.5 h-3.5" />
@@ -519,18 +483,14 @@ export function AccountsView({
                             <Play className="w-3.5 h-3.5" />
                           )}
                         </button>
-
-                        {/* Edit */}
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(acc)}
                           title="Edit Account"
-                          className="p-1.5 rounded text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-
-                        {/* Delete */}
                         <button
                           type="button"
                           onClick={() =>
@@ -541,7 +501,7 @@ export function AccountsView({
                             })
                           }
                           title="Delete Account"
-                          className="p-1.5 rounded text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -555,170 +515,152 @@ export function AccountsView({
         </div>
       </div>
 
-      {/* Add / Edit Account Modal */}
+      {/* Add / Edit Account Modal (Clean grouped sections without nested cards) */}
       <Modal
         isOpen={formModalOpen}
         onClose={() => setFormModalOpen(false)}
-        title={editingAccount ? "Edit Akun Tuyul" : "Tambah Akun Tuyul Baru"}
-        description="Lengkapi data akun dan pilih aktivitas harian yang berlaku"
+        title={editingAccount ? `Edit Account: ${editingAccount.nickname}` : "Add New Account"}
         maxWidth="lg"
       >
-        <form onSubmit={handleFormSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {formErrors.form && (
-            <div className="p-2.5 rounded bg-red-950/80 border border-red-800 text-red-300 text-xs">
+            <div className="p-2 rounded bg-red-50 border border-red-200 text-red-600">
               {formErrors.form}
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label="Nickname *"
-              value={formData.nickname}
-              onChange={(e) =>
-                setFormData({ ...formData, nickname: e.target.value })
-              }
-              error={formErrors.nickname}
-              placeholder="e.g. Rynzo"
-            />
-            <Input
-              label="Username Login *"
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
-              error={formErrors.username}
-              placeholder="e.g. rynzo_ro"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input
-              label={
-                editingAccount
-                  ? "Password Baru (Kosongkan jika tidak diubah)"
-                  : "Password Login *"
-              }
-              type="text"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              error={formErrors.password}
-              placeholder={editingAccount ? "••••••••" : "Password akun"}
-            />
-            <Input
-              label="Server *"
-              value={formData.server}
-              onChange={(e) =>
-                setFormData({ ...formData, server: e.target.value })
-              }
-              placeholder="e.g. Prontera-1"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              label="Owner *"
-              value={formData.owner}
-              onChange={(e) =>
-                setFormData({ ...formData, owner: e.target.value })
-              }
-              placeholder="e.g. Rahmad / Client A"
-            />
-            <Input
-              label="Job / Class *"
-              value={formData.job}
-              onChange={(e) =>
-                setFormData({ ...formData, job: e.target.value })
-              }
-              placeholder="e.g. Assassin Cross"
-            />
-            <Input
-              label="Level *"
-              type="number"
-              min={1}
-              max={999}
-              value={formData.level}
-              onChange={(e) =>
-                setFormData({ ...formData, level: Number(e.target.value) })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Input
-              label="Start Date *"
-              type="date"
-              value={formData.startDate}
-              onChange={(e) =>
-                setFormData({ ...formData, startDate: e.target.value })
-              }
-            />
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-zinc-300">
-                Status
-              </label>
-              <select
-                value={formData.status}
+          {/* Section 1: Account Information */}
+          <div className="space-y-2">
+            <h3 className="font-semibold text-gray-900 border-b border-gray-100 pb-1">
+              Account Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label="Nickname"
+                required
+                value={formData.nickname}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    status: e.target.value as "Active" | "Paused" | "Finished",
-                  })
+                  setFormData({ ...formData, nickname: e.target.value })
                 }
-                className="w-full rounded-md bg-zinc-900 border border-zinc-700/80 px-3 py-1.5 text-sm text-zinc-100 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="Active">Active</option>
-                <option value="Paused">Paused</option>
-                <option value="Finished">Finished</option>
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-zinc-300">
-                Group
-              </label>
-              <select
-                value={formData.groupId}
+                error={formErrors.nickname}
+                placeholder="e.g. Rynzo"
+              />
+              <Input
+                label="Owner"
+                required
+                value={formData.owner}
                 onChange={(e) =>
-                  setFormData({ ...formData, groupId: e.target.value })
+                  setFormData({ ...formData, owner: e.target.value })
                 }
-                className="w-full rounded-md bg-zinc-900 border border-zinc-700/80 px-3 py-1.5 text-sm text-zinc-100 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="">(Tanpa Group)</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.name}
-                  </option>
-                ))}
-              </select>
+                error={formErrors.owner}
+                placeholder="e.g. Personal / Client A"
+              />
+              <Input
+                label="Job / Class"
+                required
+                value={formData.job}
+                onChange={(e) =>
+                  setFormData({ ...formData, job: e.target.value })
+                }
+                error={formErrors.job}
+                placeholder="e.g. Assassin Cross"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  label="Level"
+                  type="number"
+                  min={1}
+                  max={200}
+                  value={formData.level}
+                  onChange={(e) =>
+                    setFormData({ ...formData, level: parseInt(e.target.value) || 1 })
+                  }
+                />
+                <Input
+                  label="Server"
+                  required
+                  value={formData.server}
+                  onChange={(e) =>
+                    setFormData({ ...formData, server: e.target.value })
+                  }
+                  error={formErrors.server}
+                  placeholder="Prontera-1"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block font-medium text-gray-700">Group</label>
+                <select
+                  value={formData.groupId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, groupId: e.target.value })
+                  }
+                  className="w-full bg-white border border-gray-200 rounded-md px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-blue-500 h-8"
+                >
+                  <option value="">No Group</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="block font-medium text-gray-700">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      status: e.target.value as "Active" | "Paused" | "Finished",
+                    })
+                  }
+                  className="w-full bg-white border border-gray-200 rounded-md px-3 py-1.5 text-xs text-gray-900 focus:outline-none focus:border-blue-500 h-8"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Paused">Paused</option>
+                  <option value="Finished">Finished</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Notes */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-zinc-300">
-              Catatan / Notes
-            </label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
-              rows={2}
-              placeholder="Contoh: FM belum unlock, tunggu level 95, fokus card..."
-              className="w-full rounded-md bg-zinc-900 border border-zinc-700/80 px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:border-blue-500 focus:outline-none"
-            />
+          {/* Section 2: Credentials (AES-256-GCM encrypted) */}
+          <div className="space-y-2 pt-2">
+            <h3 className="font-semibold text-gray-900 border-b border-gray-100 pb-1">
+              Credentials
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label="Login Username"
+                required
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
+                }
+                error={formErrors.username}
+                placeholder="Game username / email"
+              />
+              <Input
+                label={editingAccount ? "Password (leave blank to keep current)" : "Password"}
+                type="password"
+                required={!editingAccount}
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                error={formErrors.password}
+                placeholder={editingAccount ? "••••••••" : "Game account password"}
+              />
+            </div>
           </div>
 
-          {/* Custom Activities Selector for this Account */}
-          <div className="space-y-2 pt-2 border-t border-zinc-800">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-medium text-zinc-300">
-                Aktivitas Harian yang Berlaku untuk Akun ini *
-              </label>
-              <div className="flex items-center gap-2 text-[11px]">
+          {/* Section 3: Activities Checklist Assignment */}
+          <div className="space-y-2 pt-2">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-1">
+              <h3 className="font-semibold text-gray-900">
+                Assigned Daily Activities
+              </h3>
+              <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -727,34 +669,37 @@ export function AccountsView({
                       selectedActivityIds: activities.map((a) => a.id),
                     })
                   }
-                  className="text-blue-400 hover:underline"
+                  className="text-[11px] text-blue-600 hover:underline"
                 >
-                  Pilih Semua
+                  Select All
                 </button>
-                <span className="text-zinc-600">•</span>
                 <button
                   type="button"
                   onClick={() =>
                     setFormData({ ...formData, selectedActivityIds: [] })
                   }
-                  className="text-zinc-400 hover:underline"
+                  className="text-[11px] text-gray-500 hover:underline"
                 >
-                  Batal Semua
+                  Clear
                 </button>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-zinc-950 p-3 rounded-md border border-zinc-800/80">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {activities.map((act) => {
-                const isChecked = formData.selectedActivityIds.includes(act.id);
+                const checked = formData.selectedActivityIds.includes(act.id);
                 return (
                   <label
                     key={act.id}
-                    className="flex items-center gap-2 text-xs text-zinc-300 hover:text-white cursor-pointer select-none"
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded border transition-colors cursor-pointer select-none",
+                      checked
+                        ? "bg-blue-50/60 border-blue-200 text-blue-900"
+                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    )}
                   >
                     <input
                       type="checkbox"
-                      checked={isChecked}
+                      checked={checked}
                       onChange={(e) => {
                         if (e.target.checked) {
                           setFormData({
@@ -774,27 +719,39 @@ export function AccountsView({
                           });
                         }
                       }}
-                      className="rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-0 w-3.5 h-3.5"
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="truncate">{act.name}</span>
+                    <span className="font-medium truncate">{act.name}</span>
                   </label>
                 );
               })}
             </div>
-            {formErrors.activities && (
-              <p className="text-xs text-red-400">{formErrors.activities}</p>
-            )}
           </div>
 
-          {/* Form Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-800">
+          {/* Section 4: Notes */}
+          <div className="space-y-1 pt-2">
+            <label className="block font-medium text-gray-700">Notes (Optional)</label>
+            <textarea
+              rows={2}
+              value={formData.notes}
+              onChange={(e) =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
+              placeholder="e.g. Farm target, pin code, gear notes..."
+              className="w-full bg-white border border-gray-200 rounded-md p-2 text-xs text-gray-900 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          {/* Footer buttons */}
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() => setFormModalOpen(false)}
+              disabled={isSubmitting}
             >
-              Batal
+              Cancel
             </Button>
             <Button
               type="submit"
@@ -802,78 +759,55 @@ export function AccountsView({
               size="sm"
               isLoading={isSubmitting}
             >
-              {editingAccount ? "Simpan Perubahan" : "Buat Akun"}
+              {editingAccount ? "Save Changes" : "Create Account"}
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Credentials Modal (Show / Hide / Copy) */}
+      {/* Credentials Reveal Modal */}
       <Modal
         isOpen={credModal.isOpen}
         onClose={() => setCredModal((prev) => ({ ...prev, isOpen: false }))}
-        title={`Credential: ${credModal.nickname}`}
-        description="Data autentikasi akun Ragnarok (Reversible AES-256 Encrypted)"
+        title={`Credentials: ${credModal.nickname}`}
         maxWidth="sm"
       >
-        <div className="space-y-4">
+        <div className="space-y-3 text-xs">
           {credModal.isLoading ? (
-            <div className="py-6 text-center text-xs text-zinc-400">
-              Mengambil dan mendekripsi data credential...
+            <div className="py-6 text-center text-gray-500">
+              Decrypting credentials securely...
             </div>
           ) : (
-            <div className="space-y-3">
-              {/* Server */}
+            <>
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-zinc-400">
-                  Server
-                </label>
-                <div className="bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5 text-xs text-zinc-200">
-                  {credModal.server}
-                </div>
-              </div>
-
-              {/* Username */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-medium text-zinc-400">
-                  Username Login
-                </label>
-                <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5">
-                  <span className="text-xs font-mono text-zinc-100">
+                <label className="text-gray-500">Username / ID</label>
+                <div className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded-md font-mono">
+                  <span className="text-gray-900 font-medium">
                     {credModal.username}
                   </span>
                   <button
-                    type="button"
-                    onClick={() => handleCopy(credModal.username, "username")}
-                    className="text-zinc-400 hover:text-blue-400 text-xs flex items-center gap-1"
+                    onClick={() => handleCopy(credModal.username, "user")}
+                    className="text-gray-400 hover:text-gray-700"
                   >
-                    {copiedField === "username" ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    {copiedField === "user" ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
-                    <span>
-                      {copiedField === "username" ? "Tersalin" : "Copy"}
-                    </span>
                   </button>
                 </div>
               </div>
 
-              {/* Password */}
               <div className="space-y-1">
-                <label className="text-[11px] font-medium text-zinc-400">
-                  Password Login
-                </label>
-                <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-md px-3 py-1.5">
-                  <span className="text-xs font-mono text-zinc-100">
+                <label className="text-gray-500">Password</label>
+                <div className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded-md font-mono">
+                  <span className="text-gray-900 font-medium">
                     {showPassword ? credModal.password : "••••••••••••"}
                   </span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
-                      type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-zinc-400 hover:text-zinc-200"
-                      title={showPassword ? "Sembunyikan" : "Tampilkan"}
+                      className="text-gray-400 hover:text-gray-700"
                     >
                       {showPassword ? (
                         <EyeOff className="w-3.5 h-3.5" />
@@ -882,34 +816,37 @@ export function AccountsView({
                       )}
                     </button>
                     <button
-                      type="button"
-                      onClick={() => handleCopy(credModal.password, "password")}
-                      className="text-zinc-400 hover:text-blue-400 text-xs flex items-center gap-1"
+                      onClick={() => handleCopy(credModal.password, "pass")}
+                      className="text-gray-400 hover:text-gray-700"
                     >
-                      {copiedField === "password" ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      {copiedField === "pass" ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
                       ) : (
                         <Copy className="w-3.5 h-3.5" />
                       )}
-                      <span>
-                        {copiedField === "password" ? "Tersalin" : "Copy"}
-                      </span>
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+
+              <div className="space-y-1">
+                <label className="text-gray-500">Server</label>
+                <div className="p-2 bg-gray-50 border border-gray-200 rounded-md font-mono text-gray-700">
+                  {credModal.server}
+                </div>
+              </div>
+            </>
           )}
 
-          <div className="flex justify-end pt-2 border-t border-zinc-800">
+          <div className="pt-2 flex justify-end border-t border-gray-100">
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               onClick={() =>
                 setCredModal((prev) => ({ ...prev, isOpen: false }))
               }
             >
-              Tutup
+              Close
             </Button>
           </div>
         </div>
@@ -920,9 +857,10 @@ export function AccountsView({
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false })}
         onConfirm={handleConfirmDelete}
-        title="Hapus Akun Tuyul?"
-        message={`Apakah Anda yakin ingin menghapus akun ${deleteDialog.nickname}? Seluruh riwayat aktivitas checklist akun ini juga akan dihapus.`}
-        confirmText="Ya, Hapus Akun"
+        title={`Delete Account: ${deleteDialog.nickname}?`}
+        message="Are you sure you want to delete this account? All associated daily activity logs will be permanently deleted."
+        confirmText="Delete"
+        cancelText="Cancel"
         variant="danger"
       />
     </div>

@@ -122,7 +122,6 @@ export async function updateAccount(data: {
       });
 
       if (parsed.data.activityIds) {
-        // Delete current associations and recreate
         await tx.accountActivity.deleteMany({
           where: { accountId: parsed.data.id },
         });

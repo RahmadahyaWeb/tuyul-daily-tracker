@@ -25,7 +25,7 @@ export async function createActivity(data: {
     });
 
     if (existing) {
-      return { success: false, error: `Kode activity "${parsed.data.code}" sudah digunakan.` };
+      return { success: false, error: `Activity code "${parsed.data.code}" is already in use.` };
     }
 
     await prisma.activity.create({
@@ -70,7 +70,7 @@ export async function updateActivity(data: {
     });
 
     if (existing && existing.id !== data.id) {
-      return { success: false, error: `Kode activity "${parsed.data.code}" sudah digunakan.` };
+      return { success: false, error: `Activity code "${parsed.data.code}" is already in use.` };
     }
 
     await prisma.activity.update({
@@ -117,24 +117,22 @@ export async function toggleActivityStatus(id: string, isActive: boolean) {
   }
 }
 
-export async function reorderActivities(orderedIds: string[]) {
+export async function reorderActivities(items: { id: string; sortOrder: number }[]) {
   const session = await getSession();
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
     await prisma.$transaction(
-      orderedIds.map((id, index) =>
+      items.map((item) =>
         prisma.activity.update({
-          where: { id },
-          data: { sortOrder: index },
+          where: { id: item.id },
+          data: { sortOrder: item.sortOrder },
         })
       )
     );
 
     revalidatePath("/activities");
     revalidatePath("/tracker");
-    revalidatePath("/weekly");
-    revalidatePath("/");
 
     return { success: true };
   } catch (error) {

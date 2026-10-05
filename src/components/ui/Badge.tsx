@@ -15,22 +15,22 @@ export function Badge({
   className,
 }: BadgeProps) {
   const variantStyles = {
-    success: "bg-emerald-950/70 text-emerald-400 border border-emerald-800/60",
-    warning: "bg-amber-950/70 text-amber-400 border border-amber-800/60",
-    neutral: "bg-zinc-800/80 text-zinc-300 border border-zinc-700/60",
-    danger: "bg-red-950/70 text-red-400 border border-red-800/60",
-    blue: "bg-blue-950/70 text-blue-400 border border-blue-800/60",
+    success: "bg-emerald-50 text-emerald-700 border border-emerald-200/80",
+    warning: "bg-amber-50 text-amber-800 border border-amber-200/80",
+    neutral: "bg-gray-100 text-gray-700 border border-gray-200/80",
+    danger: "bg-red-50 text-red-700 border border-red-200/80",
+    blue: "bg-blue-50 text-blue-700 border border-blue-200/80",
   };
 
   const sizeStyles = {
-    sm: "text-[10px] px-1.5 py-0.5 rounded",
-    md: "text-xs px-2 py-0.5 rounded-md",
+    sm: "text-[11px] px-1.5 py-0.2 rounded leading-tight font-medium",
+    md: "text-xs px-2 py-0.5 rounded-md font-medium",
   };
 
   return (
     <span
       className={cn(
-        "inline-flex items-center font-medium tracking-wide",
+        "inline-flex items-center tracking-tight",
         variantStyles[variant],
         sizeStyles[size],
         className

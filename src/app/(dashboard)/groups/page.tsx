@@ -3,8 +3,8 @@ import { getGroups } from "@/server/db/queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Groups — Tuyul Tracker",
-  description: "Manajemen grup akun tuyul Ragnarok",
+  title: "Groups — Tuyul Tracker",
+  description: "Account category and group management",
 };
 
 export const dynamic = "force-dynamic";

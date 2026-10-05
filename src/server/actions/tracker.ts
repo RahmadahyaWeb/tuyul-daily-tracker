@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { revalidatePath } from "next/cache";
 
 export async function toggleActivityLog(
   accountId: string,
@@ -39,11 +38,6 @@ export async function toggleActivityLog(
       },
     });
 
-    revalidatePath("/tracker");
-    revalidatePath("/weekly");
-    revalidatePath("/");
-    revalidatePath(`/accounts/${accountId}`);
-
     return { success: true };
   } catch (error) {
     console.error("Failed to toggle activity log:", error);
@@ -61,56 +55,40 @@ export async function completeAccountDaily(
   }
 
   try {
-    // Get all active activities assigned to this account
-    const account = await prisma.account.findUnique({
-      where: { id: accountId },
-      include: {
-        accountActivities: {
-          where: { isActive: true },
-          include: { activity: { select: { isActive: true } } },
-        },
+    const accountActivities = await prisma.accountActivity.findMany({
+      where: {
+        accountId,
+        isActive: true,
+        activity: { isActive: true },
       },
+      select: { activityId: true },
     });
 
-    if (!account) {
-      return { success: false, error: "Account not found" };
+    if (accountActivities.length === 0) {
+      return { success: true };
     }
-
-    const validActivityIds = account.accountActivities
-      .filter((aa) => aa.activity.isActive)
-      .map((aa) => aa.activityId);
 
     const now = new Date();
 
-    await prisma.$transaction(
-      validActivityIds.map((actId) =>
-        prisma.activityLog.upsert({
-          where: {
-            accountId_activityId_activityDate: {
-              accountId,
-              activityId: actId,
-              activityDate,
-            },
-          },
-          create: {
-            accountId,
-            activityId: actId,
-            activityDate,
-            isCompleted: true,
-            completedAt: now,
-          },
-          update: {
-            isCompleted: true,
-            completedAt: now,
-          },
-        })
-      )
-    );
-
-    revalidatePath("/tracker");
-    revalidatePath("/weekly");
-    revalidatePath("/");
-    revalidatePath(`/accounts/${accountId}`);
+    // Fast atomic replacement using 2 operations
+    await prisma.$transaction([
+      prisma.activityLog.deleteMany({
+        where: {
+          accountId,
+          activityDate,
+          activityId: { in: accountActivities.map((a) => a.activityId) },
+        },
+      }),
+      prisma.activityLog.createMany({
+        data: accountActivities.map((a) => ({
+          accountId,
+          activityId: a.activityId,
+          activityDate,
+          isCompleted: true,
+          completedAt: now,
+        })),
+      }),
+    ]);
 
     return { success: true };
   } catch (error) {
@@ -136,11 +114,6 @@ export async function resetAccountDaily(
       },
     });
 
-    revalidatePath("/tracker");
-    revalidatePath("/weekly");
-    revalidatePath("/");
-    revalidatePath(`/accounts/${accountId}`);
-
     return { success: true };
   } catch (error) {
     console.error("Failed to reset account daily:", error);
@@ -155,55 +128,40 @@ export async function completeAllDaily(activityDate: string) {
   }
 
   try {
-    const activeAccounts = await prisma.account.findMany({
-      where: { status: "Active" },
-      include: {
-        accountActivities: {
-          where: { isActive: true },
-          include: { activity: { select: { isActive: true } } },
-        },
+    // Find all active account activities for active accounts in a single query
+    const accountActivities = await prisma.accountActivity.findMany({
+      where: {
+        isActive: true,
+        account: { status: "Active" },
+        activity: { isActive: true },
       },
+      select: { accountId: true, activityId: true },
     });
 
+    if (accountActivities.length === 0) {
+      return { success: true };
+    }
+
     const now = new Date();
-    const ops = [];
 
-    for (const acc of activeAccounts) {
-      for (const aa of acc.accountActivities) {
-        if (aa.activity.isActive) {
-          ops.push(
-            prisma.activityLog.upsert({
-              where: {
-                accountId_activityId_activityDate: {
-                  accountId: acc.id,
-                  activityId: aa.activityId,
-                  activityDate,
-                },
-              },
-              create: {
-                accountId: acc.id,
-                activityId: aa.activityId,
-                activityDate,
-                isCompleted: true,
-                completedAt: now,
-              },
-              update: {
-                isCompleted: true,
-                completedAt: now,
-              },
-            })
-          );
-        }
-      }
-    }
-
-    if (ops.length > 0) {
-      await prisma.$transaction(ops);
-    }
-
-    revalidatePath("/tracker");
-    revalidatePath("/weekly");
-    revalidatePath("/");
+    // Fast bulk transaction: delete today's logs for active accounts & insert completed records
+    await prisma.$transaction([
+      prisma.activityLog.deleteMany({
+        where: {
+          activityDate,
+          account: { status: "Active" },
+        },
+      }),
+      prisma.activityLog.createMany({
+        data: accountActivities.map((aa) => ({
+          accountId: aa.accountId,
+          activityId: aa.activityId,
+          activityDate,
+          isCompleted: true,
+          completedAt: now,
+        })),
+      }),
+    ]);
 
     return { success: true };
   } catch (error) {
@@ -224,10 +182,6 @@ export async function resetAllDaily(activityDate: string) {
         activityDate,
       },
     });
-
-    revalidatePath("/tracker");
-    revalidatePath("/weekly");
-    revalidatePath("/");
 
     return { success: true };
   } catch (error) {
