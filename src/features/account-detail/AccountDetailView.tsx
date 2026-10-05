@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Avatar } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -33,7 +35,13 @@ import {
   Eye,
   EyeOff,
   Save,
+  KeyRound,
+  Shield,
+  Activity,
+  Calendar,
+  FileText,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AccountDetailProps {
   data: {
@@ -161,250 +169,301 @@ export function AccountDetailView({ data }: AccountDetailProps) {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const handleStatusChange = async (newStatus: "Active" | "Paused" | "Finished") => {
-    setStatus(newStatus);
-    await toggleAccountStatus(account.id, newStatus as "Active" | "Paused");
+  const handleStatusToggle = async () => {
+    const nextStatus = status === "Active" ? "Paused" : "Active";
+    setStatus(nextStatus);
+    await toggleAccountStatus(account.id, nextStatus);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Link href="/accounts">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                {account.nickname}
-              </h1>
-              <Badge
-                variant={
-                  status === "Active"
-                    ? "success"
-                    : status === "Paused"
-                    ? "warning"
-                    : "neutral"
-                }
-                size="sm"
-              >
-                {status}
-              </Badge>
+    <div className="space-y-6 max-w-5xl">
+      {/* Top Breadcrumb & Back button */}
+      <div>
+        <Link
+          href="/accounts"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 transition-colors font-medium mb-3"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Accounts</span>
+        </Link>
+
+        {/* Character Profile Card */}
+        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <Avatar name={account.nickname} size="lg" />
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-none">
+                  {account.nickname}
+                </h1>
+                <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono">
+                  Lv. {account.level}
+                </Badge>
+                <Badge
+                  variant={
+                    status === "Active"
+                      ? "success"
+                      : status === "Paused"
+                      ? "warning"
+                      : "neutral"
+                  }
+                  size="sm"
+                >
+                  {status}
+                </Badge>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-1.5">
+                <span className="font-medium text-slate-700">{account.job}</span>
+                <span>·</span>
+                <span>Server: <strong className="text-slate-700">{account.server}</strong></span>
+                <span>·</span>
+                <span>Owner: <strong className="text-slate-700">{account.owner}</strong></span>
+                {account.group && (
+                  <>
+                    <span>·</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium text-[10px]">
+                      {account.group.name}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {account.job} · Lv.{account.level} · {account.server}
-              {account.group && ` · ${account.group.name}`}
-            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <select
-            value={status}
-            onChange={(e) =>
-              handleStatusChange(e.target.value as "Active" | "Paused" | "Finished")
-            }
-            className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
-          >
-            <option value="Active">Active</option>
-            <option value="Paused">Paused</option>
-            <option value="Finished">Finished</option>
-          </select>
-
-          <Link href="/tracker">
-            <Button size="sm">Open Tracker</Button>
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleStatusToggle}
+              className="text-xs h-8"
+            >
+              {status === "Active" ? "Pause Account" : "Activate Account"}
+            </Button>
+            <Link href="/tracker">
+              <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8">
+                Daily Tracker
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Overview Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Credentials & Notes */}
-        <div className="space-y-4">
-          {/* Credentials */}
-          <div className="rounded-md border border-border p-4 space-y-3 bg-background">
-            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              Credentials
-            </h2>
+      {/* 2-Column KPI & Credentials */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Today & Weekly Progress Stats */}
+        <Card className="saas-card">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-indigo-600" />
+              Checklist Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-2 space-y-4">
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600">Today&apos;s Progress</span>
+                <span className="font-bold text-slate-900">
+                  {todayCompletedCount} / {totalAssigned} ({todayProgressPercent}%)
+                </span>
+              </div>
+              <Progress value={todayProgressPercent} className="h-2" />
+            </div>
 
-            <div className="space-y-2 text-xs">
-              <div>
-                <span className="text-muted-foreground">Username</span>
-                <div className="flex items-center justify-between mt-1 p-2 bg-muted/30 border border-border rounded-md font-mono">
-                  <span className="text-foreground font-medium truncate">
-                    {account.username}
-                  </span>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-600">This Week Consistency</span>
+                <span className="font-bold text-slate-900">
+                  {weekLogs.length} / {weekTotalExpected} ({weekProgressPercent}%)
+                </span>
+              </div>
+              <Progress value={weekProgressPercent} className="h-2" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Credentials Card */}
+        <Card className="saas-card">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
+              Login Credentials
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-2 space-y-3 text-xs">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
+              <span className="text-slate-500">Username:</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-semibold text-slate-900">
+                  {account.username}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(account.username, "username")}
+                  className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                  title="Copy Username"
+                >
+                  {copiedField === "username" ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
+              <span className="text-slate-500">Password:</span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-semibold text-slate-900">
+                  {credentials.show && credentials.password
+                    ? credentials.password
+                    : "••••••••••••"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleFetchCredentials}
+                  disabled={credentials.loading}
+                  className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                  title={credentials.show ? "Hide Password" : "Show Password"}
+                >
+                  {credentials.show ? (
+                    <EyeOff className="w-3.5 h-3.5" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5" />
+                  )}
+                </button>
+                {credentials.password && (
                   <button
-                    onClick={() => handleCopy(account.username, "user")}
-                    className="text-muted-foreground hover:text-foreground ml-2 cursor-pointer"
+                    type="button"
+                    onClick={() => handleCopy(credentials.password!, "password")}
+                    className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                    title="Copy Password"
                   >
-                    {copiedField === "user" ? (
+                    {copiedField === "password" ? (
                       <Check className="w-3.5 h-3.5 text-emerald-600" />
                     ) : (
                       <Copy className="w-3.5 h-3.5" />
                     )}
                   </button>
-                </div>
-              </div>
-
-              <div>
-                <span className="text-muted-foreground">Password</span>
-                <div className="flex items-center justify-between mt-1 p-2 bg-muted/30 border border-border rounded-md font-mono">
-                  <span className="text-foreground font-medium">
-                    {credentials.show && credentials.password
-                      ? credentials.password
-                      : "••••••••••••"}
-                  </span>
-                  <div className="flex items-center gap-2 ml-2">
-                    <button
-                      onClick={handleFetchCredentials}
-                      disabled={credentials.loading}
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      {credentials.show ? (
-                        <EyeOff className="w-3.5 h-3.5" />
-                      ) : (
-                        <Eye className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                    {credentials.show && credentials.password && (
-                      <button
-                        onClick={() => handleCopy(credentials.password!, "pass")}
-                        className="text-muted-foreground hover:text-foreground cursor-pointer"
-                      >
-                        {copiedField === "pass" ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <Separator className="my-2" />
-
-              <div className="text-xs text-muted-foreground space-y-1">
-                <div>Owner: <span className="text-foreground font-medium">{account.owner}</span></div>
-                <div>Server: <span className="text-foreground font-medium">{account.server}</span></div>
-                <div>Created: <span className="text-foreground font-medium">{formatDateShort(account.startDate.toISOString().split("T")[0])}</span></div>
+                )}
               </div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Notes */}
-          <div className="rounded-md border border-border p-4 space-y-3 bg-background">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                Notes
-              </h2>
-              {notesSaved && (
-                <span className="text-xs text-emerald-600 font-medium">
-                  Saved
-                </span>
-              )}
-            </div>
-            <Textarea
-              rows={3}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Notes..."
-            />
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSaveNotes}
-                isLoading={isSavingNotes}
-              >
-                <Save className="w-3.5 h-3.5 mr-1.5" />
-                <span>Save</span>
-              </Button>
-            </div>
-          </div>
+      {/* Notes / Remarks Editor */}
+      <Card className="saas-card">
+        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
+          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5 text-indigo-600" />
+            Character Notes & Instructions
+          </CardTitle>
+          <Button
+            size="sm"
+            onClick={handleSaveNotes}
+            isLoading={isSavingNotes}
+            className="h-7 text-xs bg-slate-900 hover:bg-slate-800 text-white gap-1"
+          >
+            {notesSaved ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Save className="w-3.5 h-3.5" />}
+            <span>{notesSaved ? "Saved" : "Save Notes"}</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="p-4 pt-2">
+          <Textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Type any character settings, farm target, level targets, or equipment gear setups here..."
+            rows={3}
+            className="text-xs bg-slate-50/50"
+          />
+        </CardContent>
+      </Card>
+
+      {/* 30-Day Activity History Heatmap Matrix */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-indigo-600" />
+            30-Day Activity History Matrix
+          </h2>
         </div>
 
-        {/* Right Column: Progress & 30-Day History */}
-        <div className="lg:col-span-2 space-y-4">
-          {/* Progress Summary */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-md border border-border p-3 space-y-2 bg-background">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Today</span>
-                <span className="font-mono text-foreground font-medium">
-                  {todayCompletedCount}/{totalAssigned} ({todayProgressPercent}%)
-                </span>
-              </div>
-              <Progress value={todayProgressPercent} className="h-1.5" />
-            </div>
+        <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table className="min-w-[750px]">
+              <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[180px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4 sticky left-0 z-20 bg-slate-50/90 border-r border-slate-200/60">
+                    Activity
+                  </TableHead>
 
-            <div className="rounded-md border border-border p-3 space-y-2 bg-background">
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>This Week</span>
-                <span className="font-mono text-foreground font-medium">
-                  {weekLogs.length}/{weekTotalExpected} ({weekProgressPercent}%)
-                </span>
-              </div>
-              <Progress value={weekProgressPercent} className="h-1.5" />
-            </div>
-          </div>
-
-          {/* Assigned Activities */}
-          <div className="rounded-md border border-border p-4 space-y-2 bg-background">
-            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-              Assigned Activities ({totalAssigned})
-            </h2>
-            <div className="flex flex-wrap gap-1.5">
-              {activeActivities.map((act) => (
-                <Badge key={act.id} variant="secondary" className="font-normal text-xs">
-                  {act.name}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* 30-Day Activity History Table */}
-          <div className="rounded-md border border-border overflow-hidden bg-background">
-            <div className="p-3 border-b border-border bg-muted/30">
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
-                30-Day Activity History
-              </h2>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/20">
-                  <TableHead className="text-xs font-medium">Date</TableHead>
-                  {activeActivities.map((act) => (
-                    <TableHead key={act.id} className="text-center text-xs font-medium px-2">
-                      {act.code || act.name}
-                    </TableHead>
-                  ))}
+                  {last30Days.map((dateStr) => {
+                    const isToday = dateStr === todayStr;
+                    return (
+                      <TableHead
+                        key={dateStr}
+                        className={cn(
+                          "text-center text-[10px] font-bold text-slate-500 py-2 px-1 min-w-[32px]",
+                          isToday && "bg-indigo-50/50 text-indigo-700"
+                        )}
+                      >
+                        <span title={formatDateDisplay(dateStr)}>
+                          {formatDateShort(dateStr)}
+                        </span>
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {last30Days.map((d) => (
-                  <TableRow key={d} className="hover:bg-muted/20">
-                    <TableCell className="text-xs font-mono text-muted-foreground py-1.5 px-3">
-                      {formatDateDisplay(d)}
+
+              <TableBody className="divide-y divide-slate-100">
+                {activeActivities.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={last30Days.length + 1}
+                      className="h-28 text-center text-xs text-slate-400 py-6"
+                    >
+                      No activities assigned to this character.
                     </TableCell>
-                    {activeActivities.map((act) => {
-                      const done = logsByDateAndActivity.has(`${d}_${act.id}`);
-                      return (
-                        <TableCell key={act.id} className="text-center py-1.5 px-2">
-                          {done ? (
-                            <Check className="w-3.5 h-3.5 text-emerald-600 mx-auto stroke-[2.5]" />
-                          ) : (
-                            <span className="text-muted-foreground/30 text-xs">—</span>
-                          )}
-                        </TableCell>
-                      );
-                    })}
                   </TableRow>
-                ))}
+                ) : (
+                  activeActivities.map((act) => (
+                    <TableRow key={act.id} className="hover:bg-slate-50/60 transition-colors">
+                      <TableCell className="py-2.5 pl-4 sticky left-0 z-10 bg-white border-r border-slate-200/60 text-xs font-semibold text-slate-900">
+                        {act.name}
+                      </TableCell>
+
+                      {last30Days.map((dateStr) => {
+                        const isDone = logsByDateAndActivity.get(`${dateStr}_${act.id}`);
+                        const isToday = dateStr === todayStr;
+
+                        return (
+                          <TableCell
+                            key={dateStr}
+                            className={cn(
+                              "text-center p-1 align-middle",
+                              isToday && "bg-indigo-50/20"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "w-4 h-4 rounded-sm inline-flex items-center justify-center transition-colors",
+                                isDone
+                                  ? "bg-emerald-500 text-white shadow-2xs"
+                                  : "bg-slate-100 text-slate-300"
+                              )}
+                              title={`${act.name} on ${dateStr}: ${isDone ? "Done" : "Not Done"}`}
+                            >
+                              {isDone && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                            </span>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

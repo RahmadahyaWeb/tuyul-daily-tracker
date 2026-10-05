@@ -12,11 +12,13 @@ import {
   Folder,
   LogOut,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/server/actions/auth";
 import { SettingsModal } from "./SettingsModal";
 import { Separator } from "@/components/ui/separator";
+import { Avatar } from "@/components/ui/avatar";
 
 interface SidebarProps {
   onCloseMobile?: () => void;
@@ -25,8 +27,8 @@ interface SidebarProps {
 
 const mainNavItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/tracker", label: "Tracker", icon: CheckSquare },
-  { href: "/weekly", label: "Weekly", icon: CalendarDays },
+  { href: "/tracker", label: "Daily Tracker", icon: CheckSquare },
+  { href: "/weekly", label: "Weekly View", icon: CalendarDays },
 ];
 
 const managementNavItems = [
@@ -57,40 +59,60 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
         prefetch={true}
         onClick={handleNavClick}
         className={cn(
-          "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-colors",
+          "group flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all",
           isActive
-            ? "bg-accent text-accent-foreground font-medium"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            ? "bg-slate-900 text-white shadow-xs"
+            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
         )}
       >
-        <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-foreground" : "text-muted-foreground")} />
-        <span>{item.label}</span>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Icon
+            className={cn(
+              "w-4 h-4 shrink-0 transition-transform group-hover:scale-105",
+              isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900"
+            )}
+          />
+          <span className="truncate">{item.label}</span>
+        </div>
       </Link>
     );
   };
 
   return (
     <>
-      <aside className="w-[220px] bg-background border-r border-border flex flex-col h-full select-none">
+      <aside className="w-[230px] bg-white border-r border-slate-200/80 flex flex-col h-full select-none">
         {/* Brand Header */}
-        <div className="h-12 px-4 flex items-center border-b border-border">
-          <span className="font-semibold text-sm tracking-tight text-foreground">
-            Tuyul Tracker
-          </span>
+        <div className="h-14 px-4 flex items-center justify-between border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-slate-900 to-indigo-700 flex items-center justify-center text-white shadow-sm shadow-indigo-500/10">
+              <Sparkles className="w-4 h-4 text-indigo-200" />
+            </div>
+            <div>
+              <span className="font-bold text-xs tracking-tight text-slate-900 block leading-tight">
+                Tuyul Tracker
+              </span>
+              <span className="text-[10px] text-slate-400 font-medium leading-none block">
+                Daily Workspace
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
           {/* Main Links */}
-          <div className="space-y-0.5">
+          <div className="space-y-1">
+            <p className="px-3 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+              Overview
+            </p>
             {mainNavItems.map(renderLink)}
           </div>
 
-          <Separator />
+          <Separator className="bg-slate-100" />
 
           {/* Management Section */}
-          <div className="space-y-0.5">
-            <p className="px-3 pb-1 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="space-y-1">
+            <p className="px-3 pb-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
               Management
             </p>
             {managementNavItems.map(renderLink)}
@@ -98,24 +120,31 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
         </nav>
 
         {/* Footer: User & Logout */}
-        <div className="p-3 border-t border-border">
-          <div className="flex items-center justify-between px-1">
+        <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+          <div className="flex items-center justify-between p-1.5 rounded-lg bg-white border border-slate-200/60 shadow-2xs">
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}
-              className="text-left truncate min-w-0 pr-2 hover:opacity-80 transition-opacity cursor-pointer group"
-              title="Edit credentials"
+              className="flex items-center gap-2 text-left truncate min-w-0 pr-1 hover:opacity-85 transition-opacity cursor-pointer flex-1"
+              title="Account Settings"
             >
-              <p className="text-xs font-medium text-foreground truncate group-hover:underline">
-                {user?.username || "Admin"}
-              </p>
+              <Avatar name={user?.username || "Admin"} size="sm" />
+              <div className="truncate min-w-0">
+                <p className="text-xs font-semibold text-slate-900 truncate leading-tight">
+                  {user?.username || "Admin"}
+                </p>
+                <p className="text-[10px] text-slate-400 capitalize leading-none">
+                  {user?.role?.toLowerCase() || "user"}
+                </p>
+              </div>
             </button>
-            <div className="flex items-center gap-1">
+
+            <div className="flex items-center gap-0.5 shrink-0">
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
                 title="Account Settings"
-                className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
+                className="p-1.5 rounded-md text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <Settings className="w-3.5 h-3.5" />
               </button>
@@ -123,7 +152,7 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
                 <button
                   type="submit"
                   title="Logout"
-                  className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
@@ -142,5 +171,3 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
     </>
   );
 }
-
-

@@ -17,6 +17,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Avatar } from "@/components/ui/avatar";
 import {
   Table,
   TableHeader,
@@ -45,7 +46,9 @@ import {
   Check,
   Eye,
   EyeOff,
+  Users,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AccountItem {
   id: string;
@@ -183,34 +186,48 @@ export function AccountsView({
     setFormModalOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormErrors({});
+  const handleActivityCheckbox = (actId: string) => {
+    setFormData((prev) => {
+      const exists = prev.selectedActivityIds.includes(actId);
+      const next = exists
+        ? prev.selectedActivityIds.filter((id) => id !== actId)
+        : [...prev.selectedActivityIds, actId];
+      return { ...prev, selectedActivityIds: next };
+    });
+  };
 
+  const validateForm = () => {
     const errors: Record<string, string> = {};
     if (!formData.nickname.trim()) errors.nickname = "Nickname is required";
     if (!formData.username.trim()) errors.username = "Username is required";
-    if (!editingAccount && !formData.password) errors.password = "Password is required";
-    if (!formData.server.trim()) errors.server = "Server is required";
+    if (!editingAccount && !formData.password.trim()) {
+      errors.password = "Password is required";
+    }
     if (!formData.owner.trim()) errors.owner = "Owner is required";
     if (!formData.job.trim()) errors.job = "Job is required";
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
+    if (!formData.server.trim()) errors.server = "Server is required";
+    if (formData.selectedActivityIds.length === 0) {
+      errors.activities = "Select at least 1 activity";
     }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
       if (editingAccount) {
-        const payload: Parameters<typeof updateAccount>[0] = {
+        const payload: any = {
           id: editingAccount.id,
           nickname: formData.nickname,
           username: formData.username,
           server: formData.server,
           owner: formData.owner,
           job: formData.job,
-          level: Number(formData.level),
+          level: formData.level,
           startDate: formData.startDate,
           status: formData.status,
           notes: formData.notes,
@@ -218,11 +235,14 @@ export function AccountsView({
           activityIds: formData.selectedActivityIds,
         };
         if (formData.password.trim()) {
-          payload.password = formData.password.trim();
+          payload.password = formData.password;
         }
 
         const res = await updateAccount(payload);
-        if (!res.success) throw new Error(res.error);
+        if (!res.success) {
+          setFormErrors({ form: res.error || "Failed to update account" });
+          return;
+        }
       } else {
         const res = await createAccount({
           nickname: formData.nickname,
@@ -231,20 +251,20 @@ export function AccountsView({
           server: formData.server,
           owner: formData.owner,
           job: formData.job,
-          level: Number(formData.level),
+          level: formData.level,
           startDate: formData.startDate,
           status: formData.status,
           notes: formData.notes,
           groupId: formData.groupId || null,
           activityIds: formData.selectedActivityIds,
         });
-        if (!res.success) throw new Error(res.error);
+        if (!res.success) {
+          setFormErrors({ form: res.error || "Failed to create account" });
+          return;
+        }
       }
+
       setFormModalOpen(false);
-    } catch (err: unknown) {
-      setFormErrors({
-        form: err instanceof Error ? err.message : "Failed to save account",
-      });
     } finally {
       setIsSubmitting(false);
     }
@@ -319,33 +339,39 @@ export function AccountsView({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Accounts
-        </h1>
-        <Button size="sm" onClick={handleOpenCreate}>
-          <Plus className="w-4 h-4 mr-1.5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            Account Management
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage Ragnarok character accounts, login credentials, and assigned daily tasks
+          </p>
+        </div>
+
+        <Button size="sm" onClick={handleOpenCreate} className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs gap-1 text-xs">
+          <Plus className="w-3.5 h-3.5" />
           <span>Add Account</span>
         </Button>
       </div>
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-2 text-xs">
-        <div className="relative flex-1 min-w-[180px]">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search accounts..."
+            placeholder="Search accounts, username, owner..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-md border border-input bg-transparent pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs"
           />
         </div>
 
         <select
           value={groupFilter}
           onChange={(e) => setGroupFilter(e.target.value)}
-          className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
         >
           <option value="all">All Groups</option>
           {groups.map((g) => (
@@ -358,149 +384,188 @@ export function AccountsView({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
         >
-          <option value="all">All Status</option>
-          <option value="Active">Active</option>
+          <option value="all">All Statuses</option>
+          <option value="Active">Active Only</option>
           <option value="Paused">Paused</option>
           <option value="Finished">Finished</option>
         </select>
       </div>
 
       {/* Main Accounts Table */}
-      <div className="rounded-md border border-border overflow-hidden bg-background">
-        <Table className="min-w-[700px]">
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="font-medium text-xs">Nickname</TableHead>
-              <TableHead className="font-medium text-xs">Username</TableHead>
-              <TableHead className="font-medium text-xs">Server</TableHead>
-              <TableHead className="font-medium text-xs">Owner</TableHead>
-              <TableHead className="font-medium text-xs">Job</TableHead>
-              <TableHead className="font-medium text-xs">Level</TableHead>
-              <TableHead className="font-medium text-xs">Group</TableHead>
-              <TableHead className="text-center font-medium text-xs">Status</TableHead>
-              <TableHead className="w-12 text-center font-medium text-xs">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {filteredAccounts.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={9}
-                  className="h-24 text-center text-xs text-muted-foreground"
-                >
-                  No accounts found.
-                </TableCell>
+      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table className="min-w-[750px]">
+            <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4">
+                  Character Nickname
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Job / Class
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Server
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Owner
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Group
+                </TableHead>
+                <TableHead className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Status
+                </TableHead>
+                <TableHead className="w-12 text-right text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pr-4">
+                  Actions
+                </TableHead>
               </TableRow>
-            ) : (
-              filteredAccounts.map((acc) => (
-                <TableRow key={acc.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium text-sm">
-                    <Link
-                      href={`/accounts/${acc.id}`}
-                      className="hover:underline text-foreground"
-                    >
-                      {acc.nickname}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
-                    {acc.username}
-                  </TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{acc.server}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{acc.owner}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{acc.job}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{acc.level}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">
-                    {acc.group?.name || "—"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Badge
-                      variant={
-                        acc.status === "Active"
-                          ? "success"
-                          : acc.status === "Paused"
-                          ? "warning"
-                          : "neutral"
-                      }
-                      size="sm"
-                    >
-                      {acc.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center py-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                          <MoreHorizontal className="w-4 h-4" />
-                          <span className="sr-only">Actions</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem onClick={() => handleViewCredentials(acc)}>
-                          <KeyRound className="w-3.5 h-3.5 mr-2" />
-                          <span>Credentials</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleOpenEdit(acc)}>
-                          <Edit2 className="w-3.5 h-3.5 mr-2" />
-                          <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleToggleStatus(acc.id, acc.status)}>
-                          {acc.status === "Active" ? (
-                            <>
-                              <Pause className="w-3.5 h-3.5 mr-2" />
-                              <span>Pause</span>
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-3.5 h-3.5 mr-2" />
-                              <span>Activate</span>
-                            </>
-                          )}
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive"
-                          onClick={() =>
-                            setDeleteDialog({
-                              isOpen: true,
-                              accountId: acc.id,
-                              nickname: acc.nickname,
-                            })
-                          }
-                        >
-                          <Trash2 className="w-3.5 h-3.5 mr-2" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+            </TableHeader>
+
+            <TableBody className="divide-y divide-slate-100">
+              {filteredAccounts.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="h-32 text-center text-xs text-slate-400 py-8"
+                  >
+                    No accounts found.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filteredAccounts.map((acc) => (
+                  <TableRow key={acc.id} className="hover:bg-slate-50/60 transition-colors">
+                    <TableCell className="py-3 pl-4">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar name={acc.nickname} size="sm" />
+                        <div>
+                          <Link
+                            href={`/accounts/${acc.id}`}
+                            className="font-semibold text-xs text-slate-900 hover:text-indigo-600 hover:underline block leading-tight"
+                          >
+                            {acc.nickname}
+                          </Link>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {acc.username}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-xs text-slate-600">
+                      <div className="flex items-center gap-1.5">
+                        <span>{acc.job}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">Lv.{acc.level}</span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-xs text-slate-500 font-medium">
+                      {acc.server}
+                    </TableCell>
+
+                    <TableCell className="text-xs text-slate-600">
+                      {acc.owner}
+                    </TableCell>
+
+                    <TableCell className="text-xs text-slate-500">
+                      {acc.group?.name ? (
+                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
+                          {acc.group.name}
+                        </Badge>
+                      ) : (
+                        <span className="text-slate-300">—</span>
+                      )}
+                    </TableCell>
+
+                    <TableCell className="text-center">
+                      <Badge
+                        variant={
+                          acc.status === "Active"
+                            ? "success"
+                            : acc.status === "Paused"
+                            ? "warning"
+                            : "neutral"
+                        }
+                        size="sm"
+                      >
+                        {acc.status}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="text-right py-2 pr-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-800">
+                            <MoreHorizontal className="w-3.5 h-3.5" />
+                            <span className="sr-only">Actions</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem onClick={() => handleViewCredentials(acc)}>
+                            <KeyRound className="w-3.5 h-3.5 mr-2" />
+                            <span>Credentials</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleOpenEdit(acc)}>
+                            <Edit2 className="w-3.5 h-3.5 mr-2" />
+                            <span>Edit Account</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleToggleStatus(acc.id, acc.status)}>
+                            {acc.status === "Active" ? (
+                              <>
+                                <Pause className="w-3.5 h-3.5 mr-2" />
+                                <span>Pause</span>
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-3.5 h-3.5 mr-2" />
+                                <span>Activate</span>
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-rose-600 focus:text-rose-600 focus:bg-rose-50"
+                            onClick={() =>
+                              setDeleteDialog({
+                                isOpen: true,
+                                accountId: acc.id,
+                                nickname: acc.nickname,
+                              })
+                            }
+                          >
+                            <Trash2 className="w-3.5 h-3.5 mr-2" />
+                            <span>Delete</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
       {/* Add / Edit Account Modal */}
       <Modal
         isOpen={formModalOpen}
         onClose={() => setFormModalOpen(false)}
-        title={editingAccount ? "Edit Account" : "Add Account"}
+        title={editingAccount ? `Edit "${editingAccount.nickname}"` : "Add New Account"}
         maxWidth="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {formErrors.form && (
-            <div className="p-2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
               {formErrors.form}
             </div>
           )}
 
           {/* Section 1: Account Information */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-foreground text-xs uppercase tracking-wider">
-              Account Information
+          <div className="space-y-2.5">
+            <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+              Character Information
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
@@ -552,13 +617,13 @@ export function AccountsView({
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Group</label>
+                <label className="text-xs font-semibold text-slate-700">Group Category</label>
                 <select
                   value={formData.groupId}
                   onChange={(e) =>
                     setFormData({ ...formData, groupId: e.target.value })
                   }
-                  className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring h-9"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400 h-9 shadow-2xs"
                 >
                   <option value="">No Group</option>
                   {groups.map((g) => (
@@ -569,7 +634,7 @@ export function AccountsView({
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-foreground">Status</label>
+                <label className="text-xs font-semibold text-slate-700">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) =>
@@ -578,7 +643,7 @@ export function AccountsView({
                       status: e.target.value as "Active" | "Paused" | "Finished",
                     })
                   }
-                  className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring h-9"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400 h-9 shadow-2xs"
                 >
                   <option value="Active">Active</option>
                   <option value="Paused">Paused</option>
@@ -588,12 +653,12 @@ export function AccountsView({
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-slate-100" />
 
           {/* Section 2: Credentials */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-foreground text-xs uppercase tracking-wider">
-              Credentials
+          <div className="space-y-2.5">
+            <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+              Account Credentials
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input
@@ -618,13 +683,13 @@ export function AccountsView({
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-slate-100" />
 
           {/* Section 3: Activities Checklist */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-foreground text-xs uppercase tracking-wider">
-                Assigned Activities
+              <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
+                Assigned Daily Activities
               </h3>
               <div className="flex gap-2">
                 <button
@@ -635,7 +700,7 @@ export function AccountsView({
                       selectedActivityIds: activities.map((a) => a.id),
                     })
                   }
-                  className="text-xs text-muted-foreground hover:text-foreground underline cursor-pointer"
+                  className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer font-medium"
                 >
                   Select All
                 </button>
@@ -644,80 +709,66 @@ export function AccountsView({
                   onClick={() =>
                     setFormData({ ...formData, selectedActivityIds: [] })
                   }
-                  className="text-xs text-muted-foreground hover:text-foreground underline cursor-pointer"
+                  className="text-xs text-slate-500 hover:text-slate-800 hover:underline cursor-pointer"
                 >
                   Clear
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+
+            {formErrors.activities && (
+              <p className="text-xs text-rose-600">{formErrors.activities}</p>
+            )}
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border border-slate-200/80 rounded-lg p-3 bg-slate-50/50 max-h-48 overflow-y-auto">
               {activities.map((act) => {
-                const checked = formData.selectedActivityIds.includes(act.id);
+                const isSelected = formData.selectedActivityIds.includes(act.id);
                 return (
                   <label
                     key={act.id}
-                    className="flex items-center gap-2 p-2 rounded-md border border-border transition-colors cursor-pointer hover:bg-muted/40"
+                    onClick={() => handleActivityCheckbox(act.id)}
+                    className={cn(
+                      "flex items-center gap-2 p-1.5 rounded-md border cursor-pointer transition-colors text-xs select-none",
+                      isSelected
+                        ? "bg-white border-indigo-200 text-slate-900 shadow-2xs font-medium"
+                        : "border-transparent text-slate-500 hover:bg-slate-100"
+                    )}
                   >
                     <Checkbox
-                      checked={checked}
-                      onCheckedChange={(c) => {
-                        if (c) {
-                          setFormData({
-                            ...formData,
-                            selectedActivityIds: [
-                              ...formData.selectedActivityIds,
-                              act.id,
-                            ],
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            selectedActivityIds:
-                              formData.selectedActivityIds.filter(
-                                (id) => id !== act.id
-                              ),
-                          });
-                        }
-                      }}
+                      checked={isSelected}
+                      onCheckedChange={() => {}}
                     />
-                    <span className="text-xs font-medium truncate">{act.name}</span>
+                    <span className="truncate">{act.name}</span>
                   </label>
                 );
               })}
             </div>
           </div>
 
-          <Separator />
+          <Separator className="bg-slate-100" />
 
           {/* Section 4: Notes */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-700">Notes / Remarks</label>
             <Textarea
-              label="Notes"
-              rows={2}
               value={formData.notes}
               onChange={(e) =>
                 setFormData({ ...formData, notes: e.target.value })
               }
-              placeholder="Optional notes..."
+              placeholder="e.g. Auto-potion settings, hunting target, or special equipment"
+              rows={2}
             />
           </div>
 
-          {/* Footer buttons */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              size="sm"
               onClick={() => setFormModalOpen(false)}
-              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              size="sm"
-              isLoading={isSubmitting}
-            >
+            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
               {editingAccount ? "Save Changes" : "Create Account"}
             </Button>
           </div>
@@ -728,46 +779,47 @@ export function AccountsView({
       <Modal
         isOpen={credModal.isOpen}
         onClose={() => setCredModal((prev) => ({ ...prev, isOpen: false }))}
-        title={`Credentials: ${credModal.nickname}`}
+        title={`Credentials — ${credModal.nickname}`}
         maxWidth="sm"
       >
-        <div className="space-y-3 text-xs">
+        <div className="space-y-4 text-xs">
           {credModal.isLoading ? (
-            <div className="py-6 text-center text-muted-foreground">
-              Decrypting credentials...
-            </div>
+            <div className="py-6 text-center text-slate-400">Loading credentials...</div>
           ) : (
             <>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Username</label>
-                <div className="flex items-center justify-between p-2 bg-muted/40 border border-border rounded-md font-mono">
-                  <span className="text-foreground font-medium">
-                    {credModal.username}
-                  </span>
-                  <button
-                    onClick={() => handleCopy(credModal.username, "user")}
-                    className="text-muted-foreground hover:text-foreground cursor-pointer"
-                  >
-                    {copiedField === "user" ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
+              <div className="space-y-3 bg-slate-50 p-3 rounded-lg border border-slate-200/80">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Username:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-semibold text-slate-900">
+                      {credModal.username}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(credModal.username, "username")}
+                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      title="Copy Username"
+                    >
+                      {copiedField === "username" ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Password</label>
-                <div className="flex items-center justify-between p-2 bg-muted/40 border border-border rounded-md font-mono">
-                  <span className="text-foreground font-medium">
-                    {showPassword ? credModal.password : "••••••••••••"}
-                  </span>
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Password:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-semibold text-slate-900">
+                      {showPassword ? credModal.password : "••••••••••••"}
+                    </span>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      title={showPassword ? "Hide Password" : "Show Password"}
                     >
                       {showPassword ? (
                         <EyeOff className="w-3.5 h-3.5" />
@@ -777,10 +829,11 @@ export function AccountsView({
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleCopy(credModal.password, "pass")}
-                      className="text-muted-foreground hover:text-foreground cursor-pointer"
+                      onClick={() => handleCopy(credModal.password, "password")}
+                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      title="Copy Password"
                     >
-                      {copiedField === "pass" ? (
+                      {copiedField === "password" ? (
                         <Check className="w-3.5 h-3.5 text-emerald-600" />
                       ) : (
                         <Copy className="w-3.5 h-3.5" />
@@ -788,13 +841,20 @@ export function AccountsView({
                     </button>
                   </div>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Server:</span>
+                  <span className="font-semibold text-slate-900">{credModal.server}</span>
+                </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="flex justify-end">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCredModal((prev) => ({ ...prev, isOpen: false }))}
+                  onClick={() =>
+                    setCredModal((prev) => ({ ...prev, isOpen: false }))
+                  }
                 >
                   Close
                 </Button>
@@ -804,16 +864,15 @@ export function AccountsView({
         </div>
       </Modal>
 
-      {/* Delete Dialog */}
+      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteDialog.isOpen}
-        onClose={() => setDeleteDialog({ isOpen: false })}
+        title={`Delete "${deleteDialog.nickname}"?`}
+        description="Are you sure you want to delete this account? This action cannot be undone and will delete all associated activity logs."
+        confirmLabel="Delete Account"
+        confirmVariant="destructive"
         onConfirm={handleConfirmDelete}
-        title="Delete Account?"
-        description={`Are you sure you want to delete ${deleteDialog.nickname}? All activity logs for this account will be removed.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="danger"
+        onCancel={() => setDeleteDialog({ isOpen: false })}
       />
     </div>
   );

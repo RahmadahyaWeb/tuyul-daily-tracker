@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -18,7 +19,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Folder } from "lucide-react";
 
 interface GroupItem {
   id: string;
@@ -94,88 +95,113 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-3xl">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Groups
-        </h1>
-        <Button size="sm" onClick={handleOpenCreate}>
-          <Plus className="w-4 h-4 mr-1.5" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            Account Groups
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Organize and categorize your character accounts (e.g., Client A, Personal, Card Farm)
+          </p>
+        </div>
+
+        <Button size="sm" onClick={handleOpenCreate} className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs gap-1 text-xs">
+          <Plus className="w-3.5 h-3.5" />
           <span>Add Group</span>
         </Button>
       </div>
 
       {/* Main Groups Table */}
-      <div className="rounded-md border border-border overflow-hidden bg-background">
-        <Table className="min-w-[450px]">
-          <TableHeader>
-            <TableRow className="bg-muted/40 hover:bg-muted/40">
-              <TableHead className="font-medium text-xs">Name</TableHead>
-              <TableHead className="text-center font-medium text-xs">Accounts</TableHead>
-              <TableHead className="w-20 text-center font-medium text-xs">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {initialGroups.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} className="h-24 text-center text-xs text-muted-foreground">
-                  No groups yet.
-                </TableCell>
+      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4">
+                  Group Category Name
+                </TableHead>
+                <TableHead className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Characters
+                </TableHead>
+                <TableHead className="w-24 text-right text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pr-4">
+                  Actions
+                </TableHead>
               </TableRow>
-            ) : (
-              initialGroups.map((g) => (
-                <TableRow key={g.id} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium text-sm text-foreground">
-                    {g.name}
-                  </TableCell>
-                  <TableCell className="text-center text-xs font-mono text-muted-foreground">
-                    {g._count?.accounts ?? 0}
-                  </TableCell>
-                  <TableCell className="text-center py-2">
-                    <div className="flex items-center justify-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                        onClick={() => handleOpenEdit(g)}
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                        onClick={() =>
-                          setDeleteDialog({
-                            isOpen: true,
-                            groupId: g.id,
-                            groupName: g.name,
-                          })
-                        }
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
+            </TableHeader>
+
+            <TableBody className="divide-y divide-slate-100">
+              {initialGroups.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-28 text-center text-xs text-slate-400 py-6">
+                    No groups created yet. Click &quot;Add Group&quot; to create one.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                initialGroups.map((g) => (
+                  <TableRow key={g.id} className="hover:bg-slate-50/60 transition-colors">
+                    <TableCell className="font-semibold text-xs text-slate-900 py-3 pl-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500">
+                          <Folder className="w-3.5 h-3.5" />
+                        </div>
+                        <span>{g.name}</span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-center py-3">
+                      <Badge variant="secondary" className="text-[10px] font-mono py-0 px-2">
+                        {g._count?.accounts ?? 0} accounts
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="text-right py-3 pr-4">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-slate-400 hover:text-slate-800"
+                          onClick={() => handleOpenEdit(g)}
+                          title="Edit group"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                          onClick={() =>
+                            setDeleteDialog({
+                              isOpen: true,
+                              groupId: g.id,
+                              groupName: g.name,
+                            })
+                          }
+                          title="Delete group"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
 
-      {/* Add / Edit Group Modal */}
+      {/* Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingGroup ? "Edit Group" : "Add Group"}
+        title={editingGroup ? "Edit Group" : "New Group"}
         maxWidth="sm"
       >
-        <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {error && (
-            <div className="p-2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+            <div className="p-2.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
               {error}
             </div>
           )}
@@ -184,24 +210,19 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
             label="Group Name *"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Farm Card"
+            placeholder="e.g. Farm Card, Client A, Personal"
+            autoFocus
           />
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              size="sm"
               onClick={() => setModalOpen(false)}
-              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              size="sm"
-              isLoading={isSubmitting}
-            >
+            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
               {editingGroup ? "Save Changes" : "Create Group"}
             </Button>
           </div>
@@ -211,13 +232,12 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
       {/* Delete Confirmation */}
       <ConfirmDialog
         isOpen={deleteDialog.isOpen}
-        onClose={() => setDeleteDialog({ isOpen: false })}
+        title={`Delete "${deleteDialog.groupName}"?`}
+        description="Are you sure you want to delete this group? Accounts in this group will remain intact but will be ungrouped."
+        confirmLabel="Delete Group"
+        confirmVariant="destructive"
         onConfirm={handleConfirmDelete}
-        title="Delete Group?"
-        description={`Are you sure you want to delete ${deleteDialog.groupName}? Accounts assigned to this group will become unassigned.`}
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        variant="danger"
+        onCancel={() => setDeleteDialog({ isOpen: false })}
       />
     </div>
   );
