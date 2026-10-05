@@ -20,6 +20,8 @@ export function ProfileSettingsView({ user }: ProfileSettingsViewProps) {
       const res = await updateAdminCredentialsAction(prevState, formData);
       if (res?.success) {
         toast.success(res.message || "Profile updated successfully!");
+      } else if (res && !res.success) {
+        toast.error(res.error || "Failed to update profile");
       }
       return res;
     },

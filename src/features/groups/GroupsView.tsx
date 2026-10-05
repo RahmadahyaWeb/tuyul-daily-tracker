@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Edit2, Trash2, Folder } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
+import { toast } from "sonner";
 
 interface GroupItem {
   id: string;
@@ -78,13 +79,17 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
       if (editingGroup) {
         const res = await updateGroup({ id: editingGroup.id, name });
         if (!res.success) throw new Error(res.error);
+        toast.success(`Group "${name}" updated!`);
       } else {
         const res = await createGroup({ name });
         if (!res.success) throw new Error(res.error);
+        toast.success(`Group "${name}" created!`);
       }
       setModalOpen(false);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to save group");
+      const errMsg = err instanceof Error ? err.message : "Failed to save group";
+      setError(errMsg);
+      toast.error(errMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -93,7 +98,12 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   const handleConfirmDelete = async () => {
     if (!deleteDialog.groupId) return;
     try {
-      await deleteGroup(deleteDialog.groupId);
+      const res = await deleteGroup(deleteDialog.groupId);
+      if (res && res.success) {
+        toast.success(`Group "${deleteDialog.groupName || ""}" deleted.`);
+      } else {
+        toast.error("Failed to delete group");
+      }
     } finally {
       setDeleteDialog({ isOpen: false });
     }

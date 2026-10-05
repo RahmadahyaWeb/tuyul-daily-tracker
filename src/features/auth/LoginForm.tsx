@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useActionState } from "react";
+import React, { useActionState, useEffect } from "react";
 import { loginAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(loginAction, null);
+
+  useEffect(() => {
+    if (state?.error) {
+      toast.error(state.error);
+    }
+  }, [state]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 text-slate-900">

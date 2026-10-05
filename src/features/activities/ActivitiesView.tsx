@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
+import { toast } from "sonner";
 
 interface ActivityItem {
   id: string;
@@ -132,6 +133,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           isActive: formData.isActive,
         });
         if (!res.success) throw new Error(res.error);
+        toast.success(`Activity "${formData.name}" updated!`);
       } else {
         const res = await createActivity({
           name: formData.name,
@@ -141,12 +143,13 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           isActive: formData.isActive,
         });
         if (!res.success) throw new Error(res.error);
+        toast.success(`Activity "${formData.name}" created!`);
       }
       setModalOpen(false);
     } catch (err: unknown) {
-      setFormErrors({
-        form: err instanceof Error ? err.message : "Failed to save activity",
-      });
+      const errMsg = err instanceof Error ? err.message : "Failed to save activity";
+      setFormErrors({ form: errMsg });
+      toast.error(errMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -154,7 +157,12 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
 
   const handleToggleStatus = (id: string, currentStatus: boolean) => {
     startTransition(async () => {
-      await toggleActivityStatus(id, !currentStatus);
+      const res = await toggleActivityStatus(id, !currentStatus);
+      if (res && res.success) {
+        toast.success(`Activity status updated to ${!currentStatus ? "Active" : "Inactive"}`);
+      } else {
+        toast.error("Failed to update activity status");
+      }
     });
   };
 
@@ -179,7 +187,12 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   const handleConfirmDelete = async () => {
     if (!deleteDialog.activityId) return;
     try {
-      await deleteActivity(deleteDialog.activityId);
+      const res = await deleteActivity(deleteDialog.activityId);
+      if (res && res.success) {
+        toast.success(`Activity "${deleteDialog.activityName || ""}" deleted.`);
+      } else {
+        toast.error("Failed to delete activity");
+      }
     } finally {
       setDeleteDialog({ isOpen: false });
     }

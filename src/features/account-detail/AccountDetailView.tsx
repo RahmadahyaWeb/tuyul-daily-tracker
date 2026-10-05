@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
+import { toast } from "sonner";
 
 interface AccountDetailProps {
   data: {
@@ -130,7 +131,10 @@ export function AccountDetailView({ data }: AccountDetailProps) {
     try {
       await updateAccountNotes(account.id, notes);
       setNotesSaved(true);
+      toast.success("Character notes saved successfully!");
       setTimeout(() => setNotesSaved(false), 2000);
+    } catch {
+      toast.error("Failed to save notes");
     } finally {
       setIsSavingNotes(false);
     }
@@ -139,13 +143,19 @@ export function AccountDetailView({ data }: AccountDetailProps) {
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
+    toast.success(`${field} copied to clipboard!`);
     setTimeout(() => setCopiedField(null), 2000);
   };
 
   const handleStatusToggle = async () => {
     const nextStatus = status === "Active" ? "Paused" : "Active";
     setStatus(nextStatus);
-    await toggleAccountStatus(account.id, nextStatus);
+    const res = await toggleAccountStatus(account.id, nextStatus);
+    if (res && res.success) {
+      toast.success(`Account status changed to ${nextStatus}`);
+    } else {
+      toast.error("Failed to update status");
+    }
   };
 
   return (

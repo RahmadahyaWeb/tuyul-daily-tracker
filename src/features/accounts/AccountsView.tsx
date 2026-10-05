@@ -50,6 +50,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PlanLimitDialog } from "@/components/shared/PlanLimitDialog";
 import { Pagination } from "@/components/ui/pagination";
+import { toast } from "sonner";
 
 interface AccountItem {
   id: string;
@@ -212,9 +213,12 @@ export function AccountsView({
 
         const res = await updateAccount(payload);
         if (!res.success) {
-          setFormErrors({ form: res.error || "Failed to update account" });
+          const errMsg = res.error || "Failed to update account";
+          setFormErrors({ form: errMsg });
+          toast.error(errMsg);
           return;
         }
+        toast.success(`Character "${formData.nickname}" updated successfully!`);
       } else {
         const res: any = await createAccount({
           nickname: formData.nickname,
@@ -232,11 +236,15 @@ export function AccountsView({
           if (res.planLimitReached) {
             setFormModalOpen(false);
             setPlanLimitOpen(true);
+            toast.warning("Free plan account limit reached. Please upgrade to Pro.");
             return;
           }
-          setFormErrors({ form: res.error || "Failed to create account" });
+          const errMsg = res.error || "Failed to create account";
+          setFormErrors({ form: errMsg });
+          toast.error(errMsg);
           return;
         }
+        toast.success(`Character "${formData.nickname}" created successfully!`);
       }
 
       setFormModalOpen(false);
@@ -248,14 +256,24 @@ export function AccountsView({
   const handleToggleStatus = (id: string, currentStatus: string) => {
     const nextStatus = currentStatus === "Active" ? "Paused" : "Active";
     startTransition(async () => {
-      await toggleAccountStatus(id, nextStatus as "Active" | "Paused");
+      const res = await toggleAccountStatus(id, nextStatus as "Active" | "Paused");
+      if (res && res.success) {
+        toast.success(`Account status changed to ${nextStatus}`);
+      } else {
+        toast.error("Failed to update account status");
+      }
     });
   };
 
   const handleConfirmDelete = async () => {
     if (!deleteDialog.accountId) return;
     try {
-      await deleteAccount(deleteDialog.accountId);
+      const res = await deleteAccount(deleteDialog.accountId);
+      if (res && res.success) {
+        toast.success(`Character "${deleteDialog.nickname || ""}" deleted.`);
+      } else {
+        toast.error("Failed to delete character");
+      }
     } finally {
       setDeleteDialog({ isOpen: false });
     }
