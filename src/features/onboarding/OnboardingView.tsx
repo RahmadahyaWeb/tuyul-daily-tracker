@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { completeOnboardingAction } from "@/server/actions/onboarding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ interface OnboardingViewProps {
 }
 
 export function OnboardingView({ username, activities }: OnboardingViewProps) {
+  const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -74,12 +76,17 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
 
     try {
       const res = await completeOnboardingAction(formData);
-      if (res?.error) {
-        toast.error(res.error);
+      if (res && res.success) {
+        toast.success("Character created successfully! Welcome to Tuyul Tracker.");
+        router.push("/tracker");
+        router.refresh();
+      } else {
+        toast.error(res?.error || "Failed to create account. Please try again.");
         setIsSubmitting(false);
       }
-    } catch {
-      // redirect throws NEXT_REDIRECT which is normal
+    } catch (err: any) {
+      toast.error(err.message || "Failed to complete setup");
+      setIsSubmitting(false);
     }
   };
 
@@ -90,7 +97,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Setup Workspace
+              Setup Workspace & First Character
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
@@ -98,16 +105,28 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
           </div>
         </div>
 
-        {/* Step bars */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className={`h-1.5 rounded-full transition-all ${step >= 1 ? "bg-slate-900" : "bg-slate-200"}`} />
-          <div className={`h-1.5 rounded-full transition-all ${step >= 2 ? "bg-slate-900" : "bg-slate-200"}`} />
-          <div className={`h-1.5 rounded-full transition-all ${step >= 3 ? "bg-slate-900" : "bg-slate-200"}`} />
+        {/* Step dots */}
+        <div className="flex items-center gap-2 px-2">
+          <div
+            className={`h-1.5 flex-1 rounded-full transition-all ${
+              step >= 1 ? "bg-slate-900" : "bg-slate-200"
+            }`}
+          />
+          <div
+            className={`h-1.5 flex-1 rounded-full transition-all ${
+              step >= 2 ? "bg-slate-900" : "bg-slate-200"
+            }`}
+          />
+          <div
+            className={`h-1.5 flex-1 rounded-full transition-all ${
+              step >= 3 ? "bg-slate-900" : "bg-slate-200"
+            }`}
+          />
         </div>
 
-        {/* Card Surface */}
-        <div className="bg-white border border-slate-200/80 rounded-xl p-6 sm:p-8 shadow-sm space-y-6">
-          {/* STEP 1: Workspace */}
+        {/* Card Body */}
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+          {/* STEP 1: Workspace Name */}
           {step === 1 && (
             <form onSubmit={handleNextStep1} className="space-y-5">
               <div className="space-y-1.5">
@@ -118,17 +137,17 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   Name your workspace
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Your workspace is the home for all your tuyul accounts, activities, and daily records.
+                  A workspace is where your character accounts, teams, and daily activities live.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-2">
+              <div className="pt-2">
                 <Input
                   label="Workspace Name"
                   id="workspaceName"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
-                  placeholder="e.g. My Farm Workspace"
+                  placeholder="e.g. My RO Farm Guild"
                   required
                   autoFocus
                 />
@@ -142,7 +161,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
             </form>
           )}
 
-          {/* STEP 2: Add First Account */}
+          {/* STEP 2: First Account Info */}
           {step === 2 && (
             <form onSubmit={handleNextStep2} className="space-y-5">
               <div className="space-y-1.5">
@@ -150,10 +169,10 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   <UserPlus className="w-4 h-4" />
                 </div>
                 <h2 className="text-lg font-bold tracking-tight text-slate-900">
-                  Add your first account
+                  Add your first Tuyul character
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Enter your character information to start your daily tracking list.
+                  Enter your character information to start your daily tracking list. (Required)
                 </p>
               </div>
 
@@ -169,7 +188,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                     autoFocus
                   />
                   <Input
-                    label="Game Username"
+                    label="Game Username / ID"
                     id="username"
                     value={accountUsername}
                     onChange={(e) => setAccountUsername(e.target.value)}
@@ -225,7 +244,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   Choose daily activities
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Select activities to automatically assign to your account. You can customize them anytime.
+                  Select activities to automatically assign to this character. You can edit or add more anytime.
                 </p>
               </div>
 
@@ -233,7 +252,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                 {activities.map((act) => {
                   const isChecked = selectedActivities.includes(act.id);
                   return (
-                    <label
+                    <div
                       key={act.id}
                       onClick={() => toggleActivity(act.id)}
                       className={`flex items-center justify-between p-3 rounded-lg border text-xs cursor-pointer transition-colors ${
@@ -243,13 +262,16 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Checkbox checked={isChecked} />
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={() => toggleActivity(act.id)}
+                        />
                         <span>{act.name}</span>
                       </div>
                       <span className="text-[10px] font-mono uppercase text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
                         {act.code}
                       </span>
-                    </label>
+                    </div>
                   );
                 })}
               </div>
