@@ -4,11 +4,12 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow static files, next internals, and login page
+  // Allow static files, next internals, login, and register page
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/auth") ||
     pathname === "/login" ||
+    pathname === "/register" ||
     pathname.includes(".")
   ) {
     return NextResponse.next();

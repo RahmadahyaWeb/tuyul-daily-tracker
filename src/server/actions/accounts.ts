@@ -38,8 +38,8 @@ export async function createAccount(data: {
     const groupId = parsed.data.groupId || null;
 
     await sql`
-      INSERT INTO accounts (id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id)
-      VALUES (${id}, ${parsed.data.nickname}, ${parsed.data.username}, ${encryptedPassword}, ${parsed.data.server}, ${parsed.data.owner}, ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
+      INSERT INTO accounts (id, user_id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id)
+      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, ${encryptedPassword}, ${parsed.data.server}, ${parsed.data.owner}, ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
     `;
 
     if (parsed.data.activityIds && parsed.data.activityIds.length > 0) {
@@ -89,9 +89,9 @@ export async function updateAccount(data: {
   }
 
   try {
-    const current = await sql`SELECT * FROM accounts WHERE id = ${parsed.data.id} LIMIT 1;`;
+    const current = await sql`SELECT * FROM accounts WHERE id = ${parsed.data.id} AND user_id = ${session.id} LIMIT 1;`;
     if (current.length === 0) {
-      return { success: false, error: "Account not found" };
+      return { success: false, error: "Account not found or access denied" };
     }
     const acc = current[0];
 
@@ -125,7 +125,7 @@ export async function updateAccount(data: {
           notes = ${notes},
           group_id = ${groupId},
           updated_at = NOW()
-      WHERE id = ${parsed.data.id};
+      WHERE id = ${parsed.data.id} AND user_id = ${session.id};
     `;
 
     if (parsed.data.activityIds) {
@@ -159,7 +159,7 @@ export async function updateAccountNotes(id: string, notes: string) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await sql`UPDATE accounts SET notes = ${notes}, updated_at = NOW() WHERE id = ${id};`;
+    await sql`UPDATE accounts SET notes = ${notes}, updated_at = NOW() WHERE id = ${id} AND user_id = ${session.id};`;
     revalidatePath(`/accounts/${id}`);
     return { success: true };
   } catch (error) {
@@ -176,7 +176,7 @@ export async function toggleAccountStatus(
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await sql`UPDATE accounts SET status = ${status}, updated_at = NOW() WHERE id = ${id};`;
+    await sql`UPDATE accounts SET status = ${status}, updated_at = NOW() WHERE id = ${id} AND user_id = ${session.id};`;
 
     revalidatePath("/accounts");
     revalidatePath(`/accounts/${id}`);
@@ -196,7 +196,7 @@ export async function deleteAccount(id: string) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await sql`DELETE FROM accounts WHERE id = ${id};`;
+    await sql`DELETE FROM accounts WHERE id = ${id} AND user_id = ${session.id};`;
 
     revalidatePath("/accounts");
     revalidatePath("/tracker");
@@ -218,7 +218,7 @@ export async function getAccountCredentials(id: string) {
     const rows = await sql`
       SELECT id, nickname, username, password, server
       FROM accounts
-      WHERE id = ${id}
+      WHERE id = ${id} AND user_id = ${session.id}
       LIMIT 1;
     `;
 

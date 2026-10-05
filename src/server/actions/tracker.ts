@@ -15,6 +15,11 @@ export async function toggleActivityLog(
   }
 
   try {
+    const acc = await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+    if (acc.length === 0) {
+      return { success: false, error: "Account not found or access denied" };
+    }
+
     const id = `${accountId}_${activityId}_${activityDate}`;
     const now = completed ? new Date().toISOString() : null;
 
@@ -45,6 +50,11 @@ export async function completeAccountDaily(
   }
 
   try {
+    const acc = await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+    if (acc.length === 0) {
+      return { success: false, error: "Account not found or access denied" };
+    }
+
     const accountActivities = await sql`
       SELECT aa.activity_id
       FROM account_activities aa
@@ -85,6 +95,11 @@ export async function resetAccountDaily(
   }
 
   try {
+    const acc = await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+    if (acc.length === 0) {
+      return { success: false, error: "Account not found or access denied" };
+    }
+
     await sql`
       DELETE FROM activity_logs
       WHERE account_id = ${accountId} AND activity_date = ${activityDate};
@@ -109,7 +124,8 @@ export async function completeAllDaily(activityDate: string) {
       FROM account_activities aa
       JOIN accounts acc ON aa.account_id = acc.id
       JOIN activities act ON aa.activity_id = act.id
-      WHERE aa.is_active = TRUE AND acc.status = 'Active' AND act.is_active = TRUE;
+      WHERE aa.is_active = TRUE AND acc.status = 'Active' AND act.is_active = TRUE
+      AND acc.user_id = ${session.id};
     `;
 
     if (list.length === 0) {
@@ -144,7 +160,8 @@ export async function resetAllDaily(activityDate: string) {
   try {
     await sql`
       DELETE FROM activity_logs
-      WHERE activity_date = ${activityDate};
+      WHERE account_id IN (SELECT id FROM accounts WHERE user_id = ${session.id})
+      AND activity_date = ${activityDate};
     `;
 
     return { success: true };

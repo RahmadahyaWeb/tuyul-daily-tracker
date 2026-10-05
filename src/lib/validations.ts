@@ -5,6 +5,22 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+export const registerSchema = z
+  .object({
+    username: z
+      .string()
+      .trim()
+      .min(3, "Username must be at least 3 characters")
+      .max(30, "Username maximum 30 characters")
+      .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, hyphens, and underscores"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const groupSchema = z.object({
   name: z.string().trim().min(1, "Group name is required").max(50, "Maximum 50 characters"),
 });

@@ -35,7 +35,7 @@ async function init() {
       id TEXT PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'ADMIN',
+      role TEXT NOT NULL DEFAULT 'USER',
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
@@ -44,7 +44,8 @@ async function init() {
   await sql`
     CREATE TABLE IF NOT EXISTS groups (
       id TEXT PRIMARY KEY,
-      name TEXT UNIQUE NOT NULL,
+      user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
@@ -53,8 +54,9 @@ async function init() {
   await sql`
     CREATE TABLE IF NOT EXISTS activities (
       id TEXT PRIMARY KEY,
+      user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
-      code TEXT UNIQUE NOT NULL,
+      code TEXT NOT NULL,
       sort_order INT DEFAULT 0,
       is_active BOOLEAN DEFAULT TRUE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -65,6 +67,7 @@ async function init() {
   await sql`
     CREATE TABLE IF NOT EXISTS accounts (
       id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       nickname TEXT NOT NULL,
       username TEXT NOT NULL,
       password TEXT NOT NULL,
@@ -120,6 +123,9 @@ async function init() {
   await sql`CREATE INDEX IF NOT EXISTS idx_activity_logs_acc_date ON activity_logs (account_id, activity_date);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_accounts_status ON accounts (status);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_accounts_group ON accounts (group_id);`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts (user_id);`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_groups_user_id ON groups (user_id);`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities (user_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_account_activities_acc ON account_activities (account_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_activities_sort ON activities (sort_order);`;
 

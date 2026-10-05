@@ -1,10 +1,94 @@
 "use server";
 
 import { sql } from "@/lib/db";
-import { loginSchema } from "@/lib/validations";
+import { loginSchema, registerSchema } from "@/lib/validations";
 import { createSessionCookie, deleteSessionCookie } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import crypto from "crypto";
+
+export async function registerAction(prevState: unknown, formData: FormData) {
+  const rawData = {
+    username: formData.get("username"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  };
+
+  const parsed = registerSchema.safeParse(rawData);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message || "Invalid input",
+    };
+  }
+
+  const { username, password } = parsed.data;
+
+  try {
+    // Check if username already exists (case-insensitive)
+    const existing = await sql`
+      SELECT id FROM users WHERE LOWER(username) = LOWER(${username}) LIMIT 1;
+    `;
+
+    if (existing.length > 0) {
+      return {
+        success: false,
+        error: "Username is already taken. Please choose another.",
+      };
+    }
+
+    const userId = crypto.randomUUID();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 1. Create User
+    await sql`
+      INSERT INTO users (id, username, password, role, created_at, updated_at)
+      VALUES (${userId}, ${username}, ${hashedPassword}, 'USER', NOW(), NOW());
+    `;
+
+    // 2. Automatically seed 7 default master activities for this new user
+    const defaultActivities = [
+      { id: crypto.randomUUID(), name: "Monster Hunt 600", code: "MH600", sortOrder: 0 },
+      { id: crypto.randomUUID(), name: "Monster Hunt 3000", code: "MH3000", sortOrder: 1 },
+      { id: crypto.randomUUID(), name: "Mission Board", code: "MISSION", sortOrder: 2 },
+      { id: crypto.randomUUID(), name: "Guild Daily", code: "GUILD", sortOrder: 3 },
+      { id: crypto.randomUUID(), name: "TC", code: "TC", sortOrder: 4 },
+      { id: crypto.randomUUID(), name: "Arena", code: "ARENA", sortOrder: 5 },
+      { id: crypto.randomUUID(), name: "Final Mirage", code: "FM", sortOrder: 6 },
+    ];
+
+    for (const act of defaultActivities) {
+      await sql`
+        INSERT INTO activities (id, user_id, name, code, sort_order, is_active, created_at, updated_at)
+        VALUES (${act.id}, ${userId}, ${act.name}, ${act.code}, ${act.sortOrder}, TRUE, NOW(), NOW());
+      `;
+    }
+
+    // 3. Automatically seed sample groups for this new user
+    const defaultGroups = ["Personal", "Client A", "Farm Card"];
+    for (const gName of defaultGroups) {
+      await sql`
+        INSERT INTO groups (id, user_id, name, created_at, updated_at)
+        VALUES (${crypto.randomUUID()}, ${userId}, ${gName}, NOW(), NOW());
+      `;
+    }
+
+    // 4. Create Session Cookie & Login
+    await createSessionCookie({
+      id: userId,
+      username,
+      role: "USER",
+    });
+  } catch (err: any) {
+    console.error("Registration error:", err);
+    return {
+      success: false,
+      error: "Server error during registration. Please try again.",
+    };
+  }
+
+  redirect("/");
+}
 
 export async function loginAction(prevState: unknown, formData: FormData) {
   const rawData = {

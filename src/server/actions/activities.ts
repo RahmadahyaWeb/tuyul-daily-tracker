@@ -21,7 +21,7 @@ export async function createActivity(data: {
   }
 
   try {
-    const existing = await sql`SELECT id FROM activities WHERE code = ${parsed.data.code} LIMIT 1;`;
+    const existing = await sql`SELECT id FROM activities WHERE code = ${parsed.data.code} AND user_id = ${session.id} LIMIT 1;`;
     if (existing.length > 0) {
       return { success: false, error: `Activity code "${parsed.data.code}" is already in use.` };
     }
@@ -31,8 +31,8 @@ export async function createActivity(data: {
     const isActive = parsed.data.isActive ?? true;
 
     await sql`
-      INSERT INTO activities (id, name, code, sort_order, is_active)
-      VALUES (${id}, ${parsed.data.name}, ${parsed.data.code}, ${sortOrder}, ${isActive});
+      INSERT INTO activities (id, user_id, name, code, sort_order, is_active)
+      VALUES (${id}, ${session.id}, ${parsed.data.name}, ${parsed.data.code}, ${sortOrder}, ${isActive});
     `;
 
     revalidatePath("/activities");
@@ -63,7 +63,7 @@ export async function updateActivity(data: {
   }
 
   try {
-    const existing = await sql`SELECT id FROM activities WHERE code = ${parsed.data.code} AND id != ${data.id} LIMIT 1;`;
+    const existing = await sql`SELECT id FROM activities WHERE code = ${parsed.data.code} AND id != ${data.id} AND user_id = ${session.id} LIMIT 1;`;
     if (existing.length > 0) {
       return { success: false, error: `Activity code "${parsed.data.code}" is already in use.` };
     }
@@ -78,7 +78,7 @@ export async function updateActivity(data: {
           sort_order = ${sortOrder},
           is_active = ${isActive},
           updated_at = NOW()
-      WHERE id = ${data.id};
+      WHERE id = ${data.id} AND user_id = ${session.id};
     `;
 
     revalidatePath("/activities");
@@ -98,7 +98,7 @@ export async function toggleActivityStatus(id: string, isActive: boolean) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await sql`UPDATE activities SET is_active = ${isActive}, updated_at = NOW() WHERE id = ${id};`;
+    await sql`UPDATE activities SET is_active = ${isActive}, updated_at = NOW() WHERE id = ${id} AND user_id = ${session.id};`;
 
     revalidatePath("/activities");
     revalidatePath("/tracker");
@@ -118,7 +118,7 @@ export async function reorderActivities(items: { id: string; sortOrder: number }
 
   try {
     for (const item of items) {
-      await sql`UPDATE activities SET sort_order = ${item.sortOrder}, updated_at = NOW() WHERE id = ${item.id};`;
+      await sql`UPDATE activities SET sort_order = ${item.sortOrder}, updated_at = NOW() WHERE id = ${item.id} AND user_id = ${session.id};`;
     }
 
     revalidatePath("/activities");
@@ -136,7 +136,7 @@ export async function deleteActivity(id: string) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await sql`DELETE FROM activities WHERE id = ${id};`;
+    await sql`DELETE FROM activities WHERE id = ${id} AND user_id = ${session.id};`;
 
     revalidatePath("/activities");
     revalidatePath("/tracker");

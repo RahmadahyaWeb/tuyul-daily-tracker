@@ -1,5 +1,13 @@
 import { sql } from "@/lib/db";
 import { getTodayMakassar, getWeekDays, getLastNDays } from "@/lib/date-utils";
+import { getSession } from "@/lib/auth";
+
+async function resolveUserId(explicitUserId?: string): Promise<string> {
+  if (explicitUserId) return explicitUserId;
+  const session = await getSession();
+  if (!session) throw new Error("Unauthorized");
+  return session.id;
+}
 
 export interface DashboardStats {
   totalAccounts: number;
@@ -20,12 +28,27 @@ export interface DashboardStats {
   }[];
 }
 
-export async function getDashboardStats(dateStr: string = getTodayMakassar()): Promise<DashboardStats> {
+export async function getDashboardStats(
+  dateStr: string = getTodayMakassar(),
+  explicitUserId?: string
+): Promise<DashboardStats> {
+  const userId = await resolveUserId(explicitUserId);
+
   const [accountsRaw, masterActivitiesRaw, assignedRaw, todayLogsRaw] = await (sql as any).transaction([
-    sql`SELECT id, nickname, owner, job, server, status FROM accounts ORDER BY nickname ASC;`,
-    sql`SELECT id FROM activities WHERE is_active = TRUE;`,
-    sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
-    sql`SELECT account_id, activity_id FROM activity_logs WHERE activity_date = ${dateStr} AND is_completed = TRUE;`,
+    sql`SELECT id, nickname, owner, job, server, status FROM accounts WHERE user_id = ${userId} ORDER BY nickname ASC;`,
+    sql`SELECT id FROM activities WHERE user_id = ${userId} AND is_active = TRUE;`,
+    sql`
+      SELECT aa.account_id, aa.activity_id
+      FROM account_activities aa
+      JOIN accounts a ON aa.account_id = a.id
+      WHERE a.user_id = ${userId} AND aa.is_active = TRUE;
+    `,
+    sql`
+      SELECT al.account_id, al.activity_id
+      FROM activity_logs al
+      JOIN accounts a ON al.account_id = a.id
+      WHERE a.user_id = ${userId} AND al.activity_date = ${dateStr} AND al.is_completed = TRUE;
+    `,
   ]);
 
   const accounts = accountsRaw as { id: string; nickname: string; owner: string; job: string; server: string; status: string }[];
@@ -172,18 +195,34 @@ export interface TrackerData {
   };
 }
 
-export async function getTrackerData(dateStr: string = getTodayMakassar()): Promise<TrackerData> {
+export async function getTrackerData(
+  dateStr: string = getTodayMakassar(),
+  explicitUserId?: string
+): Promise<TrackerData> {
+  const userId = await resolveUserId(explicitUserId);
+
   const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
-    sql`SELECT id, name, code, sort_order FROM activities WHERE is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
+    sql`SELECT id, name, code, sort_order FROM activities WHERE user_id = ${userId} AND is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
     sql`
       SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
+      WHERE a.user_id = ${userId}
       ORDER BY a.nickname ASC;
     `,
-    sql`SELECT id, name FROM groups ORDER BY name ASC;`,
-    sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
-    sql`SELECT account_id, activity_id FROM activity_logs WHERE activity_date = ${dateStr} AND is_completed = TRUE;`,
+    sql`SELECT id, name FROM groups WHERE user_id = ${userId} ORDER BY name ASC;`,
+    sql`
+      SELECT aa.account_id, aa.activity_id
+      FROM account_activities aa
+      JOIN accounts a ON aa.account_id = a.id
+      WHERE a.user_id = ${userId} AND aa.is_active = TRUE;
+    `,
+    sql`
+      SELECT al.account_id, al.activity_id
+      FROM activity_logs al
+      JOIN accounts a ON al.account_id = a.id
+      WHERE a.user_id = ${userId} AND al.activity_date = ${dateStr} AND al.is_completed = TRUE;
+    `,
   ]);
 
   const activities: TrackerActivityItem[] = (activitiesRaw as any[]).map((a) => ({
@@ -310,10 +349,14 @@ export interface WeeklyAccountRow {
   }[];
 }
 
-export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): Promise<{
+export async function getWeeklyData(
+  baseDateStr: string = getTodayMakassar(),
+  explicitUserId?: string
+): Promise<{
   weekDays: ReturnType<typeof getWeekDays>;
   accounts: WeeklyAccountRow[];
 }> {
+  const userId = await resolveUserId(explicitUserId);
   const weekDays = getWeekDays(baseDateStr);
   const startDateStr = weekDays[0].dateStr;
   const endDateStr = weekDays[6].dateStr;
@@ -323,14 +366,21 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
       SELECT a.id, a.nickname, a.server, a.owner, a.job, a.status, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
+      WHERE a.user_id = ${userId}
       ORDER BY a.nickname ASC;
     `,
-    sql`SELECT id FROM activities WHERE is_active = TRUE;`,
-    sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
+    sql`SELECT id FROM activities WHERE user_id = ${userId} AND is_active = TRUE;`,
     sql`
-      SELECT account_id, activity_id, activity_date
-      FROM activity_logs
-      WHERE activity_date >= ${startDateStr} AND activity_date <= ${endDateStr} AND is_completed = TRUE;
+      SELECT aa.account_id, aa.activity_id
+      FROM account_activities aa
+      JOIN accounts a ON aa.account_id = a.id
+      WHERE a.user_id = ${userId} AND aa.is_active = TRUE;
+    `,
+    sql`
+      SELECT al.account_id, al.activity_id, al.activity_date
+      FROM activity_logs al
+      JOIN accounts a ON al.account_id = a.id
+      WHERE a.user_id = ${userId} AND al.activity_date >= ${startDateStr} AND al.activity_date <= ${endDateStr} AND al.is_completed = TRUE;
     `,
   ]);
 
@@ -416,19 +466,23 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
   };
 }
 
-export async function getAccountsList() {
+export async function getAccountsList(explicitUserId?: string) {
+  const userId = await resolveUserId(explicitUserId);
+
   const [accountsRaw, activitiesRaw] = await (sql as any).transaction([
     sql`
       SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.created_at, a.updated_at, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
+      WHERE a.user_id = ${userId}
       ORDER BY a.nickname ASC;
     `,
     sql`
       SELECT aa.account_id, aa.activity_id, act.name, act.code
       FROM account_activities aa
+      JOIN accounts a ON aa.account_id = a.id
       JOIN activities act ON aa.activity_id = act.id
-      WHERE aa.is_active = TRUE;
+      WHERE a.user_id = ${userId} AND aa.is_active = TRUE;
     `,
   ]);
 
@@ -463,13 +517,14 @@ export async function getAccountsList() {
   }));
 }
 
-export async function getAccountDetail(id: string) {
+export async function getAccountDetail(id: string, explicitUserId?: string) {
+  const userId = await resolveUserId(explicitUserId);
   const todayStr = getTodayMakassar();
   const last30Days = getLastNDays(30, todayStr);
   const startDateStr = last30Days[0];
 
   const [accountRows, activitiesRows, groupRows, logsRaw] = await (sql as any).transaction([
-    sql`SELECT * FROM accounts WHERE id = ${id} LIMIT 1;`,
+    sql`SELECT * FROM accounts WHERE id = ${id} AND user_id = ${userId} LIMIT 1;`,
     sql`
       SELECT aa.id, aa.activity_id, aa.is_active, act.name, act.code, act.sort_order
       FROM account_activities aa
@@ -477,7 +532,7 @@ export async function getAccountDetail(id: string) {
       WHERE aa.account_id = ${id}
       ORDER BY act.sort_order ASC;
     `,
-    sql`SELECT g.id, g.name FROM groups g JOIN accounts a ON a.group_id = g.id WHERE a.id = ${id} LIMIT 1;`,
+    sql`SELECT g.id, g.name FROM groups g JOIN accounts a ON a.group_id = g.id WHERE a.id = ${id} AND a.user_id = ${userId} LIMIT 1;`,
     sql`
       SELECT activity_id, activity_date, is_completed, completed_at
       FROM activity_logs
@@ -529,10 +584,18 @@ export async function getAccountDetail(id: string) {
   };
 }
 
-export async function getMasterActivities() {
+export async function getMasterActivities(explicitUserId?: string) {
+  const userId = await resolveUserId(explicitUserId);
+
   const [activities, counts] = await (sql as any).transaction([
-    sql`SELECT id, name, code, sort_order, is_active FROM activities ORDER BY sort_order ASC, created_at ASC;`,
-    sql`SELECT activity_id, count(*) as count FROM account_activities GROUP BY activity_id;`,
+    sql`SELECT id, name, code, sort_order, is_active FROM activities WHERE user_id = ${userId} ORDER BY sort_order ASC, created_at ASC;`,
+    sql`
+      SELECT aa.activity_id, count(*) as count
+      FROM account_activities aa
+      JOIN accounts a ON aa.account_id = a.id
+      WHERE a.user_id = ${userId}
+      GROUP BY aa.activity_id;
+    `,
   ]);
 
   const countMap = new Map<string, number>();
@@ -552,10 +615,12 @@ export async function getMasterActivities() {
   }));
 }
 
-export async function getGroups() {
+export async function getGroups(explicitUserId?: string) {
+  const userId = await resolveUserId(explicitUserId);
+
   const [groups, counts] = await (sql as any).transaction([
-    sql`SELECT id, name, created_at FROM groups ORDER BY name ASC;`,
-    sql`SELECT group_id, count(*) as count FROM accounts WHERE group_id IS NOT NULL GROUP BY group_id;`,
+    sql`SELECT id, name, created_at FROM groups WHERE user_id = ${userId} ORDER BY name ASC;`,
+    sql`SELECT group_id, count(*) as count FROM accounts WHERE user_id = ${userId} AND group_id IS NOT NULL GROUP BY group_id;`,
   ]);
 
   const countMap = new Map<string, number>();
@@ -572,4 +637,3 @@ export async function getGroups() {
     },
   }));
 }
-

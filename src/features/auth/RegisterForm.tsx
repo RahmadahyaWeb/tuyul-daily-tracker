@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useActionState } from "react";
-import { loginAction } from "@/server/actions/auth";
+import { registerAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 
-export function LoginForm() {
-  const [state, formAction, isPending] = useActionState(loginAction, null);
+export function RegisterForm() {
+  const [state, formAction, isPending] = useActionState(registerAction, null);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background text-foreground">
@@ -17,6 +17,9 @@ export function LoginForm() {
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Tuyul Tracker
           </h1>
+          <p className="text-xs text-muted-foreground">
+            Create an account to manage your tuyul daily tasks
+          </p>
         </div>
 
         {/* Card Surface */}
@@ -35,7 +38,7 @@ export function LoginForm() {
               name="username"
               type="text"
               required
-              placeholder="Username"
+              placeholder="e.g. johndoe"
               autoFocus
             />
 
@@ -45,7 +48,16 @@ export function LoginForm() {
               name="password"
               type="password"
               required
-              placeholder="Password"
+              placeholder="Minimum 6 characters"
+            />
+
+            <Input
+              label="Confirm Password"
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              required
+              placeholder="Repeat your password"
             />
 
             <Button
@@ -53,17 +65,17 @@ export function LoginForm() {
               className="w-full"
               isLoading={isPending}
             >
-              Sign In
+              Create Account
             </Button>
           </form>
 
           <div className="text-center pt-2 text-xs text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <a
-              href="/register"
+              href="/login"
               className="font-medium text-foreground hover:underline"
             >
-              Create Account
+              Sign In
             </a>
           </div>
         </div>
