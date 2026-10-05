@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import {
   approveBillingRequestAction,
   rejectBillingRequestAction,
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { Pagination } from "@/components/ui/pagination";
 
 interface BillingRequestItem {
   id: string;
@@ -48,6 +49,10 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleApprove = (requestId: string, username: string) => {
     startTransition(async () => {
@@ -85,6 +90,15 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
     if (statusFilter !== "all" && r.status !== statusFilter) return false;
     return true;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  const paginatedRequests = filteredRequests.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const pendingCount = requests.filter((r) => r.status === "PENDING").length;
 
@@ -217,7 +231,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredRequests.map((req) => (
+              paginatedRequests.map((req) => (
                 <TableRow
                   key={req.id}
                   className="hover:bg-slate-50/60 transition-colors"
@@ -308,6 +322,19 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
             )}
           </TableBody>
         </Table>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredRequests.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          itemLabel="requests"
+        />
       </div>
     </div>
   );

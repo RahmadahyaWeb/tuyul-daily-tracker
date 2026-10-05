@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import {
   updateUserPlanAction,
   updateUserRoleAction,
@@ -50,6 +50,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { Pagination } from "@/components/ui/pagination";
 
 interface AdminUserItem {
   id: string;
@@ -76,6 +77,10 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [planFilter, setPlanFilter] = useState<string>("all");
   const [isPending, startTransition] = useTransition();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleUpdatePlan = (userId: string, newPlan: "FREE" | "PRO") => {
     startTransition(async () => {
@@ -155,6 +160,15 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
     if (planFilter !== "all" && u.plan !== planFilter) return false;
     return true;
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, roleFilter, planFilter]);
+
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className="space-y-6 w-full">
@@ -316,7 +330,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredUsers.map((u) => (
+              paginatedUsers.map((u) => (
                 <TableRow
                   key={u.id}
                   className="hover:bg-slate-50/60 transition-colors"
@@ -458,6 +472,19 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
             )}
           </TableBody>
         </Table>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredUsers.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          itemLabel="users"
+        />
       </div>
 
       {/* Reset Password Dialog */}

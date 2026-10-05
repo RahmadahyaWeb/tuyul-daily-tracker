@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { WeeklyAccountRow } from "@/server/db/queries";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { ChevronLeft, ChevronRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Pagination } from "@/components/ui/pagination";
 
 interface WeeklyViewProps {
   initialWeekDays: ReturnType<typeof getWeekDays>;
@@ -37,6 +38,10 @@ export function WeeklyView({
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState("");
   const todayStr = getTodayMakassar();
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const handleWeekNav = (daysOffset: number) => {
     const nextBase = addDays(baseDateStr, daysOffset);
@@ -60,6 +65,15 @@ export function WeeklyView({
       (acc.groupName && acc.groupName.toLowerCase().includes(q))
     );
   });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
+  const paginatedAccounts = filteredAccounts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const weekRangeLabel = `${formatDateShort(initialWeekDays[0].dateStr)} – ${formatDateShort(
     initialWeekDays[6].dateStr
@@ -172,7 +186,7 @@ export function WeeklyView({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAccounts.map((acc) => {
+                paginatedAccounts.map((acc) => {
                   const dailyMap = new Map(
                     acc.dailyStatus.map((d) => [d.dateStr, d])
                   );
@@ -230,6 +244,19 @@ export function WeeklyView({
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredAccounts.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[10, 25, 50, 100]}
+          itemLabel="accounts"
+        />
       </div>
 
       {/* MOBILE ACCOUNT-ORIENTED WEEK LIST (shown only on mobile < md) */}
@@ -239,7 +266,7 @@ export function WeeklyView({
             No accounts found.
           </div>
         ) : (
-          filteredAccounts.map((acc) => {
+          paginatedAccounts.map((acc) => {
             const dailyMap = new Map(
               acc.dailyStatus.map((d) => [d.dateStr, d])
             );
@@ -297,6 +324,23 @@ export function WeeklyView({
               </div>
             );
           })
+        )}
+
+        {filteredAccounts.length > 0 && (
+          <div className="rounded-xl overflow-hidden border border-slate-200/80 shadow-2xs">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={filteredAccounts.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              itemLabel="accounts"
+            />
+          </div>
         )}
       </div>
     </div>

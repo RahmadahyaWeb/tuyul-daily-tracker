@@ -9,17 +9,29 @@ export function Toaster({ ...props }: ToasterProps) {
     <Sonner
       theme="light"
       className="toaster group"
+      richColors
+      closeButton
+      duration={3500}
       toastOptions={{
         classNames: {
           toast:
-            "group toast group-[.toaster]:bg-white group-[.toaster]:text-slate-900 group-[.toaster]:border-slate-200 group-[.toaster]:shadow-lg group-[.toaster]:rounded-lg text-xs font-medium",
-          description: "group-[.toast]:text-slate-500 text-xs",
+            "group toast font-sans shadow-lg rounded-xl border text-xs font-medium py-3 px-4 flex items-center gap-2.5",
+          title: "text-xs font-semibold leading-tight",
+          description: "text-[11px] text-slate-500 mt-0.5",
           actionButton:
-            "group-[.toast]:bg-slate-900 group-[.toast]:text-white font-medium text-xs",
+            "bg-slate-900 text-white font-medium text-xs px-2.5 py-1 rounded-md hover:bg-slate-800 transition-colors",
           cancelButton:
-            "group-[.toast]:bg-slate-100 group-[.toast]:text-slate-600 font-medium text-xs",
-          error: "group-[.toaster]:border-rose-200 group-[.toaster]:text-rose-900",
-          success: "group-[.toaster]:border-emerald-200 group-[.toaster]:text-emerald-900",
+            "bg-slate-100 text-slate-600 font-medium text-xs px-2.5 py-1 rounded-md hover:bg-slate-200 transition-colors",
+          closeButton:
+            "border-slate-200 bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors",
+          success:
+            "bg-emerald-50/95 text-emerald-950 border-emerald-200/80 shadow-emerald-500/5",
+          error:
+            "bg-rose-50/95 text-rose-950 border-rose-200/80 shadow-rose-500/5",
+          warning:
+            "bg-amber-50/95 text-amber-950 border-amber-200/80 shadow-amber-500/5",
+          info:
+            "bg-sky-50/95 text-sky-950 border-sky-200/80 shadow-sky-500/5",
         },
       }}
       {...props}

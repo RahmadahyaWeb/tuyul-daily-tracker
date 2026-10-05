@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Pagination } from "@/components/ui/pagination";
 
 interface TrackerViewProps {
   initialData: TrackerData;
@@ -97,6 +98,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   // Reset confirmation dialog
   const [confirmResetAllOpen, setConfirmResetAllOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Date Navigation
   const handleDateChange = (newDate: string) => {
@@ -354,6 +359,18 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     }
   }, [filteredAccounts, sortBy]);
 
+  // Reset page when filters or sort change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedGroup, selectedStatus, completionFilter, sortBy]);
+
+  const paginatedAccounts = useMemo(() => {
+    return sortedAccounts.slice(
+      (currentPage - 1) * pageSize,
+      currentPage * pageSize
+    );
+  }, [sortedAccounts, currentPage, pageSize]);
+
   // Live Metrics
   const activeList = accounts.filter((a) => a.status === "Active");
   const totalActive = activeList.length;
@@ -559,7 +576,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                sortedAccounts.map((acc) => {
+                paginatedAccounts.map((acc) => {
                   const isFinished =
                     acc.totalAssigned > 0 &&
                     acc.completedCount === acc.totalAssigned;
@@ -666,6 +683,19 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={sortedAccounts.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[10, 25, 50, 100]}
+          itemLabel="accounts"
+        />
       </div>
 
       {/* MOBILE ACCOUNT-ORIENTED CARD LIST (shown only on mobile < md) */}
@@ -675,7 +705,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             No accounts found matching filters.
           </div>
         ) : (
-          sortedAccounts.map((acc) => {
+          paginatedAccounts.map((acc) => {
             const isFinished =
               acc.totalAssigned > 0 &&
               acc.completedCount === acc.totalAssigned;
@@ -756,6 +786,23 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               </div>
             );
           })
+        )}
+
+        {sortedAccounts.length > 0 && (
+          <div className="rounded-xl overflow-hidden border border-slate-200/80 shadow-2xs">
+            <Pagination
+              currentPage={currentPage}
+              totalItems={sortedAccounts.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              itemLabel="accounts"
+            />
+          </div>
         )}
       </div>
 
