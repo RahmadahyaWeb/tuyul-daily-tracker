@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { sql } from "@/lib/db";
 import { loginSchema } from "@/lib/validations";
 import { createSessionCookie, deleteSessionCookie } from "@/lib/auth";
 import bcrypt from "bcryptjs";
@@ -23,16 +23,21 @@ export async function loginAction(prevState: unknown, formData: FormData) {
   const { username, password } = parsed.data;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { username },
-    });
+    const rows = await sql`
+      SELECT id, username, password, role
+      FROM users
+      WHERE username = ${username}
+      LIMIT 1;
+    `;
 
-    if (!user) {
+    if (rows.length === 0) {
       return {
         success: false,
         error: "Invalid username or password",
       };
     }
+
+    const user = rows[0];
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {

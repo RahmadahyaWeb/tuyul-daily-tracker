@@ -1,10 +1,11 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { encryptPassword, decryptPassword } from "@/lib/encryption";
 import { accountSchema, accountUpdateSchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import crypto from "crypto";
 
 export async function createAccount(data: {
   nickname: string;
@@ -29,36 +30,28 @@ export async function createAccount(data: {
   }
 
   try {
+    const id = crypto.randomUUID();
     const encryptedPassword = encryptPassword(parsed.data.password);
-    const startDate = new Date(parsed.data.startDate);
+    const startDate = new Date(parsed.data.startDate).toISOString();
+    const status = parsed.data.status || "Active";
+    const notes = parsed.data.notes || null;
+    const groupId = parsed.data.groupId || null;
 
-    await prisma.$transaction(async (tx) => {
-      const account = await tx.account.create({
-        data: {
-          nickname: parsed.data.nickname,
-          username: parsed.data.username,
-          password: encryptedPassword,
-          server: parsed.data.server,
-          owner: parsed.data.owner,
-          job: parsed.data.job,
-          level: parsed.data.level,
-          startDate: isNaN(startDate.getTime()) ? new Date() : startDate,
-          status: parsed.data.status,
-          notes: parsed.data.notes || null,
-          groupId: parsed.data.groupId || null,
-        },
-      });
+    await sql`
+      INSERT INTO accounts (id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id)
+      VALUES (${id}, ${parsed.data.nickname}, ${parsed.data.username}, ${encryptedPassword}, ${parsed.data.server}, ${parsed.data.owner}, ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
+    `;
 
-      if (parsed.data.activityIds && parsed.data.activityIds.length > 0) {
-        await tx.accountActivity.createMany({
-          data: parsed.data.activityIds.map((activityId) => ({
-            accountId: account.id,
-            activityId,
-            isActive: true,
-          })),
-        });
+    if (parsed.data.activityIds && parsed.data.activityIds.length > 0) {
+      for (const actId of parsed.data.activityIds) {
+        const aaId = crypto.randomUUID();
+        await sql`
+          INSERT INTO account_activities (id, account_id, activity_id, is_active)
+          VALUES (${aaId}, ${id}, ${actId}, TRUE)
+          ON CONFLICT (account_id, activity_id) DO NOTHING;
+        `;
       }
-    });
+    }
 
     revalidatePath("/accounts");
     revalidatePath("/tracker");
@@ -96,47 +89,57 @@ export async function updateAccount(data: {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
-      const updateData: Record<string, unknown> = {};
+    const current = await sql`SELECT * FROM accounts WHERE id = ${parsed.data.id} LIMIT 1;`;
+    if (current.length === 0) {
+      return { success: false, error: "Account not found" };
+    }
+    const acc = current[0];
 
-      if (parsed.data.nickname) updateData.nickname = parsed.data.nickname;
-      if (parsed.data.username) updateData.username = parsed.data.username;
-      if (parsed.data.password && parsed.data.password.trim() !== "") {
-        updateData.password = encryptPassword(parsed.data.password);
+    const nickname = parsed.data.nickname ?? acc.nickname;
+    const username = parsed.data.username ?? acc.username;
+    const password = parsed.data.password && parsed.data.password.trim() !== ""
+      ? encryptPassword(parsed.data.password)
+      : acc.password;
+    const server = parsed.data.server ?? acc.server;
+    const owner = parsed.data.owner ?? acc.owner;
+    const job = parsed.data.job ?? acc.job;
+    const level = parsed.data.level ?? acc.level;
+    const startDate = parsed.data.startDate
+      ? new Date(parsed.data.startDate).toISOString()
+      : acc.start_date;
+    const status = parsed.data.status ?? acc.status;
+    const notes = parsed.data.notes !== undefined ? parsed.data.notes : acc.notes;
+    const groupId = parsed.data.groupId !== undefined ? (parsed.data.groupId || null) : acc.group_id;
+
+    await sql`
+      UPDATE accounts
+      SET nickname = ${nickname},
+          username = ${username},
+          password = ${password},
+          server = ${server},
+          owner = ${owner},
+          job = ${job},
+          level = ${level},
+          start_date = ${startDate},
+          status = ${status},
+          notes = ${notes},
+          group_id = ${groupId},
+          updated_at = NOW()
+      WHERE id = ${parsed.data.id};
+    `;
+
+    if (parsed.data.activityIds) {
+      await sql`DELETE FROM account_activities WHERE account_id = ${parsed.data.id};`;
+
+      for (const actId of parsed.data.activityIds) {
+        const aaId = crypto.randomUUID();
+        await sql`
+          INSERT INTO account_activities (id, account_id, activity_id, is_active)
+          VALUES (${aaId}, ${parsed.data.id}, ${actId}, TRUE)
+          ON CONFLICT (account_id, activity_id) DO NOTHING;
+        `;
       }
-      if (parsed.data.server) updateData.server = parsed.data.server;
-      if (parsed.data.owner) updateData.owner = parsed.data.owner;
-      if (parsed.data.job) updateData.job = parsed.data.job;
-      if (parsed.data.level !== undefined) updateData.level = parsed.data.level;
-      if (parsed.data.startDate) {
-        const d = new Date(parsed.data.startDate);
-        if (!isNaN(d.getTime())) updateData.startDate = d;
-      }
-      if (parsed.data.status) updateData.status = parsed.data.status;
-      if (parsed.data.notes !== undefined) updateData.notes = parsed.data.notes;
-      if (parsed.data.groupId !== undefined) updateData.groupId = parsed.data.groupId || null;
-
-      await tx.account.update({
-        where: { id: parsed.data.id },
-        data: updateData,
-      });
-
-      if (parsed.data.activityIds) {
-        await tx.accountActivity.deleteMany({
-          where: { accountId: parsed.data.id },
-        });
-
-        if (parsed.data.activityIds.length > 0) {
-          await tx.accountActivity.createMany({
-            data: parsed.data.activityIds.map((activityId) => ({
-              accountId: parsed.data.id,
-              activityId,
-              isActive: true,
-            })),
-          });
-        }
-      }
-    });
+    }
 
     revalidatePath("/accounts");
     revalidatePath(`/accounts/${data.id}`);
@@ -156,11 +159,7 @@ export async function updateAccountNotes(id: string, notes: string) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await prisma.account.update({
-      where: { id },
-      data: { notes },
-    });
-
+    await sql`UPDATE accounts SET notes = ${notes}, updated_at = NOW() WHERE id = ${id};`;
     revalidatePath(`/accounts/${id}`);
     return { success: true };
   } catch (error) {
@@ -177,10 +176,7 @@ export async function toggleAccountStatus(
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await prisma.account.update({
-      where: { id },
-      data: { status },
-    });
+    await sql`UPDATE accounts SET status = ${status}, updated_at = NOW() WHERE id = ${id};`;
 
     revalidatePath("/accounts");
     revalidatePath(`/accounts/${id}`);
@@ -200,9 +196,7 @@ export async function deleteAccount(id: string) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await prisma.account.delete({
-      where: { id },
-    });
+    await sql`DELETE FROM accounts WHERE id = ${id};`;
 
     revalidatePath("/accounts");
     revalidatePath("/tracker");
@@ -216,29 +210,23 @@ export async function deleteAccount(id: string) {
   }
 }
 
-/**
- * Securely fetch and decrypt credentials only upon explicit request
- */
 export async function getAccountCredentials(id: string) {
   const session = await getSession();
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    const account = await prisma.account.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        nickname: true,
-        username: true,
-        password: true,
-        server: true,
-      },
-    });
+    const rows = await sql`
+      SELECT id, nickname, username, password, server
+      FROM accounts
+      WHERE id = ${id}
+      LIMIT 1;
+    `;
 
-    if (!account) {
+    if (rows.length === 0) {
       return { success: false, error: "Account not found" };
     }
 
+    const account = rows[0];
     const decrypted = decryptPassword(account.password);
 
     return {

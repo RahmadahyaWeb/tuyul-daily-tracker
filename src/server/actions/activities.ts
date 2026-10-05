@@ -1,9 +1,10 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { activitySchema } from "@/lib/validations";
 import { revalidatePath } from "next/cache";
+import crypto from "crypto";
 
 export async function createActivity(data: {
   name: string;
@@ -20,22 +21,19 @@ export async function createActivity(data: {
   }
 
   try {
-    const existing = await prisma.activity.findUnique({
-      where: { code: parsed.data.code },
-    });
-
-    if (existing) {
+    const existing = await sql`SELECT id FROM activities WHERE code = ${parsed.data.code} LIMIT 1;`;
+    if (existing.length > 0) {
       return { success: false, error: `Activity code "${parsed.data.code}" is already in use.` };
     }
 
-    await prisma.activity.create({
-      data: {
-        name: parsed.data.name,
-        code: parsed.data.code,
-        sortOrder: parsed.data.sortOrder ?? 0,
-        isActive: parsed.data.isActive ?? true,
-      },
-    });
+    const id = crypto.randomUUID();
+    const sortOrder = parsed.data.sortOrder ?? 0;
+    const isActive = parsed.data.isActive ?? true;
+
+    await sql`
+      INSERT INTO activities (id, name, code, sort_order, is_active)
+      VALUES (${id}, ${parsed.data.name}, ${parsed.data.code}, ${sortOrder}, ${isActive});
+    `;
 
     revalidatePath("/activities");
     revalidatePath("/tracker");
@@ -65,23 +63,23 @@ export async function updateActivity(data: {
   }
 
   try {
-    const existing = await prisma.activity.findUnique({
-      where: { code: parsed.data.code },
-    });
-
-    if (existing && existing.id !== data.id) {
+    const existing = await sql`SELECT id FROM activities WHERE code = ${parsed.data.code} AND id != ${data.id} LIMIT 1;`;
+    if (existing.length > 0) {
       return { success: false, error: `Activity code "${parsed.data.code}" is already in use.` };
     }
 
-    await prisma.activity.update({
-      where: { id: data.id },
-      data: {
-        name: parsed.data.name,
-        code: parsed.data.code,
-        sortOrder: parsed.data.sortOrder ?? 0,
-        isActive: parsed.data.isActive ?? true,
-      },
-    });
+    const sortOrder = parsed.data.sortOrder ?? 0;
+    const isActive = parsed.data.isActive ?? true;
+
+    await sql`
+      UPDATE activities
+      SET name = ${parsed.data.name},
+          code = ${parsed.data.code},
+          sort_order = ${sortOrder},
+          is_active = ${isActive},
+          updated_at = NOW()
+      WHERE id = ${data.id};
+    `;
 
     revalidatePath("/activities");
     revalidatePath("/tracker");
@@ -100,10 +98,7 @@ export async function toggleActivityStatus(id: string, isActive: boolean) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await prisma.activity.update({
-      where: { id },
-      data: { isActive },
-    });
+    await sql`UPDATE activities SET is_active = ${isActive}, updated_at = NOW() WHERE id = ${id};`;
 
     revalidatePath("/activities");
     revalidatePath("/tracker");
@@ -122,14 +117,9 @@ export async function reorderActivities(items: { id: string; sortOrder: number }
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await prisma.$transaction(
-      items.map((item) =>
-        prisma.activity.update({
-          where: { id: item.id },
-          data: { sortOrder: item.sortOrder },
-        })
-      )
-    );
+    for (const item of items) {
+      await sql`UPDATE activities SET sort_order = ${item.sortOrder}, updated_at = NOW() WHERE id = ${item.id};`;
+    }
 
     revalidatePath("/activities");
     revalidatePath("/tracker");
@@ -146,9 +136,7 @@ export async function deleteActivity(id: string) {
   if (!session) return { success: false, error: "Unauthorized" };
 
   try {
-    await prisma.activity.delete({
-      where: { id },
-    });
+    await sql`DELETE FROM activities WHERE id = ${id};`;
 
     revalidatePath("/activities");
     revalidatePath("/tracker");

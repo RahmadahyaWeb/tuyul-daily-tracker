@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { sql } from "@/lib/db";
 import { getTodayMakassar, getWeekDays, getLastNDays } from "@/lib/date-utils";
 
 export interface DashboardStats {
@@ -21,32 +21,40 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(dateStr: string = getTodayMakassar()): Promise<DashboardStats> {
-  const [accounts, masterActivities] = await Promise.all([
-    prisma.account.findMany({
-      select: {
-        id: true,
-        nickname: true,
-        owner: true,
-        job: true,
-        server: true,
-        status: true,
-        accountActivities: {
-          where: { isActive: true },
-          select: { activityId: true },
-        },
-        activityLogs: {
-          where: { activityDate: dateStr, isCompleted: true },
-          select: { activityId: true },
-        },
-      },
-    }),
-    prisma.activity.findMany({
-      where: { isActive: true },
-      select: { id: true },
-    }),
+  const [accountsRaw, masterActivitiesRaw, assignedRaw, todayLogsRaw] = await Promise.all([
+    sql`SELECT id, nickname, owner, job, server, status FROM accounts ORDER BY nickname ASC;`,
+    sql`SELECT id FROM activities WHERE is_active = TRUE;`,
+    sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
+    sql`SELECT account_id, activity_id FROM activity_logs WHERE activity_date = ${dateStr} AND is_completed = TRUE;`,
   ]);
 
+  const accounts = accountsRaw as { id: string; nickname: string; owner: string; job: string; server: string; status: string }[];
+  const masterActivities = masterActivitiesRaw as { id: string }[];
+  const assignedActivities = assignedRaw as { account_id: string; activity_id: string }[];
+  const todayLogs = todayLogsRaw as { account_id: string; activity_id: string }[];
+
   const activeMasterIds = new Set(masterActivities.map((a) => a.id));
+
+  // Map assigned activities per account
+  const assignedByAccount = new Map<string, Set<string>>();
+  for (const aa of assignedActivities) {
+    if (activeMasterIds.has(aa.activity_id)) {
+      if (!assignedByAccount.has(aa.account_id)) {
+        assignedByAccount.set(aa.account_id, new Set());
+      }
+      assignedByAccount.get(aa.account_id)!.add(aa.activity_id);
+    }
+  }
+
+  // Map completed activities per account
+  const completedByAccount = new Map<string, Set<string>>();
+  for (const log of todayLogs) {
+    if (!completedByAccount.has(log.account_id)) {
+      completedByAccount.set(log.account_id, new Set());
+    }
+    completedByAccount.get(log.account_id)!.add(log.activity_id);
+  }
+
   const totalAccounts = accounts.length;
   const activeAccountsList = accounts.filter((a) => a.status === "Active");
   const activeAccountsCount = activeAccountsList.length;
@@ -60,20 +68,16 @@ export async function getDashboardStats(dateStr: string = getTodayMakassar()): P
   const needAttention: DashboardStats["needAttention"] = [];
 
   for (const acc of activeAccountsList) {
-    // Only count activities that are currently active master activities AND active for this account
-    const assignedIds = acc.accountActivities
-      .map((aa) => aa.activityId)
-      .filter((id) => activeMasterIds.has(id));
+    const assignedSet = assignedByAccount.get(acc.id) || new Set();
+    const totalAssigned = assignedSet.size;
 
-    const totalAssigned = assignedIds.length;
-    if (totalAssigned === 0) {
-      continue;
+    if (totalAssigned === 0) continue;
+
+    const completedSet = completedByAccount.get(acc.id) || new Set();
+    let completedCount = 0;
+    for (const actId of completedSet) {
+      if (assignedSet.has(actId)) completedCount++;
     }
-
-    const assignedSet = new Set(assignedIds);
-    const completedCount = acc.activityLogs.filter((log) =>
-      assignedSet.has(log.activityId)
-    ).length;
 
     totalAssignedAll += totalAssigned;
     totalCompletedAll += completedCount;
@@ -109,7 +113,6 @@ export async function getDashboardStats(dateStr: string = getTodayMakassar()): P
     }
   }
 
-  // Sort need attention: prioritize in-progress and higher completion or least progress
   needAttention.sort((a, b) => b.completedCount - a.completedCount);
 
   const overallProgress =
@@ -146,8 +149,8 @@ export interface TrackerAccountRow {
   status: "Active" | "Paused" | "Finished";
   groupId: string | null;
   groupName: string | null;
-  assignedActivityIds: string[]; // Activity IDs enabled for this account
-  completedActivityIds: string[]; // Activity IDs checked for this date
+  assignedActivityIds: string[];
+  completedActivityIds: string[];
   totalAssigned: number;
   completedCount: number;
   progressPercent: number;
@@ -170,42 +173,56 @@ export interface TrackerData {
 }
 
 export async function getTrackerData(dateStr: string = getTodayMakassar()): Promise<TrackerData> {
-  const [activities, accounts, groups] = await Promise.all([
-    prisma.activity.findMany({
-      where: { isActive: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      select: { id: true, name: true, code: true, sortOrder: true },
-    }),
-    prisma.account.findMany({
-      orderBy: [{ nickname: "asc" }],
-      select: {
-        id: true,
-        nickname: true,
-        username: true,
-        server: true,
-        owner: true,
-        job: true,
-        level: true,
-        status: true,
-        groupId: true,
-        group: { select: { id: true, name: true } },
-        accountActivities: {
-          where: { isActive: true },
-          select: { activityId: true },
-        },
-        activityLogs: {
-          where: { activityDate: dateStr, isCompleted: true },
-          select: { activityId: true },
-        },
-      },
-    }),
-    prisma.group.findMany({
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
+  const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await Promise.all([
+    sql`SELECT id, name, code, sort_order FROM activities WHERE is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
+    sql`
+      SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
+      FROM accounts a
+      LEFT JOIN groups g ON a.group_id = g.id
+      ORDER BY a.nickname ASC;
+    `,
+    sql`SELECT id, name FROM groups ORDER BY name ASC;`,
+    sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
+    sql`SELECT account_id, activity_id FROM activity_logs WHERE activity_date = ${dateStr} AND is_completed = TRUE;`,
   ]);
 
+  const activities: TrackerActivityItem[] = (activitiesRaw as any[]).map((a) => ({
+    id: String(a.id),
+    name: String(a.name),
+    code: String(a.code),
+    sortOrder: Number(a.sort_order),
+  }));
+
+  const accountsList = accountsRaw as any[];
+  const groupsList = groupsRaw as any[];
+  const assignedList = assignedRaw as any[];
+  const logsList = logsRaw as any[];
+
   const activeMasterIds = new Set(activities.map((a) => a.id));
+
+  // Build assigned map
+  const assignedMap = new Map<string, string[]>();
+  for (const aa of assignedList) {
+    const actId = String(aa.activity_id);
+    const accId = String(aa.account_id);
+    if (activeMasterIds.has(actId)) {
+      if (!assignedMap.has(accId)) {
+        assignedMap.set(accId, []);
+      }
+      assignedMap.get(accId)!.push(actId);
+    }
+  }
+
+  // Build completed map
+  const completedMap = new Map<string, string[]>();
+  for (const log of logsList) {
+    const accId = String(log.account_id);
+    const actId = String(log.activity_id);
+    if (!completedMap.has(accId)) {
+      completedMap.set(accId, []);
+    }
+    completedMap.get(accId)!.push(actId);
+  }
 
   let completedAccounts = 0;
   let inProgressAccounts = 0;
@@ -213,23 +230,21 @@ export async function getTrackerData(dateStr: string = getTodayMakassar()): Prom
   let totalTasks = 0;
   let completedTasks = 0;
 
-  const accountRows: TrackerAccountRow[] = accounts.map((acc) => {
-    // Assigned activities filtered by active master activities
-    const assignedActivityIds = acc.accountActivities
-      .map((aa) => aa.activityId)
-      .filter((id) => activeMasterIds.has(id));
-
+  const accountRows: TrackerAccountRow[] = accountsList.map((acc) => {
+    const accId = String(acc.id);
+    const assignedActivityIds = assignedMap.get(accId) || [];
     const assignedSet = new Set(assignedActivityIds);
-    const completedActivityIds = acc.activityLogs
-      .map((log) => log.activityId)
-      .filter((id) => assignedSet.has(id));
+
+    const completedRawList = completedMap.get(accId) || [];
+    const completedActivityIds = completedRawList.filter((id) => assignedSet.has(id));
 
     const totalAssigned = assignedActivityIds.length;
     const completedCount = completedActivityIds.length;
     const progressPercent =
       totalAssigned > 0 ? Math.round((completedCount / totalAssigned) * 100) : 0;
 
-    if (acc.status === "Active") {
+    const status = String(acc.status);
+    if (status === "Active") {
       totalTasks += totalAssigned;
       completedTasks += completedCount;
 
@@ -241,16 +256,16 @@ export async function getTrackerData(dateStr: string = getTodayMakassar()): Prom
     }
 
     return {
-      id: acc.id,
-      nickname: acc.nickname,
-      username: acc.username,
-      server: acc.server,
-      owner: acc.owner,
-      job: acc.job,
-      level: acc.level,
-      status: acc.status as "Active" | "Paused" | "Finished",
-      groupId: acc.groupId,
-      groupName: acc.group?.name || null,
+      id: accId,
+      nickname: String(acc.nickname),
+      username: String(acc.username),
+      server: String(acc.server),
+      owner: String(acc.owner),
+      job: String(acc.job),
+      level: Number(acc.level),
+      status: status as "Active" | "Paused" | "Finished",
+      groupId: acc.group_id ? String(acc.group_id) : null,
+      groupName: acc.group_name ? String(acc.group_name) : null,
       assignedActivityIds,
       completedActivityIds,
       totalAssigned,
@@ -266,9 +281,9 @@ export async function getTrackerData(dateStr: string = getTodayMakassar()): Prom
     dateStr,
     activities,
     accounts: accountRows,
-    groups,
+    groups: groupsList.map((g) => ({ id: String(g.id), name: String(g.name) })),
     summary: {
-      totalAccounts: accounts.filter((a) => a.status === "Active").length,
+      totalAccounts: accountsList.filter((a) => a.status === "Active").length,
       completedAccounts,
       inProgressAccounts,
       notStartedAccounts,
@@ -303,59 +318,66 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
   const startDateStr = weekDays[0].dateStr;
   const endDateStr = weekDays[6].dateStr;
 
-  const [accounts, masterActivities] = await Promise.all([
-    prisma.account.findMany({
-      orderBy: [{ nickname: "asc" }],
-      select: {
-        id: true,
-        nickname: true,
-        server: true,
-        owner: true,
-        job: true,
-        status: true,
-        group: { select: { name: true } },
-        accountActivities: {
-          where: { isActive: true },
-          select: { activityId: true },
-        },
-        activityLogs: {
-          where: {
-            activityDate: {
-              gte: startDateStr,
-              lte: endDateStr,
-            },
-            isCompleted: true,
-          },
-          select: { activityId: true, activityDate: true },
-        },
-      },
-    }),
-    prisma.activity.findMany({
-      where: { isActive: true },
-      select: { id: true },
-    }),
+  const [accountsRaw, masterActivitiesRaw, assignedRaw, logsRaw] = await Promise.all([
+    sql`
+      SELECT a.id, a.nickname, a.server, a.owner, a.job, a.status, g.name as group_name
+      FROM accounts a
+      LEFT JOIN groups g ON a.group_id = g.id
+      ORDER BY a.nickname ASC;
+    `,
+    sql`SELECT id FROM activities WHERE is_active = TRUE;`,
+    sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
+    sql`
+      SELECT account_id, activity_id, activity_date
+      FROM activity_logs
+      WHERE activity_date >= ${startDateStr} AND activity_date <= ${endDateStr} AND is_completed = TRUE;
+    `,
   ]);
 
-  const activeMasterIds = new Set(masterActivities.map((a) => a.id));
+  const accountsList = accountsRaw as any[];
+  const masterActivities = masterActivitiesRaw as any[];
+  const assignedList = assignedRaw as any[];
+  const logsList = logsRaw as any[];
 
-  const resultRows: WeeklyAccountRow[] = accounts.map((acc) => {
-    const assignedIds = acc.accountActivities
-      .map((aa) => aa.activityId)
-      .filter((id) => activeMasterIds.has(id));
+  const activeMasterIds = new Set(masterActivities.map((a) => String(a.id)));
 
-    const totalAssigned = assignedIds.length;
-    const assignedSet = new Set(assignedIds);
-
-    // Map logs by date
-    const logsByDate = new Map<string, number>();
-    for (const log of acc.activityLogs) {
-      if (assignedSet.has(log.activityId)) {
-        logsByDate.set(log.activityDate, (logsByDate.get(log.activityDate) || 0) + 1);
+  // Map assigned
+  const assignedMap = new Map<string, Set<string>>();
+  for (const aa of assignedList) {
+    const actId = String(aa.activity_id);
+    const accId = String(aa.account_id);
+    if (activeMasterIds.has(actId)) {
+      if (!assignedMap.has(accId)) {
+        assignedMap.set(accId, new Set());
       }
+      assignedMap.get(accId)!.add(actId);
     }
+  }
+
+  // Map logs: account_id -> date -> count
+  const logsMap = new Map<string, Map<string, number>>();
+  for (const log of logsList) {
+    const accId = String(log.account_id);
+    const actId = String(log.activity_id);
+    const actDate = String(log.activity_date);
+    const accAssigned = assignedMap.get(accId);
+    if (accAssigned && accAssigned.has(actId)) {
+      if (!logsMap.has(accId)) {
+        logsMap.set(accId, new Map());
+      }
+      const dateMap = logsMap.get(accId)!;
+      dateMap.set(actDate, (dateMap.get(actDate) || 0) + 1);
+    }
+  }
+
+  const resultRows: WeeklyAccountRow[] = accountsList.map((acc) => {
+    const accId = String(acc.id);
+    const assignedSet = assignedMap.get(accId) || new Set();
+    const totalAssigned = assignedSet.size;
+    const dateLogs = logsMap.get(accId);
 
     const dailyStatus = weekDays.map((day) => {
-      const completed = logsByDate.get(day.dateStr) || 0;
+      const completed = dateLogs?.get(day.dateStr) || 0;
       let status: "COMPLETED" | "PARTIAL" | "NOT_STARTED" | "NO_TASKS" = "NOT_STARTED";
 
       if (totalAssigned === 0) {
@@ -377,13 +399,13 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
     });
 
     return {
-      id: acc.id,
-      nickname: acc.nickname,
-      server: acc.server,
-      owner: acc.owner,
-      job: acc.job,
-      status: acc.status as "Active" | "Paused" | "Finished",
-      groupName: acc.group?.name || null,
+      id: accId,
+      nickname: String(acc.nickname),
+      server: String(acc.server),
+      owner: String(acc.owner),
+      job: String(acc.job),
+      status: String(acc.status) as "Active" | "Paused" | "Finished",
+      groupName: acc.group_name ? String(acc.group_name) : null,
       dailyStatus,
     };
   });
@@ -395,95 +417,158 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
 }
 
 export async function getAccountsList() {
-  return prisma.account.findMany({
-    orderBy: { nickname: "asc" },
-    select: {
-      id: true,
-      nickname: true,
-      username: true,
-      server: true,
-      owner: true,
-      job: true,
-      level: true,
-      startDate: true,
-      status: true,
-      notes: true,
-      groupId: true,
-      group: { select: { id: true, name: true } },
-      createdAt: true,
-      updatedAt: true,
-      accountActivities: {
-        where: { isActive: true },
-        select: {
-          activityId: true,
-          activity: { select: { id: true, name: true, code: true } },
-        },
-      },
-    },
-  });
+  const [accountsRaw, activitiesRaw] = await Promise.all([
+    sql`
+      SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.created_at, a.updated_at, g.name as group_name
+      FROM accounts a
+      LEFT JOIN groups g ON a.group_id = g.id
+      ORDER BY a.nickname ASC;
+    `,
+    sql`
+      SELECT aa.account_id, aa.activity_id, act.name, act.code
+      FROM account_activities aa
+      JOIN activities act ON aa.activity_id = act.id
+      WHERE aa.is_active = TRUE;
+    `,
+  ]);
+
+  const activitiesMap = new Map<string, { activityId: string; activity: { id: string; name: string; code: string } }[]>();
+  for (const act of (activitiesRaw as any[])) {
+    const accId = String(act.account_id);
+    if (!activitiesMap.has(accId)) {
+      activitiesMap.set(accId, []);
+    }
+    activitiesMap.get(accId)!.push({
+      activityId: String(act.activity_id),
+      activity: { id: String(act.activity_id), name: String(act.name), code: String(act.code) },
+    });
+  }
+
+  return (accountsRaw as any[]).map((acc) => ({
+    id: String(acc.id),
+    nickname: String(acc.nickname),
+    username: String(acc.username),
+    server: String(acc.server),
+    owner: String(acc.owner),
+    job: String(acc.job),
+    level: Number(acc.level),
+    startDate: new Date(acc.start_date),
+    status: String(acc.status) as "Active" | "Paused" | "Finished",
+    notes: acc.notes ? String(acc.notes) : null,
+    groupId: acc.group_id ? String(acc.group_id) : null,
+    group: acc.group_id ? { id: String(acc.group_id), name: String(acc.group_name || "") } : null,
+    createdAt: new Date(acc.created_at),
+    updatedAt: new Date(acc.updated_at),
+    accountActivities: activitiesMap.get(String(acc.id)) || [],
+  }));
 }
 
 export async function getAccountDetail(id: string) {
-  const account = await prisma.account.findUnique({
-    where: { id },
-    include: {
-      group: true,
-      accountActivities: {
-        include: {
-          activity: true,
-        },
-        orderBy: { activity: { sortOrder: "asc" } },
-      },
-    },
-  });
+  const [accountRows, activitiesRows, groupRows] = await Promise.all([
+    sql`SELECT * FROM accounts WHERE id = ${id} LIMIT 1;`,
+    sql`
+      SELECT aa.id, aa.activity_id, aa.is_active, act.name, act.code, act.sort_order
+      FROM account_activities aa
+      JOIN activities act ON aa.activity_id = act.id
+      WHERE aa.account_id = ${id}
+      ORDER BY act.sort_order ASC;
+    `,
+    sql`SELECT g.id, g.name FROM groups g JOIN accounts a ON a.group_id = g.id WHERE a.id = ${id} LIMIT 1;`,
+  ]);
 
-  if (!account) return null;
+  const accList = accountRows as any[];
+  if (accList.length === 0) return null;
+  const acc = accList[0];
 
   const todayStr = getTodayMakassar();
   const last30Days = getLastNDays(30, todayStr);
   const startDateStr = last30Days[0];
 
-  const logs = await prisma.activityLog.findMany({
-    where: {
-      accountId: id,
-      activityDate: {
-        gte: startDateStr,
-        lte: todayStr,
-      },
-    },
-    select: {
-      activityId: true,
-      activityDate: true,
-      isCompleted: true,
-      completedAt: true,
-    },
-  });
+  const logs = (await sql`
+    SELECT activity_id, activity_date, is_completed, completed_at
+    FROM activity_logs
+    WHERE account_id = ${id} AND activity_date >= ${startDateStr} AND activity_date <= ${todayStr};
+  `) as any[];
+
+  const actList = activitiesRows as any[];
+  const grpList = groupRows as any[];
 
   return {
-    account,
+    account: {
+      id: String(acc.id),
+      nickname: String(acc.nickname),
+      username: String(acc.username),
+      server: String(acc.server),
+      owner: String(acc.owner),
+      job: String(acc.job),
+      level: Number(acc.level),
+      startDate: new Date(acc.start_date),
+      status: String(acc.status) as "Active" | "Paused" | "Finished",
+      notes: acc.notes ? String(acc.notes) : null,
+      groupId: acc.group_id ? String(acc.group_id) : null,
+      group: grpList.length > 0 ? { id: String(grpList[0].id), name: String(grpList[0].name) } : null,
+      accountActivities: actList.map((aa) => ({
+        id: String(aa.id),
+        activityId: String(aa.activity_id),
+        isActive: Boolean(aa.is_active),
+        activity: {
+          id: String(aa.activity_id),
+          name: String(aa.name),
+          code: String(aa.code),
+          sortOrder: Number(aa.sort_order),
+        },
+      })),
+    },
     last30Days,
-    logs,
+    logs: logs.map((l) => ({
+      activityId: String(l.activity_id),
+      activityDate: String(l.activity_date),
+      isCompleted: Boolean(l.is_completed),
+      completedAt: l.completed_at ? new Date(l.completed_at) : null,
+    })),
   };
 }
 
 export async function getMasterActivities() {
-  return prisma.activity.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    include: {
-      _count: {
-        select: { accountActivities: true },
-      },
+  const [activities, counts] = await Promise.all([
+    sql`SELECT id, name, code, sort_order, is_active FROM activities ORDER BY sort_order ASC, created_at ASC;`,
+    sql`SELECT activity_id, count(*) as count FROM account_activities GROUP BY activity_id;`,
+  ]);
+
+  const countMap = new Map<string, number>();
+  for (const c of (counts as any[])) {
+    countMap.set(String(c.activity_id), parseInt(c.count, 10));
+  }
+
+  return (activities as any[]).map((act) => ({
+    id: String(act.id),
+    name: String(act.name),
+    code: String(act.code),
+    sortOrder: Number(act.sort_order),
+    isActive: Boolean(act.is_active),
+    _count: {
+      accountActivities: countMap.get(String(act.id)) || 0,
     },
-  });
+  }));
 }
 
 export async function getGroups() {
-  return prisma.group.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      _count: {
-        select: { accounts: true },
-      },
+  const [groups, counts] = await Promise.all([
+    sql`SELECT id, name, created_at FROM groups ORDER BY name ASC;`,
+    sql`SELECT group_id, count(*) as count FROM accounts WHERE group_id IS NOT NULL GROUP BY group_id;`,
+  ]);
+
+  const countMap = new Map<string, number>();
+  for (const c of (counts as any[])) {
+    countMap.set(String(c.group_id), parseInt(c.count, 10));
+  }
+
+  return (groups as any[]).map((g) => ({
+    id: String(g.id),
+    name: String(g.name),
+    createdAt: new Date(g.created_at),
+    _count: {
+      accounts: countMap.get(String(g.id)) || 0,
     },
-  });
+  }));
 }
