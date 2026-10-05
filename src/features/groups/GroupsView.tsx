@@ -20,6 +20,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus, Edit2, Trash2, Folder } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 
 interface GroupItem {
   id: string;
@@ -40,6 +41,10 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -139,7 +144,9 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                initialGroups.map((g) => (
+                initialGroups
+                  .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                  .map((g) => (
                   <TableRow key={g.id} className="hover:bg-slate-50/60 transition-colors">
                     <TableCell className="font-semibold text-xs text-slate-900 py-3 pl-4">
                       <div className="flex items-center gap-2">
@@ -190,6 +197,19 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={initialGroups.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          itemLabel="groups"
+        />
       </div>
 
       {/* Modal */}

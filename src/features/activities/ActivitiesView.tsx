@@ -32,6 +32,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Pagination } from "@/components/ui/pagination";
 
 interface ActivityItem {
   id: string;
@@ -52,6 +53,10 @@ interface ActivitiesViewProps {
 export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   const [, startTransition] = useTransition();
   const [activities, setActivities] = useState(initialActivities);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   React.useEffect(() => {
     setActivities(initialActivities);
@@ -240,27 +245,31 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                   </TableCell>
                 </TableRow>
               ) : (
-                activities.map((act, index) => (
+                activities
+                  .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                  .map((act, localIndex) => {
+                    const globalIndex = (currentPage - 1) * pageSize + localIndex;
+                    return (
                   <TableRow key={act.id} className="hover:bg-slate-50/60 transition-colors">
                     {/* Sort Order Cell with Up/Down buttons */}
                     <TableCell className="py-2.5 text-center">
                       <div className="flex items-center justify-center gap-0.5">
                         <button
                           type="button"
-                          disabled={index === 0}
-                          onClick={() => handleMove(index, "up")}
+                          disabled={globalIndex === 0}
+                          onClick={() => handleMove(globalIndex, "up")}
                           className="p-1 text-slate-400 hover:text-slate-800 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                           title="Move up"
                         >
                           <ArrowUp className="w-3 h-3" />
                         </button>
                         <span className="font-mono text-xs text-slate-400 font-semibold w-4 text-center">
-                          {index + 1}
+                          {globalIndex + 1}
                         </span>
                         <button
                           type="button"
-                          disabled={index === activities.length - 1}
-                          onClick={() => handleMove(index, "down")}
+                          disabled={globalIndex === activities.length - 1}
+                          onClick={() => handleMove(globalIndex, "down")}
                           className="p-1 text-slate-400 hover:text-slate-800 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                           title="Move down"
                         >
@@ -340,11 +349,25 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                    );
+                  })
               )}
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={activities.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[5, 10, 25, 50]}
+          itemLabel="activities"
+        />
       </div>
 
       {/* Modal */}

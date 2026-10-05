@@ -38,6 +38,7 @@ import {
   UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Pagination } from "@/components/ui/pagination";
 
 interface AccountDetailProps {
   data: {
@@ -85,6 +86,10 @@ export function AccountDetailView({ data }: AccountDetailProps) {
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Pagination for activities matrix
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Status state
   const [status, setStatus] = useState(account.status);
@@ -375,7 +380,9 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  activeActivities.map((act) => (
+                  activeActivities
+                    .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                    .map((act) => (
                     <TableRow key={act.id} className="hover:bg-slate-50/60 transition-colors">
                       <TableCell className="py-2.5 pl-4 sticky left-0 z-10 bg-white border-r border-slate-200/60 text-xs font-semibold text-slate-900">
                         {act.name}
@@ -413,6 +420,21 @@ export function AccountDetailView({ data }: AccountDetailProps) {
               </TableBody>
             </Table>
           </div>
+
+          {activeActivities.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalItems={activeActivities.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[5, 10, 20]}
+              itemLabel="activities"
+            />
+          )}
         </div>
       </div>
     </div>

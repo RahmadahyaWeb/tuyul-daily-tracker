@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import {
   createAccount,
@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PlanLimitDialog } from "@/components/shared/PlanLimitDialog";
+import { Pagination } from "@/components/ui/pagination";
 
 interface AccountItem {
   id: string;
@@ -96,6 +97,10 @@ export function AccountsView({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [groupFilter, setGroupFilter] = useState("all");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountItem | null>(null);
@@ -274,6 +279,15 @@ export function AccountsView({
     return true;
   });
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, groupFilter, statusFilter]);
+
+  const paginatedAccounts = filteredAccounts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -369,7 +383,7 @@ export function AccountsView({
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAccounts.map((acc) => (
+                paginatedAccounts.map((acc) => (
                   <TableRow key={acc.id} className="hover:bg-slate-50/60 transition-colors">
                     <TableCell className="py-3 pl-4">
                       <div className="flex items-center gap-2.5">
@@ -473,6 +487,19 @@ export function AccountsView({
             </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalItems={filteredAccounts.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+          onPageSizeChange={(newSize) => {
+            setPageSize(newSize);
+            setCurrentPage(1);
+          }}
+          pageSizeOptions={[10, 25, 50, 100]}
+          itemLabel="accounts"
+        />
       </div>
 
       {/* Add / Edit Account Modal */}
