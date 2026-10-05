@@ -33,6 +33,9 @@ export async function getDashboardStats(
   explicitUserId?: string
 ): Promise<DashboardStats> {
   const userId = await resolveUserId(explicitUserId);
+  const weekDays = getWeekDays(dateStr);
+  const mondayStr = weekDays[0].dateStr;
+  const sundayStr = weekDays[6].dateStr;
 
   const [accountsRaw, masterActivitiesRaw, assignedRaw, todayLogsRaw] = await (sql as any).transaction([
     sql`SELECT id, nickname, owner, job, server, status FROM accounts WHERE user_id = ${userId} ORDER BY nickname ASC;`,
@@ -44,10 +47,17 @@ export async function getDashboardStats(
       WHERE a.user_id = ${userId} AND aa.is_active = TRUE;
     `,
     sql`
-      SELECT al.account_id, al.activity_id
+      SELECT DISTINCT al.account_id, al.activity_id
       FROM activity_logs al
       JOIN accounts a ON al.account_id = a.id
-      WHERE a.user_id = ${userId} AND al.activity_date = ${dateStr} AND al.is_completed = TRUE;
+      JOIN activities act ON al.activity_id = act.id
+      WHERE a.user_id = ${userId}
+        AND al.is_completed = TRUE
+        AND (
+          (act.activity_type = 'DAILY' AND al.activity_date = ${dateStr})
+          OR
+          (act.activity_type = 'WEEKLY' AND al.activity_date >= ${mondayStr} AND al.activity_date <= ${sundayStr})
+        );
     `,
   ]);
 
@@ -222,7 +232,7 @@ export async function getTrackerData(
       WHERE a.user_id = ${userId} AND aa.is_active = TRUE;
     `,
     sql`
-      SELECT al.account_id, al.activity_id
+      SELECT DISTINCT al.account_id, al.activity_id
       FROM activity_logs al
       JOIN accounts a ON al.account_id = a.id
       JOIN activities act ON al.activity_id = act.id
@@ -264,15 +274,15 @@ export async function getTrackerData(
     }
   }
 
-  // Build completed map
-  const completedMap = new Map<string, string[]>();
+  // Build completed map (ensuring unique activity IDs per account)
+  const completedMap = new Map<string, Set<string>>();
   for (const log of logsList) {
     const accId = String(log.account_id);
     const actId = String(log.activity_id);
     if (!completedMap.has(accId)) {
-      completedMap.set(accId, []);
+      completedMap.set(accId, new Set());
     }
-    completedMap.get(accId)!.push(actId);
+    completedMap.get(accId)!.add(actId);
   }
 
   let completedAccounts = 0;
@@ -286,8 +296,8 @@ export async function getTrackerData(
     const assignedActivityIds = assignedMap.get(accId) || [];
     const assignedSet = new Set(assignedActivityIds);
 
-    const completedRawList = completedMap.get(accId) || [];
-    const completedActivityIds = completedRawList.filter((id) => assignedSet.has(id));
+    const completedSet = completedMap.get(accId) || new Set<string>();
+    const completedActivityIds = assignedActivityIds.filter((id) => completedSet.has(id));
 
     const totalAssigned = assignedActivityIds.length;
     const completedCount = completedActivityIds.length;

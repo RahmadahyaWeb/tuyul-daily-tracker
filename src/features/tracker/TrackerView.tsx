@@ -109,19 +109,23 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const handleToggle = async (
     accountId: string,
     activityId: string,
-    currentCompleted: boolean
+    nextCompleted: boolean
   ) => {
-    const nextCompleted = !currentCompleted;
-
     // 1. Instant local optimistic update
     setAccounts((prevAccounts) =>
       prevAccounts.map((acc) => {
         if (acc.id !== accountId) return acc;
 
-        const nextCompletedIds = nextCompleted
-          ? [...acc.completedActivityIds, activityId]
-          : acc.completedActivityIds.filter((id) => id !== activityId);
+        const currentSet = new Set(acc.completedActivityIds);
+        if (nextCompleted) {
+          currentSet.add(activityId);
+        } else {
+          currentSet.delete(activityId);
+        }
 
+        const nextCompletedIds = acc.assignedActivityIds.filter((id) =>
+          currentSet.has(id)
+        );
         const totalAssigned = acc.assignedActivityIds.length;
         const completedCount = nextCompletedIds.length;
         const progressPercent =
@@ -155,10 +159,16 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         prevAccounts.map((acc) => {
           if (acc.id !== accountId) return acc;
 
-          const rolledBackIds = currentCompleted
-            ? [...acc.completedActivityIds, activityId]
-            : acc.completedActivityIds.filter((id) => id !== activityId);
+          const currentSet = new Set(acc.completedActivityIds);
+          if (!nextCompleted) {
+            currentSet.add(activityId);
+          } else {
+            currentSet.delete(activityId);
+          }
 
+          const rolledBackIds = acc.assignedActivityIds.filter((id) =>
+            currentSet.has(id)
+          );
           const totalAssigned = acc.assignedActivityIds.length;
           const completedCount = rolledBackIds.length;
           const progressPercent =
@@ -595,8 +605,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                             <div className="flex items-center justify-center">
                               <Checkbox
                                 checked={isCompleted}
-                                onCheckedChange={() =>
-                                  handleToggle(acc.id, act.id, isCompleted)
+                                onCheckedChange={(checked) =>
+                                  handleToggle(acc.id, act.id, Boolean(checked))
                                 }
                                 aria-label={`Toggle ${act.name} for ${acc.nickname}`}
                               />
@@ -711,10 +721,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                     const isCompleted = acc.completedActivityIds.includes(act.id);
 
                     return (
-                      <label
+                      <div
                         key={act.id}
-                        onClick={() => handleToggle(acc.id, act.id, isCompleted)}
-                        className={`flex items-center justify-between p-2 rounded-lg text-xs cursor-pointer transition-colors ${
+                        onClick={() => handleToggle(acc.id, act.id, !isCompleted)}
+                        className={`flex items-center justify-between p-2 rounded-lg text-xs cursor-pointer select-none transition-colors ${
                           isCompleted
                             ? "bg-slate-50 text-slate-900 font-medium"
                             : "text-slate-600 hover:bg-slate-50/50"
@@ -723,6 +733,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                         <div className="flex items-center gap-2.5">
                           <Checkbox
                             checked={isCompleted}
+                            onCheckedChange={(checked) => {
+                              handleToggle(acc.id, act.id, Boolean(checked));
+                            }}
+                            onClick={(e) => e.stopPropagation()}
                             aria-label={`Toggle ${act.name}`}
                           />
                           <span>{act.name}</span>
@@ -735,7 +749,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                         <span className="text-[10px] font-mono text-slate-400 uppercase">
                           {act.code}
                         </span>
-                      </label>
+                      </div>
                     );
                   })}
                 </div>

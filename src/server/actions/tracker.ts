@@ -4,6 +4,8 @@ import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { getWeekDays } from "@/lib/date-utils";
 
+import { revalidatePath } from "next/cache";
+
 export async function toggleActivityLog(
   accountId: string,
   activityId: string,
@@ -16,7 +18,11 @@ export async function toggleActivityLog(
   }
 
   try {
-    const acc = await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+    const acc =
+      session.role === "ADMIN"
+        ? await sql`SELECT id FROM accounts WHERE id = ${accountId} LIMIT 1;`
+        : await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+
     if (acc.length === 0) {
       return { success: false, error: "Account not found or access denied" };
     }
@@ -63,10 +69,15 @@ export async function toggleActivityLog(
       `;
     }
 
+    revalidatePath("/tracker");
+    revalidatePath("/dashboard");
+    revalidatePath("/weekly");
+    revalidatePath(`/accounts/${accountId}`);
+
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to toggle activity log:", error);
-    return { success: false, error: "Failed to update activity." };
+    return { success: false, error: error?.message || "Failed to update activity." };
   }
 }
 
@@ -108,6 +119,11 @@ export async function completeAccountDaily(
       `;
     }
 
+    revalidatePath("/tracker");
+    revalidatePath("/dashboard");
+    revalidatePath("/weekly");
+    revalidatePath(`/accounts/${accountId}`);
+
     return { success: true };
   } catch (error) {
     console.error("Failed to complete account daily:", error);
@@ -125,7 +141,11 @@ export async function resetAccountDaily(
   }
 
   try {
-    const acc = await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+    const acc =
+      session.role === "ADMIN"
+        ? await sql`SELECT id FROM accounts WHERE id = ${accountId} LIMIT 1;`
+        : await sql`SELECT id FROM accounts WHERE id = ${accountId} AND user_id = ${session.id} LIMIT 1;`;
+
     if (acc.length === 0) {
       return { success: false, error: "Account not found or access denied" };
     }
@@ -134,6 +154,11 @@ export async function resetAccountDaily(
       DELETE FROM activity_logs
       WHERE account_id = ${accountId} AND activity_date = ${activityDate};
     `;
+
+    revalidatePath("/tracker");
+    revalidatePath("/dashboard");
+    revalidatePath("/weekly");
+    revalidatePath(`/accounts/${accountId}`);
 
     return { success: true };
   } catch (error) {
@@ -149,14 +174,23 @@ export async function completeAllDaily(activityDate: string) {
   }
 
   try {
-    const list = await sql`
-      SELECT aa.account_id, aa.activity_id
-      FROM account_activities aa
-      JOIN accounts acc ON aa.account_id = acc.id
-      JOIN activities act ON aa.activity_id = act.id
-      WHERE aa.is_active = TRUE AND acc.status = 'Active' AND act.is_active = TRUE
-      AND acc.user_id = ${session.id};
-    `;
+    const list =
+      session.role === "ADMIN"
+        ? await sql`
+            SELECT aa.account_id, aa.activity_id
+            FROM account_activities aa
+            JOIN accounts acc ON aa.account_id = acc.id
+            JOIN activities act ON aa.activity_id = act.id
+            WHERE aa.is_active = TRUE AND acc.status = 'Active' AND act.is_active = TRUE;
+          `
+        : await sql`
+            SELECT aa.account_id, aa.activity_id
+            FROM account_activities aa
+            JOIN accounts acc ON aa.account_id = acc.id
+            JOIN activities act ON aa.activity_id = act.id
+            WHERE aa.is_active = TRUE AND acc.status = 'Active' AND act.is_active = TRUE
+            AND acc.user_id = ${session.id};
+          `;
 
     if (list.length === 0) {
       return { success: true };
@@ -174,6 +208,10 @@ export async function completeAllDaily(activityDate: string) {
       `;
     }
 
+    revalidatePath("/tracker");
+    revalidatePath("/dashboard");
+    revalidatePath("/weekly");
+
     return { success: true };
   } catch (error) {
     console.error("Failed to complete all daily:", error);
@@ -188,11 +226,22 @@ export async function resetAllDaily(activityDate: string) {
   }
 
   try {
-    await sql`
-      DELETE FROM activity_logs
-      WHERE account_id IN (SELECT id FROM accounts WHERE user_id = ${session.id})
-      AND activity_date = ${activityDate};
-    `;
+    if (session.role === "ADMIN") {
+      await sql`
+        DELETE FROM activity_logs
+        WHERE activity_date = ${activityDate};
+      `;
+    } else {
+      await sql`
+        DELETE FROM activity_logs
+        WHERE account_id IN (SELECT id FROM accounts WHERE user_id = ${session.id})
+        AND activity_date = ${activityDate};
+      `;
+    }
+
+    revalidatePath("/tracker");
+    revalidatePath("/dashboard");
+    revalidatePath("/weekly");
 
     return { success: true };
   } catch (error) {
