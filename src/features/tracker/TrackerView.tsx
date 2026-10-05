@@ -73,7 +73,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>("Active");
   const [completionFilter, setCompletionFilter] =
     useState<CompletionFilter>("all");
-  const [sortBy, setSortBy] = useState<SortOption>("least-progress");
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
 
   // Confirmation dialog state
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -438,10 +438,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           onChange={(e) => setSortBy(e.target.value as SortOption)}
           className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
         >
-          <option value="least-progress">Least Progress</option>
-          <option value="most-progress">Most Progress</option>
           <option value="name-asc">Nickname A-Z</option>
           <option value="name-desc">Nickname Z-A</option>
+          <option value="least-progress">Least Progress</option>
+          <option value="most-progress">Most Progress</option>
           <option value="group">Group</option>
         </select>
       </div>
