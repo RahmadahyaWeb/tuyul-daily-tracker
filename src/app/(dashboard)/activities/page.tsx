@@ -3,7 +3,7 @@ import { getMasterActivities } from "@/server/db/queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Activities — Tuyul Tracker",
+  title: "Activities — Dituyulin",
   description: "Master daily repeatable checklist activities management",
 };
 

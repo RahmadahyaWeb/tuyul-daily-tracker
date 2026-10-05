@@ -164,19 +164,19 @@ export function AccountDetailView({ data }: AccountDetailProps) {
       <div>
         <Link
           href="/accounts"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-900 transition-colors font-medium mb-3"
+          className="inline-flex items-center gap-1.5 text-xs text-[#736350] hover:text-[#231b12] transition-colors font-medium mb-3"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Accounts</span>
         </Link>
 
         {/* Character Profile Card */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-5 shadow-[3px_3px_0px_#baa892] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <Avatar name={account.nickname} size="lg" />
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-none">
+                <h1 className="text-xl font-bold tracking-tight text-[#231b12] leading-none">
                   {account.nickname}
                 </h1>
                 <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-mono">
@@ -196,14 +196,14 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                 </Badge>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-1.5">
-                <span className="font-medium text-slate-700">{account.job}</span>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#736350] mt-1.5">
+                <span className="font-semibold text-[#2c261e]">{account.job}</span>
                 <span>·</span>
-                <span>Server: <strong className="text-slate-700">{account.server}</strong></span>
+                <span>Server: <strong className="text-[#2c261e]">{account.server}</strong></span>
                 {account.group && (
                   <>
                     <span>·</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium text-[10px]">
+                    <span className="px-1.5 py-0.5 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28] font-bold text-[10px] font-pixel">
                       {account.group.name}
                     </span>
                   </>
@@ -222,7 +222,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
               {status === "Active" ? "Pause Account" : "Activate Account"}
             </Button>
             <Link href="/tracker">
-              <Button size="sm" className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8">
+              <Button size="sm" className="text-xs h-8">
                 Daily Tracker
               </Button>
             </Link>

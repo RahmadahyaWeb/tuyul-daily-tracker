@@ -4,8 +4,8 @@ import { getTodayMakassar, isValidDateString } from "@/lib/date-utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Daily Tracker — Tuyul Tracker",
-  description: "Fast daily checklist and activity management matrix for Ragnarok accounts",
+  title: "Tracker — Dituyulin",
+  description: "Fast daily checklist and activity management matrix for accounts",
 };
 
 export const dynamic = "force-dynamic";

@@ -14,10 +14,10 @@ export async function generateMetadata({
 }: AccountDetailPageProps): Promise<Metadata> {
   const { id } = await params;
   const data = await getAccountDetail(id);
-  if (!data) return { title: "Account Not Found — Tuyul Tracker" };
+  if (!data) return { title: "Account Not Found — Dituyulin" };
 
   return {
-    title: `${data.account.nickname} — Tuyul Tracker`,
+    title: `${data.account.nickname} — Dituyulin`,
     description: `Details, credentials, and 30-day activity history for ${data.account.nickname}`,
   };
 }

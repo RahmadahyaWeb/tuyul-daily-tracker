@@ -112,35 +112,38 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   return (
     <div className="space-y-4 w-full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Account Groups
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Organize and categorize your character accounts (e.g., Client A, Personal, Card Farm)
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#dfd5c5]">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
+              Account Groups
+            </h1>
+            <p className="text-xs text-[#736350] mt-0.5">
+              Organize and categorize your character accounts (e.g., Client A, Personal, Card Farm)
+            </p>
+          </div>
         </div>
 
-        <Button size="sm" onClick={handleOpenCreate} className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs gap-1 text-xs">
+        <Button size="sm" onClick={handleOpenCreate} className="gap-1 text-xs">
           <Plus className="w-3.5 h-3.5" />
           <span>Add Group</span>
         </Button>
       </div>
 
       {/* Main Groups Table */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+            <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4">
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pl-4 font-pixel">
                   Group Category Name
                 </TableHead>
-                <TableHead className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                <TableHead className="text-center text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
                   Characters
                 </TableHead>
-                <TableHead className="w-24 text-right text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pr-4">
+                <TableHead className="w-24 text-right text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pr-4 font-pixel">
                   Actions
                 </TableHead>
               </TableRow>

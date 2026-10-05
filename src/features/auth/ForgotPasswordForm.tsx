@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 
 export function ForgotPasswordForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -14,7 +15,6 @@ export function ForgotPasswordForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate reset request / provide instructions
     setTimeout(() => {
       setLoading(false);
       setSubmitted(true);
@@ -22,32 +22,34 @@ export function ForgotPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAF8F5] text-[#2c261e]">
       <div className="w-full max-w-sm space-y-6">
-        <div className="text-center space-y-2">
-          <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white mx-auto shadow-sm">
-            <span className="font-bold text-sm">T</span>
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <Link href="/">
+              <Logo size="lg" />
+            </Link>
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
               Reset Password
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-[#736350] mt-0.5">
               Enter your username to request a password reset
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-4">
+        <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-6 shadow-[3px_4px_0px_#cfbeaa] space-y-4">
           {submitted ? (
             <div className="space-y-4 text-center py-2">
-              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-10 h-10 bg-[#ECFDF3] border border-[#a3ddb4] text-[#1E5D2F] rounded-xs flex items-center justify-center mx-auto shadow-[1px_1px_0px_#a3ddb4]">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-slate-900">Request Sent</p>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  If an account exists for <span className="font-medium text-slate-700">{username}</span>, contact your workspace administrator or support to complete reset.
+                <p className="text-sm font-bold text-[#231b12] font-pixel tracking-wide uppercase">Request Sent</p>
+                <p className="text-xs text-[#736350] leading-relaxed">
+                  If an account exists for <span className="font-semibold text-[#231b12]">@{username}</span>, contact your guild administrator to complete reset.
                 </p>
               </div>
               <Button asChild variant="outline" className="w-full text-xs mt-2">
@@ -72,17 +74,17 @@ export function ForgotPasswordForm() {
 
               <Button
                 type="submit"
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium"
+                className="w-full"
                 isLoading={loading}
               >
                 Send Reset Link
               </Button>
 
-              <div className="text-center pt-2 text-xs text-slate-500 border-t border-slate-100">
+              <div className="text-center pt-2 text-xs text-[#736350] border-t border-[#dfd5c5]">
                 Remember your password?{" "}
                 <Link
                   href="/login"
-                  className="font-semibold text-slate-900 hover:underline"
+                  className="font-semibold text-[#3B6EA8] hover:text-[#2F5B8D] hover:underline"
                 >
                   Sign In
                 </Link>

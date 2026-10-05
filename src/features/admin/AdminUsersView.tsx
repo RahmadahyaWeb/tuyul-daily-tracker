@@ -209,68 +209,68 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-4 rounded-xl border border-slate-200/80 bg-white shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+        <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892] space-y-1">
+          <div className="flex items-center justify-between text-[#8a7b68]">
+            <span className="text-[11px] font-bold uppercase tracking-wider font-pixel">
               Total Users
             </span>
-            <Users className="w-4 h-4 text-slate-400" />
+            <Users className="w-4 h-4 text-[#8a7b68]" />
           </div>
-          <p className="text-2xl font-bold text-slate-900">{stats.totalUsers}</p>
+          <p className="text-2xl font-extrabold text-[#231b12]">{stats.totalUsers}</p>
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-200/80 bg-white shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
-              Total Tuyul Accounts
+        <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892] space-y-1">
+          <div className="flex items-center justify-between text-[#8a7b68]">
+            <span className="text-[11px] font-bold uppercase tracking-wider font-pixel">
+              Total Characters
             </span>
-            <Bot className="w-4 h-4 text-slate-400" />
+            <Bot className="w-4 h-4 text-[#8a7b68]" />
           </div>
-          <p className="text-2xl font-bold text-slate-900">{stats.totalAccounts}</p>
+          <p className="text-2xl font-extrabold text-[#231b12]">{stats.totalAccounts}</p>
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-200/80 bg-white shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
-              Pro Subscribers
+        <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892] space-y-1">
+          <div className="flex items-center justify-between text-[#8a7b68]">
+            <span className="text-[11px] font-bold uppercase tracking-wider font-pixel">
+              Pro Guilds
             </span>
-            <Sparkles className="w-4 h-4 text-indigo-600" />
+            <Sparkles className="w-4 h-4 text-[#3B6EA8]" />
           </div>
-          <p className="text-2xl font-bold text-indigo-600">
+          <p className="text-2xl font-extrabold text-[#3B6EA8]">
             {stats.proSubscribers}
           </p>
         </div>
 
-        <div className="p-4 rounded-xl border border-slate-200/80 bg-white shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-semibold uppercase tracking-wider">
+        <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892] space-y-1">
+          <div className="flex items-center justify-between text-[#8a7b68]">
+            <span className="text-[11px] font-bold uppercase tracking-wider font-pixel">
               Pending Approvals
             </span>
-            <CreditCard className="w-4 h-4 text-amber-500" />
+            <CreditCard className="w-4 h-4 text-[#B57C1E]" />
           </div>
-          <p className="text-2xl font-bold text-amber-600">
+          <p className="text-2xl font-extrabold text-[#8C580B]">
             {stats.pendingBilling}
           </p>
         </div>
       </div>
 
       {/* Toolbar / Filters */}
-      <div className="flex flex-wrap items-center gap-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
         <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
           <input
             type="text"
             placeholder="Search by username..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs"
+            className="h-8 w-full rounded-xs border border-[#cfc3b0] bg-white pl-8 pr-3 text-xs text-[#2c261e] placeholder:text-[#9c8e7b] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0]"
           />
         </div>
 
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
         >
           <option value="all">All Roles</option>
           <option value="USER">User</option>
@@ -280,40 +280,40 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
         <select
           value={planFilter}
           onChange={(e) => setPlanFilter(e.target.value)}
-          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
         >
           <option value="all">All Plans</option>
           <option value="FREE">Free Plan</option>
           <option value="PRO">Pro Plan</option>
         </select>
 
-        <div className="ml-auto text-xs text-slate-400">
-          Showing <strong>{filteredUsers.length}</strong> of{" "}
-          <strong>{users.length}</strong> users
+        <div className="ml-auto text-xs text-[#736350] font-pixel">
+          SHOWING <strong>{filteredUsers.length}</strong> OF{" "}
+          <strong>{users.length}</strong> USERS
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+          <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
             <TableRow>
-              <TableHead className="py-2.5 pl-4 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 pl-4 text-xs font-bold text-[#5a4c3a] font-pixel">
                 User
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
                 Role
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
                 Plan
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600 text-center">
-                Tuyul Count
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] text-center font-pixel">
+                Characters
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
                 Registered
               </TableHead>
-              <TableHead className="py-2.5 pr-4 text-xs font-bold text-slate-600 text-right">
+              <TableHead className="py-2.5 pr-4 text-xs font-bold text-[#5a4c3a] text-right font-pixel">
                 Actions
               </TableHead>
             </TableRow>

@@ -22,16 +22,21 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
   return (
     <div className="w-full space-y-6">
       {/* Page Header */}
-      <div className="pb-4 border-b border-slate-200/80">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900">Settings</h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Manage your personal account, workspace preferences, and billing.
-        </p>
+      <div className="pb-3 border-b border-[#dfd5c5]">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">Settings</h1>
+            <p className="text-xs text-[#736350] mt-0.5">
+              Manage your personal account, workspace preferences, and billing.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Settings Navigation Tabs */}
-        <nav className="w-full md:w-56 shrink-0 flex md:flex-col gap-1 p-1 bg-slate-100/70 md:bg-transparent rounded-lg">
+        <nav className="w-full md:w-56 shrink-0 flex md:flex-col gap-1 p-1 bg-[#F4EFE6] md:bg-transparent rounded-xs">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -43,13 +48,13 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors w-full",
+                  "flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-colors w-full select-none",
                   isActive
-                    ? "bg-white text-slate-900 shadow-2xs md:bg-slate-900 md:text-white"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    ? "bg-[#3B6EA8] text-white shadow-[1.5px_1.5px_0px_#1e3b60]"
+                    : "text-[#5c4e3b] hover:text-[#231b12] hover:bg-[#F3ECE0]"
                 )}
               >
-                <Icon className={cn("w-4 h-4", isActive ? "md:text-white" : "text-slate-500")} />
+                <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-[#736350]")} />
                 <span>{item.label}</span>
               </Link>
             );

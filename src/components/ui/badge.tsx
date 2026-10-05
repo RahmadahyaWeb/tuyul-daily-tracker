@@ -3,27 +3,30 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-1 focus:ring-ring select-none",
+  "inline-flex items-center rounded-xs border px-2 py-0.5 text-xs font-medium transition-colors focus:outline-none select-none tracking-tight",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground shadow-none",
+          "border-[#2a5082] bg-[#3B6EA8] text-white shadow-[1px_1px_0px_#1e3b60]",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "border-[#cfc3b0] bg-[#f0eae1] text-[#4a3e2e] hover:bg-[#e8e0d4]",
         destructive:
-          "border-transparent bg-destructive/10 text-destructive border-destructive/20",
-        outline: "text-foreground border-border",
+          "border-[#b34032] bg-[#FDECEB] text-[#A82A1E] font-medium shadow-[1px_1px_0px_#e8b0ab]",
+        outline: "text-foreground border-[#d6cbba] bg-white/70",
         success:
-          "border-emerald-200 bg-emerald-50 text-emerald-700 font-medium",
+          "border-[#347A46] bg-[#ECFDF3] text-[#1E5D2F] font-medium shadow-[1px_1px_0px_#b6e4c3]",
         warning:
-          "border-amber-200 bg-amber-50 text-amber-700 font-medium",
+          "border-[#B57C1E] bg-[#FFF8EB] text-[#8C580B] font-medium shadow-[1px_1px_0px_#f0d49e]",
         neutral:
-          "border-border bg-muted text-muted-foreground font-medium",
+          "border-[#ded3c3] bg-[#f5efe6] text-[#6d6150] font-medium",
+        rpg:
+          "border-[#8c7456] bg-[#FAF3E0] text-[#5A4122] font-semibold shadow-[1px_1px_0px_#baa58a]",
       },
       size: {
         default: "text-xs px-2 py-0.5",
         sm: "text-[11px] px-1.5 py-0.25",
+        lg: "text-xs px-2.5 py-1 font-semibold",
       },
     },
     defaultVariants: {

@@ -3,7 +3,7 @@ import { getGroups } from "@/server/db/queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Groups — Tuyul Tracker",
+  title: "Groups — Dituyulin",
   description: "Account category and group management",
 };
 

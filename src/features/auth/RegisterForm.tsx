@@ -4,9 +4,10 @@ import React, { useActionState, useEffect } from "react";
 import { registerAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, Sparkles } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Logo } from "@/components/brand/Logo";
 
 export function RegisterForm() {
   const [state, formAction, isPending] = useActionState(registerAction, null);
@@ -18,28 +19,30 @@ export function RegisterForm() {
   }, [state]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#FAF8F5] text-[#2c261e]">
       <div className="w-full max-w-sm space-y-6">
         {/* Brand */}
-        <div className="text-center space-y-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-900 to-indigo-700 flex items-center justify-center text-white mx-auto shadow-md shadow-indigo-500/10">
-            <Sparkles className="w-5 h-5 text-indigo-200" />
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <Link href="/">
+              <Logo size="lg" />
+            </Link>
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
               Create your account
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Start organizing and tracking your tuyul accounts
+            <p className="text-xs text-[#736350] mt-0.5">
+              Start tracking every account, the pixel way
             </p>
           </div>
         </div>
 
         {/* Card Surface */}
-        <div className="rounded-xl border border-slate-200/80 bg-white p-6 shadow-sm space-y-4">
+        <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-6 shadow-[3px_4px_0px_#cfbeaa] space-y-4">
           {state?.error && (
-            <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+            <div className="p-3 rounded-xs bg-[#FDF4F3] border border-[#e5b8b4] text-[#A82A1E] text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-[#A82A1E]" />
               <span>{state.error}</span>
             </div>
           )}
@@ -75,18 +78,18 @@ export function RegisterForm() {
 
             <Button
               type="submit"
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium"
+              className="w-full"
               isLoading={isPending}
             >
               Get Started
             </Button>
           </form>
 
-          <div className="text-center pt-2 text-xs text-slate-500 border-t border-slate-100">
+          <div className="text-center pt-2 text-xs text-[#736350] border-t border-[#dfd5c5]">
             Already have an account?{" "}
             <Link
               href="/login"
-              className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline"
+              className="font-semibold text-[#3B6EA8] hover:text-[#2F5B8D] hover:underline"
             >
               Sign in
             </Link>

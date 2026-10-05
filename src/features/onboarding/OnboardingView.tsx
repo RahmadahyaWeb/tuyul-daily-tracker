@@ -77,7 +77,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
     try {
       const res = await completeOnboardingAction(formData);
       if (res && res.success) {
-        toast.success("Character created successfully! Welcome to Tuyul Tracker.");
+        toast.success("Character created successfully! Welcome to Dituyulin.");
         router.push("/tracker");
         router.refresh();
       } else {
@@ -91,16 +91,16 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 selection:bg-slate-900 selection:text-white">
+    <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-4 selection:bg-[#3B6EA8] selection:text-white">
       <div className="w-full max-w-lg space-y-6">
         {/* Progress indicator */}
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8a7b68] font-pixel">
               Setup Workspace & First Character
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+          <div className="flex items-center gap-1.5 text-xs text-[#8a7b68] font-medium font-pixel">
             Step {step} of 3
           </div>
         </div>
@@ -108,35 +108,35 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
         {/* Step dots */}
         <div className="flex items-center gap-2 px-2">
           <div
-            className={`h-1.5 flex-1 rounded-full transition-all ${
-              step >= 1 ? "bg-slate-900" : "bg-slate-200"
+            className={`h-1.5 flex-1 rounded-xs transition-all ${
+              step >= 1 ? "bg-[#3B6EA8]" : "bg-[#ded4c4]"
             }`}
           />
           <div
-            className={`h-1.5 flex-1 rounded-full transition-all ${
-              step >= 2 ? "bg-slate-900" : "bg-slate-200"
+            className={`h-1.5 flex-1 rounded-xs transition-all ${
+              step >= 2 ? "bg-[#3B6EA8]" : "bg-[#ded4c4]"
             }`}
           />
           <div
-            className={`h-1.5 flex-1 rounded-full transition-all ${
-              step >= 3 ? "bg-slate-900" : "bg-slate-200"
+            className={`h-1.5 flex-1 rounded-xs transition-all ${
+              step >= 3 ? "bg-[#3B6EA8]" : "bg-[#ded4c4]"
             }`}
           />
         </div>
 
         {/* Card Body */}
-        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 sm:p-8 shadow-[3px_4px_0px_#baa892]">
           {/* STEP 1: Workspace Name */}
           {step === 1 && (
             <form onSubmit={handleNextStep1} className="space-y-5">
               <div className="space-y-1.5">
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 mb-2">
+                <div className="w-9 h-9 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] flex items-center justify-center text-[#5A4122] mb-2">
                   <Layers className="w-4 h-4" />
                 </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900">
+                <h2 className="text-lg font-bold tracking-tight text-[#231b12]">
                   Name your workspace
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-[#736350]">
                   A workspace is where your character accounts, teams, and daily activities live.
                 </p>
               </div>
@@ -147,14 +147,14 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   id="workspaceName"
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
-                  placeholder="e.g. My RO Farm Guild"
+                  placeholder="e.g. My Farm Guild"
                   required
                   autoFocus
                 />
               </div>
 
               <div className="pt-4 flex justify-end">
-                <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white text-xs">
+                <Button type="submit" size="sm">
                   Continue <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
               </div>
@@ -165,14 +165,14 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
           {step === 2 && (
             <form onSubmit={handleNextStep2} className="space-y-5">
               <div className="space-y-1.5">
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 mb-2">
+                <div className="w-9 h-9 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] flex items-center justify-center text-[#5A4122] mb-2">
                   <UserPlus className="w-4 h-4" />
                 </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900">
-                  Add your first Tuyul character
+                <h2 className="text-lg font-bold tracking-tight text-[#231b12]">
+                  Add your first character account
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Enter your character information to start your daily tracking list. (Required)
+                <p className="text-xs text-[#736350]">
+                  Enter your character information to start your daily tracking list.
                 </p>
               </div>
 

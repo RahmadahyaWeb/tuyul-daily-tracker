@@ -30,10 +30,10 @@ export function ProfileSettingsView({ user }: ProfileSettingsViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-2xs space-y-5">
+      <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 shadow-[3px_3px_0px_#baa892] space-y-5">
         <div>
-          <h2 className="text-sm font-bold text-slate-900">Profile Information</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wider uppercase">Profile Information</h2>
+          <p className="text-xs text-[#736350] mt-0.5">
             Update your account credentials and login information.
           </p>
         </div>

@@ -31,6 +31,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { Logo } from "@/components/brand/Logo";
+
 interface SidebarProps {
   onCloseMobile?: () => void;
   user?: { id?: string; username: string; role: string } | null;
@@ -73,56 +75,57 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
         prefetch={true}
         onClick={handleNavClick}
         className={cn(
-          "group flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all",
+          "group flex items-center justify-between px-3 py-2 rounded-xs text-xs font-medium transition-all select-none",
           isActive
-            ? "bg-slate-900 text-white shadow-2xs"
-            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+            ? "bg-[#3B6EA8] text-white shadow-[1.5px_1.5px_0px_#1e3b60]"
+            : "text-[#5c4e3b] hover:text-[#231b12] hover:bg-[#F3ECE0]"
         )}
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <Icon
             className={cn(
               "w-4 h-4 shrink-0 transition-transform group-hover:scale-105",
-              isActive ? "text-white" : "text-slate-500 group-hover:text-slate-900"
+              isActive ? "text-white" : "text-[#7a6a54] group-hover:text-[#231b12]"
             )}
           />
           <span className="truncate">{item.label}</span>
         </div>
+        {isActive && (
+          <div className="w-1.5 h-1.5 bg-[#FDEECA] rounded-none shrink-0 shadow-[0.5px_0.5px_0px_#1e3b60]" />
+        )}
       </Link>
     );
   };
 
   return (
-    <aside className="w-[230px] bg-white border-r border-slate-200/80 flex flex-col h-full select-none">
+    <aside className="w-[230px] bg-[#FCFAF7] border-r border-[#dfd5c5] flex flex-col h-full select-none">
       {/* Brand Header */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-slate-100">
+      <div className="h-14 px-4 flex items-center justify-between border-b border-[#dfd5c5] bg-[#F7F2E9]/60">
         <Link
           href="/dashboard"
           onClick={handleNavClick}
-          className="flex items-center gap-2.5 hover:opacity-85 transition-opacity"
+          className="hover:opacity-90 transition-opacity"
         >
-          <div className="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white">
-            <span className="font-bold text-xs">T</span>
-          </div>
-          <span className="font-bold text-xs tracking-tight text-slate-900">
-            Tuyul Tracker
-          </span>
+          <Logo size="md" />
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
         {/* Core Links */}
         <div className="space-y-1">
+          <p className="px-3 pb-1 text-[10px] font-bold text-[#8f7e68] uppercase tracking-wider font-pixel">
+            MAIN BOARD
+          </p>
           {mainNavItems.map(renderLink)}
         </div>
 
-        <Separator className="bg-slate-100" />
+        <div className="border-b border-[#ebd7b2] my-2" />
 
         {/* Management Section */}
         <div className="space-y-1">
-          <p className="px-3 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-            Management
+          <p className="px-3 pb-1 text-[10px] font-bold text-[#8f7e68] uppercase tracking-wider font-pixel">
+            MANAGEMENT
           </p>
           {managementNavItems.map(renderLink)}
         </div>
@@ -130,11 +133,11 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
         {/* Admin Console (Only visible to ADMIN role) */}
         {user?.role === "ADMIN" && (
           <>
-            <Separator className="bg-slate-100" />
+            <div className="border-b border-[#ebd7b2] my-2" />
             <div className="space-y-1">
-              <p className="px-3 pb-1 text-[10px] font-semibold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
-                <Shield className="w-3 h-3" />
-                <span>Admin Console</span>
+              <p className="px-3 pb-1 text-[10px] font-bold text-[#3B6EA8] uppercase tracking-wider flex items-center gap-1.5 font-pixel">
+                <Shield className="w-3 h-3 text-[#3B6EA8]" />
+                <span>ADMIN GUILD</span>
               </p>
               {adminNavItems.map(renderLink)}
             </div>
@@ -143,46 +146,46 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
       </nav>
 
       {/* Footer: Workspace & User Dropdown */}
-      <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+      <div className="p-3 border-t border-[#dfd5c5] bg-[#F7F2E9]/60">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="w-full flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer text-left"
+              className="w-full flex items-center justify-between p-2 rounded-xs bg-white border border-[#cfc3b0] shadow-[1px_1px_0px_#e5ddd0] hover:bg-[#FAF7F2] transition-colors cursor-pointer text-left"
             >
               <div className="flex items-center gap-2 min-w-0 pr-1">
                 <Avatar name={user?.username || "User"} size="sm" />
                 <div className="truncate min-w-0">
-                  <p className="text-xs font-semibold text-slate-900 truncate leading-tight">
+                  <p className="text-xs font-semibold text-[#2c261e] truncate leading-tight">
                     {user?.username || "User"}
                   </p>
-                  <p className="text-[10px] text-slate-400 truncate leading-none mt-0.5">
-                    Workspace
+                  <p className="text-[10px] text-[#8a7b68] truncate leading-none mt-0.5 font-pixel">
+                    WORKSPACE
                   </p>
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#8a7b68] shrink-0" />
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" side="top" className="w-52 mb-1">
+          <DropdownMenuContent align="end" side="top" className="w-52 mb-1 rounded-xs border-2 border-[#cfc3b0] bg-[#FCFAF7] shadow-[3px_3px_0px_#baa892]">
             <DropdownMenuLabel className="font-normal py-1.5 px-2">
               <div className="flex flex-col space-y-0.5">
-                <p className="text-xs font-bold text-slate-900">{user?.username || "User"}</p>
-                <p className="text-[10px] text-slate-400">
-                  {user?.role === "ADMIN" ? "Pro Plan" : "Free Plan"}
+                <p className="text-xs font-bold text-[#2c261e]">{user?.username || "User"}</p>
+                <p className="text-[10px] text-[#8a7b68] font-pixel">
+                  {user?.role === "ADMIN" ? "GUILD MASTER" : "ADVENTURER"}
                 </p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-[#e8dfd0]" />
 
             <DropdownMenuItem asChild>
               <Link
                 href="/settings/profile"
                 onClick={handleNavClick}
-                className="flex items-center gap-2 text-xs cursor-pointer"
+                className="flex items-center gap-2 text-xs cursor-pointer text-[#4d4030] hover:bg-[#F3ECE0] rounded-xs"
               >
-                <User className="w-3.5 h-3.5 text-slate-500" />
+                <User className="w-3.5 h-3.5 text-[#7a6a54]" />
                 <span>Profile</span>
               </Link>
             </DropdownMenuItem>
@@ -191,9 +194,9 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
               <Link
                 href="/settings/workspace"
                 onClick={handleNavClick}
-                className="flex items-center gap-2 text-xs cursor-pointer"
+                className="flex items-center gap-2 text-xs cursor-pointer text-[#4d4030] hover:bg-[#F3ECE0] rounded-xs"
               >
-                <Layers className="w-3.5 h-3.5 text-slate-500" />
+                <Layers className="w-3.5 h-3.5 text-[#7a6a54]" />
                 <span>Workspace</span>
               </Link>
             </DropdownMenuItem>
@@ -202,9 +205,9 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
               <Link
                 href="/settings/billing"
                 onClick={handleNavClick}
-                className="flex items-center gap-2 text-xs cursor-pointer"
+                className="flex items-center gap-2 text-xs cursor-pointer text-[#4d4030] hover:bg-[#F3ECE0] rounded-xs"
               >
-                <CreditCard className="w-3.5 h-3.5 text-slate-500" />
+                <CreditCard className="w-3.5 h-3.5 text-[#7a6a54]" />
                 <span>Billing</span>
               </Link>
             </DropdownMenuItem>
@@ -214,20 +217,20 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
                 <Link
                   href="/admin/users"
                   onClick={handleNavClick}
-                  className="flex items-center gap-2 text-xs cursor-pointer text-indigo-600 font-medium"
+                  className="flex items-center gap-2 text-xs cursor-pointer text-[#3B6EA8] font-semibold hover:bg-[#F3ECE0] rounded-xs"
                 >
-                  <Shield className="w-3.5 h-3.5 text-indigo-600" />
+                  <Shield className="w-3.5 h-3.5 text-[#3B6EA8]" />
                   <span>Admin Console</span>
                 </Link>
               </DropdownMenuItem>
             )}
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-[#e8dfd0]" />
 
             <form action={logoutAction} className="w-full">
               <button
                 type="submit"
-                className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-sm cursor-pointer transition-colors"
+                className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-[#A82A1E] hover:bg-[#FDECEB] rounded-xs cursor-pointer transition-colors font-medium"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign Out</span>

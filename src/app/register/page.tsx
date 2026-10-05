@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Register — Tuyul Tracker",
-  description: "Create your account on Tuyul Tracker",
+  title: "Register — Dituyulin",
+  description: "Create your account on Dituyulin",
 };
 
 export default async function RegisterPage() {

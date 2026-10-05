@@ -15,23 +15,23 @@ export function Toaster({ ...props }: ToasterProps) {
       toastOptions={{
         classNames: {
           toast:
-            "group toast font-sans shadow-lg rounded-xl border text-xs font-medium py-3 px-4 flex items-center gap-2.5",
+            "group toast font-sans shadow-[2px_2px_0px_#baa892] rounded-xs border text-xs font-medium py-3 px-4 flex items-center gap-2.5",
           title: "text-xs font-semibold leading-tight",
-          description: "text-[11px] text-slate-500 mt-0.5",
+          description: "text-[11px] text-slate-600 mt-0.5",
           actionButton:
-            "bg-slate-900 text-white font-medium text-xs px-2.5 py-1 rounded-md hover:bg-slate-800 transition-colors",
+            "bg-[#3B6EA8] text-white font-medium text-xs px-2.5 py-1 rounded-xs hover:bg-[#2F5B8D] transition-colors shadow-[1px_1px_0px_#1e3b60]",
           cancelButton:
-            "bg-slate-100 text-slate-600 font-medium text-xs px-2.5 py-1 rounded-md hover:bg-slate-200 transition-colors",
+            "bg-[#f0eae1] text-[#4a3e2e] font-medium text-xs px-2.5 py-1 rounded-xs hover:bg-[#e4dcce] transition-colors border border-[#cfc3b0]",
           closeButton:
-            "border-slate-200 bg-white text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors",
+            "border-[#cfc3b0] bg-[#fbf9f5] text-[#7a6d5c] hover:text-[#2c261e] hover:bg-[#ede5d8] transition-colors",
           success:
-            "bg-emerald-50/95 text-emerald-950 border-emerald-200/80 shadow-emerald-500/5",
+            "bg-[#F2FAF4] text-[#1E5D2F] border-[#347A46]",
           error:
-            "bg-rose-50/95 text-rose-950 border-rose-200/80 shadow-rose-500/5",
+            "bg-[#FDF4F3] text-[#A82A1E] border-[#b34032]",
           warning:
-            "bg-amber-50/95 text-amber-950 border-amber-200/80 shadow-amber-500/5",
+            "bg-[#FFFBF0] text-[#8C580B] border-[#B57C1E]",
           info:
-            "bg-sky-50/95 text-sky-950 border-sky-200/80 shadow-sky-500/5",
+            "bg-[#F2F7FC] text-[#204E85] border-[#3B6EA8]",
         },
       }}
       {...props}

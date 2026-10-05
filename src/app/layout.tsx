@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Tuyul Tracker — Keep every account on track",
-    template: "%s | Tuyul Tracker",
+    default: "Dituyulin — Track every account, the pixel way.",
+    template: "%s | Dituyulin",
   },
   description:
-    "Track daily activities, progress, and multiple accounts from one simple workspace.",
+    "Track daily quest progress, manage multiple game accounts, and keep character activities organized in a fantasy pixel workspace.",
 };
 
 export default function RootLayout({
@@ -34,7 +34,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-slate-900 selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#FAF8F5] text-slate-900 selection:bg-slate-900 selection:text-white font-sans">
         <Suspense fallback={null}>
           <TopProgressBar />
         </Suspense>

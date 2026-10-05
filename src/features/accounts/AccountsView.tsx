@@ -309,39 +309,42 @@ export function AccountsView({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Account Management
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Manage Ragnarok character accounts, groups, and assigned daily tasks
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#dfd5c5]">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
+              Account Management
+            </h1>
+            <p className="text-xs text-[#736350] mt-0.5">
+              Manage character accounts, groups, and assigned daily tasks
+            </p>
+          </div>
         </div>
 
-        <Button size="sm" onClick={handleOpenCreate} className="bg-slate-900 hover:bg-slate-800 text-white shadow-xs gap-1 text-xs">
+        <Button size="sm" onClick={handleOpenCreate} className="gap-1 text-xs">
           <Plus className="w-3.5 h-3.5" />
           <span>Add Account</span>
         </Button>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
         <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
           <input
             type="text"
             placeholder="Search accounts, username, group..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs"
+            className="h-8 w-full rounded-xs border border-[#cfc3b0] bg-white pl-8 pr-3 text-xs text-[#2c261e] placeholder:text-[#9c8e7b] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0]"
           />
         </div>
 
         <select
           value={groupFilter}
           onChange={(e) => setGroupFilter(e.target.value)}
-          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
         >
           <option value="all">All Groups</option>
           {groups.map((g) => (
@@ -354,7 +357,7 @@ export function AccountsView({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
         >
           <option value="all">All Statuses</option>
           <option value="Active">Active Only</option>
@@ -364,27 +367,27 @@ export function AccountsView({
       </div>
 
       {/* Main Accounts Table */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
         <div className="overflow-x-auto">
           <Table className="min-w-[750px]">
-            <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+            <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4">
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pl-4 font-pixel">
                   Character Nickname
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
                   Job / Class
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
                   Server
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
                   Group
                 </TableHead>
-                <TableHead className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                <TableHead className="text-center text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
                   Status
                 </TableHead>
-                <TableHead className="w-12 text-right text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pr-4">
+                <TableHead className="w-12 text-right text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pr-4 font-pixel">
                   Actions
                 </TableHead>
               </TableRow>

@@ -134,26 +134,26 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
       </div>
 
       {/* Toolbar / Filters */}
-      <div className="flex flex-wrap items-center gap-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
         <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
           <input
             type="text"
             placeholder="Search by username..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs"
+            className="h-8 w-full rounded-xs border border-[#cfc3b0] bg-white pl-8 pr-3 text-xs text-[#2c261e] placeholder:text-[#9c8e7b] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0]"
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200/80">
+        <div className="flex items-center gap-1 bg-white p-0.5 rounded-xs border border-[#cfc3b0]">
           <button
             type="button"
             onClick={() => setStatusFilter("all")}
-            className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
               statusFilter === "all"
-                ? "bg-white text-slate-900 shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[#3B6EA8] text-white shadow-[0.5px_0.5px_0px_#1e3b60]"
+                : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
             }`}
           >
             All ({requests.length})
@@ -161,10 +161,10 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <button
             type="button"
             onClick={() => setStatusFilter("PENDING")}
-            className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
               statusFilter === "PENDING"
-                ? "bg-white text-slate-900 shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[#B57C1E] text-white shadow-[0.5px_0.5px_0px_#785112]"
+                : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
             }`}
           >
             Pending ({pendingCount})
@@ -172,10 +172,10 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <button
             type="button"
             onClick={() => setStatusFilter("APPROVED")}
-            className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
               statusFilter === "APPROVED"
-                ? "bg-white text-slate-900 shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[#347A46] text-white shadow-[0.5px_0.5px_0px_#1b4b27]"
+                : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
             }`}
           >
             Approved
@@ -183,10 +183,10 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <button
             type="button"
             onClick={() => setStatusFilter("REJECTED")}
-            className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
               statusFilter === "REJECTED"
-                ? "bg-white text-slate-900 shadow-2xs"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-[#A82A1E] text-white shadow-[0.5px_0.5px_0px_#78180e]"
+                : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
             }`}
           >
             Rejected
@@ -195,26 +195,26 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
       </div>
 
       {/* Requests Table */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
         <Table>
-          <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+          <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
             <TableRow>
-              <TableHead className="py-2.5 pl-4 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 pl-4 text-xs font-bold text-[#5a4c3a] font-pixel">
                 User
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
                 Requested Plan
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
                 Notes / Proof
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
                 Date Requested
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-slate-600 text-center">
+              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] text-center font-pixel">
                 Status
               </TableHead>
-              <TableHead className="py-2.5 pr-4 text-xs font-bold text-slate-600 text-right">
+              <TableHead className="py-2.5 pr-4 text-xs font-bold text-[#5a4c3a] text-right font-pixel">
                 Decision
               </TableHead>
             </TableRow>

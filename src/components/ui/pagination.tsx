@@ -66,25 +66,25 @@ export function Pagination({
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-center justify-between gap-3 px-3 py-3 border-t border-slate-200/80 bg-white/80 text-xs text-slate-600 ${className}`}
+      className={`flex flex-col sm:flex-row items-center justify-between gap-3 px-3 py-3 border-t border-[#dfd5c5] bg-[#FAF8F5] text-xs text-[#5c4e3b] ${className}`}
     >
       {/* Left side: Item Count & Page Size Selector */}
       <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-        <span className="text-slate-500 font-medium">
-          Showing <strong className="text-slate-900">{startItem}</strong> to{" "}
-          <strong className="text-slate-900">{endItem}</strong> of{" "}
-          <strong className="text-slate-900">{totalItems}</strong> {itemLabel}
+        <span className="text-[#736350] font-medium">
+          Showing <strong className="text-[#231b12]">{startItem}</strong> to{" "}
+          <strong className="text-[#231b12]">{endItem}</strong> of{" "}
+          <strong className="text-[#231b12]">{totalItems}</strong> {itemLabel}
         </span>
 
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 ml-2">
-            <span className="text-[11px] text-slate-400 hidden sm:inline">
+            <span className="text-[11px] text-[#8a7b68] hidden sm:inline font-pixel">
               Per page:
             </span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="h-7 rounded-md border border-slate-200 bg-white px-2 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+              className="h-7 rounded-xs border border-[#cfc3b0] bg-white px-2 text-xs text-[#2c261e] focus:outline-none focus:ring-1 focus:ring-[#3B6EA8] cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>

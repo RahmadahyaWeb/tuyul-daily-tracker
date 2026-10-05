@@ -6,8 +6,8 @@ import { Metadata } from "next";
 import crypto from "crypto";
 
 export const metadata: Metadata = {
-  title: "Onboarding — Setup Workspace & First Character",
-  description: "Create your first Tuyul account to get started",
+  title: "Onboarding — Dituyulin",
+  description: "Setup your workspace and first character to get started",
 };
 
 export const dynamic = "force-dynamic";

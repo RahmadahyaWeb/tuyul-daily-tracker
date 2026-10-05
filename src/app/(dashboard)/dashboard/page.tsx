@@ -4,8 +4,8 @@ import { getTodayMakassar } from "@/lib/date-utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Overview of daily tuyul activity progress",
+  title: "Dashboard — Dituyulin",
+  description: "Overview of daily character activity and quest progress",
 };
 
 export const dynamic = "force-dynamic";

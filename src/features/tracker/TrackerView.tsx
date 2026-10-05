@@ -382,18 +382,19 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   return (
     <div className="space-y-4 w-full">
       {/* Header & Date Controller */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200/80">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Tracker</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[#dfd5c5]">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
+          <h1 className="text-xl font-bold tracking-tight text-[#231b12]">Tracker</h1>
         </div>
 
         {/* Date Controller: ‹ Today ›  Oct 5, 2026 */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+          <div className="flex items-center bg-white border border-[#cfc3b0] rounded-xs p-0.5 shadow-[1px_1px_0px_#e5ddd0]">
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-slate-600 hover:text-slate-900"
+              className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
               onClick={() => handleDateChange(addDays(currentDate, -1))}
               disabled={isPending}
               aria-label="Previous day"
@@ -404,17 +405,17 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             <Button
               variant={isViewingToday ? "secondary" : "ghost"}
               size="sm"
-              className="h-7 text-xs px-2.5 font-medium text-slate-700"
+              className="h-7 text-xs px-2.5 font-bold font-pixel text-[#3d3326]"
               onClick={() => handleDateChange(todayDate)}
               disabled={isPending || isViewingToday}
             >
-              Today
+              TODAY
             </Button>
 
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-slate-600 hover:text-slate-900"
+              className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
               onClick={() => handleDateChange(addDays(currentDate, 1))}
               disabled={isPending}
               aria-label="Next day"
@@ -432,18 +433,18 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       </div>
 
       {/* Filter & Action Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-white border border-slate-200/80 rounded-xl shadow-2xs">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
         {/* Left: Search & Filter Dropdowns */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
           <div className="relative w-full sm:w-44">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#8a7b68] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search accounts..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-900"
+              className="w-full h-8 pl-8 pr-3 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#2c261e] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0]"
             />
           </div>
 
@@ -451,7 +452,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            className="h-8 px-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none cursor-pointer"
+            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
           >
             <option value="all">All Groups</option>
             {initialData.groups.map((g) => (
@@ -466,7 +467,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-8 px-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none cursor-pointer"
+            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
           >
             <option value="Active">Active</option>
             <option value="all">All Status</option>
@@ -478,7 +479,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <select
             value={completionFilter}
             onChange={(e) => setCompletionFilter(e.target.value as CompletionFilter)}
-            className="h-8 px-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none cursor-pointer"
+            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
           >
             <option value="all">All Progress</option>
             <option value="completed">Completed</option>
@@ -490,7 +491,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="h-8 px-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none cursor-pointer"
+            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
           >
             <option value="name-asc">Name (A-Z)</option>
             <option value="least-progress">Least Progress</option>
@@ -500,9 +501,9 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         </div>
 
         {/* Right: Counter & Actions */}
-        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-          <span className="text-xs font-medium text-slate-500 shrink-0">
-            {totalActive} Accounts · {completedAccountsCount} Completed
+        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#ebd7b2]">
+          <span className="text-xs font-semibold text-[#736350] shrink-0 font-pixel">
+            {totalActive} ACCOUNTS · {completedAccountsCount} DONE
           </span>
 
           <div className="flex items-center gap-1.5">
@@ -511,16 +512,16 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               size="sm"
               onClick={handleCompleteAll}
               disabled={actionLoading}
-              className="h-8 text-xs font-medium border-slate-200"
+              className="h-8 text-xs font-medium"
             >
-              <CheckCheck className="w-3.5 h-3.5 mr-1" /> Complete All
+              <CheckCheck className="w-3.5 h-3.5 mr-1 text-[#1E5D2F]" /> Complete All
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setConfirmResetAllOpen(true)}
               disabled={actionLoading}
-              className="h-8 text-xs font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50"
+              className="h-8 text-xs font-medium text-[#8a7b68] hover:text-[#A82A1E] hover:bg-[#FDECEB]"
             >
               <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset All
             </Button>
@@ -529,20 +530,20 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       </div>
 
       {/* DESKTOP & TABLET MATRIX TABLE (hidden on mobile) */}
-      <div className="hidden md:block bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs">
+      <div className="hidden md:block bg-white border-2 border-[#cfbeaa] rounded-xs overflow-hidden shadow-[3px_3px_0px_#baa892]">
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader className="bg-slate-50/80 border-b border-slate-200">
+            <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[180px] font-semibold text-xs text-slate-900">
-                  Account
+                <TableHead className="w-[180px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                  ACCOUNT
                 </TableHead>
                 {initialData.activities.map((act) => {
                   const isWeekly = act.activityType === "WEEKLY";
                   return (
                     <TableHead
                       key={act.id}
-                      className="text-center font-semibold text-xs text-slate-700 min-w-[76px] py-2"
+                      className="text-center font-bold text-xs text-[#5a4c3a] min-w-[76px] py-2 font-pixel tracking-wide"
                       title={
                         isWeekly
                           ? `${act.name} (Weekly Task — Reset every Monday)`
@@ -552,28 +553,28 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       <div className="flex flex-col items-center justify-center">
                         <span>{act.code || act.name}</span>
                         {isWeekly && (
-                          <span className="text-[9px] font-bold tracking-wider uppercase text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1 py-0.5 rounded leading-none mt-0.5 shadow-2xs">
-                            Weekly
+                          <span className="text-[9px] font-bold tracking-wider uppercase text-[#664b28] bg-[#FAF2E1] border border-[#cfbeaa] px-1 py-0.5 rounded-none leading-none mt-0.5 shadow-[0.5px_0.5px_0px_#baa892]">
+                            WEEKLY
                           </span>
                         )}
                       </div>
                     </TableHead>
                   );
                 })}
-                <TableHead className="text-right w-[110px] font-semibold text-xs text-slate-900">
-                  Progress
+                <TableHead className="text-right w-[110px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                  PROGRESS
                 </TableHead>
-                <TableHead className="w-[50px] text-right pr-4 font-semibold text-xs text-slate-900">
-                  Actions
+                <TableHead className="w-[50px] text-right pr-4 font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                  ACTION
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-slate-100">
+            <TableBody className="divide-y divide-[#eee7dc]">
               {sortedAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={initialData.activities.length + 3}
-                    className="text-center py-12 text-xs text-slate-400"
+                    className="text-center py-12 text-xs text-[#8a7b68]"
                   >
                     No accounts found matching current filters.
                   </TableCell>
@@ -588,8 +589,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                     <TableRow
                       key={acc.id}
                       className={cn(
-                        "hover:bg-slate-50/60 transition-colors",
-                        isFinished && "bg-emerald-50/15"
+                        "hover:bg-[#FAF6F0] transition-colors",
+                        isFinished && "bg-[#F2FAF4]/70"
                       )}
                     >
                       {/* Account Column */}
@@ -597,11 +598,11 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                         <div className="min-w-0">
                           <Link
                             href={`/accounts/${acc.id}`}
-                            className="text-xs font-bold text-slate-900 hover:underline truncate block"
+                            className="text-xs font-bold text-[#231b12] hover:text-[#3B6EA8] truncate block"
                           >
                             {acc.nickname}
                           </Link>
-                          <p className="text-[10px] text-slate-400 truncate leading-tight mt-0.5">
+                          <p className="text-[10px] text-[#8a7b68] truncate leading-tight mt-0.5">
                             {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
                           </p>
                         </div>
@@ -638,11 +639,15 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       {/* Progress Column */}
                       <TableCell className="text-right py-3">
                         <div className="flex flex-col items-end gap-1">
-                          <span className="text-xs font-semibold text-slate-700">
+                          <span className="text-xs font-bold text-[#231b12] font-mono">
                             {acc.completedCount} / {acc.totalAssigned}
                           </span>
                           <div className="w-16">
-                            <Progress value={acc.progressPercent} className="h-1" />
+                            <Progress
+                              value={acc.progressPercent}
+                              className="h-1.5 bg-[#f0eae1]"
+                              indicatorColor={acc.progressPercent === 100 ? "bg-[#347A46]" : "bg-[#3B6EA8]"}
+                            />
                           </div>
                         </div>
                       </TableCell>
@@ -651,28 +656,28 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       <TableCell className="text-right py-3 pr-4">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-800">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-[#8a7b68] hover:text-[#231b12]">
                               <MoreHorizontal className="w-3.5 h-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40 text-xs">
+                          <DropdownMenuContent align="end" className="w-40 text-xs rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[3px_3px_0px_#baa892]">
                             <DropdownMenuItem
                               onClick={() => handleCompleteAccount(acc)}
-                              className="cursor-pointer"
+                              className="cursor-pointer text-[#1E5D2F] hover:bg-[#F2FAF4]"
                             >
-                              <Check className="w-3.5 h-3.5 mr-2 text-emerald-600" />
+                              <Check className="w-3.5 h-3.5 mr-2 text-[#1E5D2F]" />
                               <span>Complete All</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleResetAccount(acc)}
-                              className="cursor-pointer"
+                              className="cursor-pointer text-[#8C580B] hover:bg-[#FFF8EB]"
                             >
-                              <RotateCcw className="w-3.5 h-3.5 mr-2 text-amber-600" />
+                              <RotateCcw className="w-3.5 h-3.5 mr-2 text-[#8C580B]" />
                               <span>Reset Today</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                              <Link href={`/accounts/${acc.id}`} className="cursor-pointer">
-                                <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                              <Link href={`/accounts/${acc.id}`} className="cursor-pointer text-[#2c261e] hover:bg-[#F3ECE0]">
+                                <ExternalLink className="w-3.5 h-3.5 mr-2 text-[#736350]" />
                                 <span>View Account</span>
                               </Link>
                             </DropdownMenuItem>
@@ -704,7 +709,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       {/* MOBILE ACCOUNT-ORIENTED CARD LIST (shown only on mobile < md) */}
       <div className="md:hidden space-y-3">
         {sortedAccounts.length === 0 ? (
-          <div className="p-8 bg-white border border-slate-200/80 rounded-xl text-center text-xs text-slate-400">
+          <div className="p-8 bg-white border border-[#ded5c5] rounded-xs text-center text-xs text-[#8a7b68]">
             No accounts found matching filters.
           </div>
         ) : (
@@ -717,8 +722,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               <div
                 key={acc.id}
                 className={cn(
-                  "bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs space-y-3",
-                  isFinished && "border-emerald-200 bg-emerald-50/10"
+                  "bg-white border-2 border-[#cfbeaa] rounded-xs p-4 shadow-[2px_2px_0px_#dfd5c5] space-y-3",
+                  isFinished && "bg-[#F2FAF4]/80 border-[#a3ddb4]"
                 )}
               >
                 {/* Account Header */}
@@ -726,27 +731,31 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                   <div>
                     <Link
                       href={`/accounts/${acc.id}`}
-                      className="text-xs font-bold text-slate-900 hover:underline"
+                      className="text-xs font-bold text-[#231b12] hover:text-[#3B6EA8]"
                     >
                       {acc.nickname}
                     </Link>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
+                    <p className="text-[11px] text-[#8a7b68] mt-0.5">
                       {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
                     </p>
                   </div>
 
                   <div className="text-right">
-                    <span className="text-xs font-bold text-slate-900">
+                    <span className="text-xs font-bold text-[#231b12] font-mono">
                       {acc.completedCount} / {acc.totalAssigned}
                     </span>
                     <div className="w-16 mt-1">
-                      <Progress value={acc.progressPercent} className="h-1" />
+                      <Progress
+                        value={acc.progressPercent}
+                        className="h-1.5 bg-[#f0eae1]"
+                        indicatorColor={acc.progressPercent === 100 ? "bg-[#347A46]" : "bg-[#3B6EA8]"}
+                      />
                     </div>
                   </div>
                 </div>
 
                 {/* Vertical Activities Checklist */}
-                <div className="pt-2 border-t border-slate-100 space-y-2">
+                <div className="pt-2 border-t border-[#eee7dc] space-y-2">
                   {initialData.activities.map((act) => {
                     const isAssigned = acc.assignedActivityIds.includes(act.id);
                     if (!isAssigned) return null;
@@ -757,10 +766,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       <div
                         key={act.id}
                         onClick={() => handleToggle(acc.id, act.id, !isCompleted)}
-                        className={`flex items-center justify-between p-2 rounded-lg text-xs cursor-pointer select-none transition-colors ${
+                        className={`flex items-center justify-between p-2 rounded-xs text-xs cursor-pointer select-none transition-colors ${
                           isCompleted
-                            ? "bg-slate-50 text-slate-900 font-medium"
-                            : "text-slate-600 hover:bg-slate-50/50"
+                            ? "bg-[#F3ECE0] text-[#231b12] font-medium"
+                            : "text-[#5c4e3b] hover:bg-[#FAF6F0]"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
@@ -774,12 +783,12 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                           />
                           <span>{act.name}</span>
                           {act.activityType === "WEEKLY" && (
-                            <span className="text-[9px] font-bold uppercase text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1 py-0.2 rounded">
+                            <span className="text-[9px] font-bold uppercase text-[#664b28] bg-[#FAF2E1] border border-[#cfbeaa] px-1 py-0.2 rounded-none font-pixel">
                               Weekly
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] font-mono text-slate-400 uppercase">
+                        <span className="text-[10px] font-mono text-[#8a7b68] uppercase">
                           {act.code}
                         </span>
                       </div>

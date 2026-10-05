@@ -74,55 +74,59 @@ export function BillingSettingsView({
     <div className="space-y-6">
       {/* Pending Approval Notice */}
       {!isPro && billingRequest?.status === "PENDING" && (
-        <div className="p-4 rounded-xl border border-amber-200/80 bg-amber-50/70 text-amber-900 shadow-2xs flex items-start gap-3">
-          <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FFF8EB] text-[#8C580B] shadow-[2px_2px_0px_#e5ddd0] flex items-start gap-3">
+          <Clock className="w-5 h-5 text-[#8C580B] shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C580B] font-pixel">
               Upgrade Request Pending Approval
             </h4>
-            <p className="text-xs text-amber-700 leading-relaxed">
-              Your request to upgrade to the <strong>Pro Plan ($9/mo)</strong> has been submitted to the administrator. Once approved, your account limit will be automatically unlocked to 100 tuyul accounts.
+            <p className="text-xs text-[#8C580B] leading-relaxed">
+              Your request to upgrade to the <strong>Pro Plan ($9/mo)</strong> has been submitted to the administrator. Once approved, your account limit will be automatically unlocked to 100 character accounts.
             </p>
           </div>
         </div>
       )}
 
       {/* Current Plan Overview */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-2xs space-y-5">
+      <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 shadow-[3px_3px_0px_#baa892] space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-slate-900">{plan.name} Plan</h2>
+              <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wider uppercase">{plan.name} Plan</h2>
               <span
-                className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-none font-pixel ${
                   isPro
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-700 border border-slate-200"
+                    ? "bg-[#3B6EA8] text-white shadow-[0.5px_0.5px_0px_#1e3b60]"
+                    : "bg-[#FAF2E1] text-[#664b28] border border-[#cfbeaa]"
                 }`}
               >
                 Current
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">{plan.description}</p>
+            <p className="text-xs text-[#736350] mt-1">{plan.description}</p>
           </div>
 
           <div className="text-left sm:text-right">
-            <span className="text-2xl font-bold text-slate-900">{plan.price}</span>
-            <span className="text-xs text-slate-500"> / {plan.billingPeriod}</span>
+            <span className="text-2xl font-bold text-[#231b12]">{plan.price}</span>
+            <span className="text-xs text-[#736350]"> / {plan.billingPeriod}</span>
           </div>
         </div>
 
         {/* Usage Progress */}
-        <div className="p-4 bg-slate-50 border border-slate-100 rounded-lg space-y-2">
+        <div className="p-4 bg-white border border-[#cfc3b0] rounded-xs space-y-2 shadow-[1px_1px_0px_#e5ddd0]">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-700">Account Usage</span>
-            <span className="font-medium text-slate-900">
+            <span className="font-semibold text-[#5c4e3b]">Account Usage</span>
+            <span className="font-mono font-bold text-[#231b12]">
               {count} of {limit} accounts ({usagePercent}%)
             </span>
           </div>
-          <Progress value={usagePercent} className="h-2" />
+          <Progress
+            value={usagePercent}
+            className="h-2.5 bg-[#f0eae1]"
+            indicatorColor={usagePercent >= 100 ? "bg-[#A82A1E]" : "bg-[#3B6EA8]"}
+          />
           {count >= limit && (
-            <p className="text-[11px] text-amber-700 font-medium pt-1">
+            <p className="text-[11px] text-[#A82A1E] font-medium pt-1">
               You have reached the maximum account limit for the {plan.name} plan.
             </p>
           )}
@@ -130,15 +134,15 @@ export function BillingSettingsView({
 
         {!isPro && (
           <div className="pt-2 flex items-center justify-between">
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-[#736350]">
               Need to manage more characters? Upgrade to unlock 100 accounts.
             </span>
             <Button
               onClick={() => setUpgradeModalOpen(true)}
               disabled={billingRequest?.status === "PENDING"}
-              className="bg-slate-900 hover:bg-slate-800 text-white text-xs gap-1.5"
+              className="text-xs gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-300" />
+              <Sparkles className="w-3.5 h-3.5 text-[#FDEECA]" />
               <span>
                 {billingRequest?.status === "PENDING"
                   ? "Upgrade Pending..."
@@ -150,14 +154,14 @@ export function BillingSettingsView({
       </div>
 
       {/* Plan Features */}
-      <div className="bg-white border border-slate-200/80 rounded-xl p-6 shadow-2xs space-y-4">
-        <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider text-slate-400">
+      <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 shadow-[3px_3px_0px_#baa892] space-y-4">
+        <h3 className="text-xs font-bold text-[#5a4c3a] uppercase tracking-wider font-pixel">
           Plan Capabilities
         </h3>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-slate-600">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-[#5c4e3b]">
           {plan.features.map((f, i) => (
             <li key={i} className="flex items-center gap-2">
-              <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+              <Check className="w-4 h-4 text-[#1E5D2F] shrink-0 stroke-[2.5]" />
               <span>{f}</span>
             </li>
           ))}

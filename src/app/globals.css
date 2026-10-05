@@ -1,27 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    --background: 210 40% 98.5%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    /* Dituyulin Pixel-Fantasy Palette (Light Mode Only) */
+    --background: 40 25% 97.5%;     /* #FAF8F5 Warm Parchment/Soft Cream */
+    --foreground: 220 28% 16%;     /* #1E2738 Deep Retro Ink Slate */
+    
+    --card: 0 0% 100%;             /* Crisp White Panels */
+    --card-foreground: 220 28% 16%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 94%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 90%;
-    --input: 214.3 31.8% 90%;
-    --ring: 222 47% 11%;
-    --radius: 0.5rem;
+    --popover-foreground: 220 28% 16%;
+    
+    --primary: 217 88% 46%;        /* #0F62FE Classic Adventurer Sky/Royal Blue */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 38 25% 93%;       /* #F4EEE7 Warm Muted Parchment */
+    --secondary-foreground: 220 28% 16%;
+    
+    --muted: 36 20% 92%;           /* #ECE5DC Soft Warm Gray */
+    --muted-foreground: 218 16% 45%;/* #64748B Balanced Subtitle */
+    
+    --accent: 145 65% 42%;         /* #10B981 Field Nature Green */
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 350 82% 56%;    /* #F43F5E Soft Brick Red */
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 35 20% 86%;          /* #E2DCD5 Warm Crisp Border */
+    --input: 35 20% 86%;
+    --ring: 217 88% 46%;
+    
+    --radius: 0.25rem;             /* 4px Sharper/Pixel-inspired corners */
   }
 
   * {
@@ -56,48 +67,88 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 6px);
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
 }
 
-/* Minimal Modern SaaS Scrollbar */
+/* Pixel Typography Utility */
+.font-pixel {
+  font-family: 'Pixelify Sans', cursive, monospace, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Pixel-Grid Background (Ultra subtle 16px retro pattern) */
+.pixel-grid-bg {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.22) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Pixel Fantasy UI Panels */
+.rpg-panel {
+  background-color: #ffffff;
+  border: 1.5px solid #d4cdc5;
+  box-shadow: 2px 2px 0px rgba(30, 41, 59, 0.08);
+  border-radius: 4px;
+}
+
+.rpg-panel-header {
+  background-color: #f7f3ee;
+  border-bottom: 1.5px solid #e2dcd5;
+}
+
+/* Retro RPG Button Styling */
+.pixel-btn-primary {
+  border: 1.5px solid #0f172a;
+  box-shadow: 2px 2px 0px #0f172a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.pixel-btn-primary:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #0f172a;
+}
+.pixel-btn-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px #0f172a;
+}
+
+.pixel-btn-secondary {
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 1.5px 1.5px 0px #94a3b8;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.pixel-btn-secondary:hover {
+  border-color: #94a3b8;
+  transform: translate(-1px, -1px);
+  box-shadow: 2.5px 2.5px 0px #94a3b8;
+}
+.pixel-btn-secondary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 0.5px 0.5px 0px #94a3b8;
+}
+
+/* Minimal Retro Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1ede8;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-  border-radius: 9999px;
+  background: #cbd5e1;
+  border-radius: 2px;
+  border: 1px solid #94a3b8;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: #94a3b8;
 }
 
-/* Subtle Card Glow & Elevation */
-.saas-card {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border) / 0.85);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.saas-card:hover {
-  border-color: hsl(var(--border));
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.03);
-}
-
-/* Checkbox Animation */
+/* Fast Pixel Checkbox Animation */
 .checkbox-interactive {
-  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.1s ease, background-color 0.1s ease, border-color 0.1s ease;
 }
 .checkbox-interactive:active {
-  transform: scale(0.88);
-}
-.checkbox-interactive:hover {
-  transform: scale(1.08);
+  transform: scale(0.92);
 }
