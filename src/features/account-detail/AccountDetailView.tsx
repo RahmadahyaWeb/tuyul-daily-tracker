@@ -176,7 +176,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       {/* Top Breadcrumb & Back button */}
       <div>
         <Link

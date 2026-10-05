@@ -95,7 +95,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   };
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
         <div>

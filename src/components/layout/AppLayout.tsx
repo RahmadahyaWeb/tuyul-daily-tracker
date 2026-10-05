@@ -55,7 +55,7 @@ export function AppLayout({ children, user }: AppLayoutProps) {
 
         {/* Dynamic Page Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-slate-50">
-          <div className="w-full max-w-[1500px] mx-auto">{children}</div>
+          <div className="w-full">{children}</div>
         </main>
       </div>
     </div>

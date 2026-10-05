@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RootLoading() {
   return (
-    <div className="min-h-screen flex flex-col p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="min-h-screen flex flex-col p-6 space-y-6 w-full">
       {/* Header skeleton */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-200/60">
         <div className="space-y-2">

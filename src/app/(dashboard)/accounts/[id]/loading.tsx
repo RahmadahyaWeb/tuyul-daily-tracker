@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AccountDetailLoading() {
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       {/* Back button & Profile Hero Card Skeleton */}
       <div className="space-y-3">
         <Skeleton className="h-4 w-28" />
