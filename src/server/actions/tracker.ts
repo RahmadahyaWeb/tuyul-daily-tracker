@@ -2,6 +2,7 @@
 
 import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { getWeekDays } from "@/lib/date-utils";
 
 export async function toggleActivityLog(
   accountId: string,
@@ -20,18 +21,47 @@ export async function toggleActivityLog(
       return { success: false, error: "Account not found or access denied" };
     }
 
-    const id = `${accountId}_${activityId}_${activityDate}`;
-    const now = completed ? new Date().toISOString() : null;
+    const actRes = await sql`SELECT activity_type FROM activities WHERE id = ${activityId} LIMIT 1;`;
+    const isWeekly = actRes[0]?.activity_type === "WEEKLY";
 
-    await sql`
-      INSERT INTO activity_logs (id, account_id, activity_id, activity_date, is_completed, completed_at, updated_at)
-      VALUES (${id}, ${accountId}, ${activityId}, ${activityDate}, ${completed}, ${now}, NOW())
-      ON CONFLICT (account_id, activity_id, activity_date)
-      DO UPDATE SET
-        is_completed = ${completed},
-        completed_at = ${now},
-        updated_at = NOW();
-    `;
+    if (isWeekly) {
+      const weekDays = getWeekDays(activityDate);
+      const mondayStr = weekDays[0].dateStr;
+      const sundayStr = weekDays[6].dateStr;
+
+      if (completed) {
+        const id = `${accountId}_${activityId}_${activityDate}`;
+        const now = new Date().toISOString();
+        await sql`
+          INSERT INTO activity_logs (id, account_id, activity_id, activity_date, is_completed, completed_at, updated_at)
+          VALUES (${id}, ${accountId}, ${activityId}, ${activityDate}, TRUE, ${now}, NOW())
+          ON CONFLICT (account_id, activity_id, activity_date)
+          DO UPDATE SET is_completed = TRUE, completed_at = ${now}, updated_at = NOW();
+        `;
+      } else {
+        await sql`
+          UPDATE activity_logs
+          SET is_completed = FALSE, updated_at = NOW()
+          WHERE account_id = ${accountId}
+            AND activity_id = ${activityId}
+            AND activity_date >= ${mondayStr}
+            AND activity_date <= ${sundayStr};
+        `;
+      }
+    } else {
+      const id = `${accountId}_${activityId}_${activityDate}`;
+      const now = completed ? new Date().toISOString() : null;
+
+      await sql`
+        INSERT INTO activity_logs (id, account_id, activity_id, activity_date, is_completed, completed_at, updated_at)
+        VALUES (${id}, ${accountId}, ${activityId}, ${activityDate}, ${completed}, ${now}, NOW())
+        ON CONFLICT (account_id, activity_id, activity_date)
+        DO UPDATE SET
+          is_completed = ${completed},
+          completed_at = ${now},
+          updated_at = NOW();
+      `;
+    }
 
     return { success: true };
   } catch (error) {

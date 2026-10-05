@@ -33,6 +33,7 @@ export const activitySchema = z.object({
     .min(1, "Activity code is required")
     .max(20, "Maximum 20 characters")
     .toUpperCase(),
+  activityType: z.enum(["DAILY", "WEEKLY"]).default("DAILY"),
   sortOrder: z.coerce.number().int().default(0),
   isActive: z.boolean().default(true),
 });

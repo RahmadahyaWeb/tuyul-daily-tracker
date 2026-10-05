@@ -70,6 +70,7 @@ async function init() {
       user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
       code TEXT NOT NULL,
+      activity_type TEXT NOT NULL DEFAULT 'DAILY',
       sort_order INT DEFAULT 0,
       is_active BOOLEAN DEFAULT TRUE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

@@ -37,6 +37,7 @@ interface ActivityItem {
   id: string;
   name: string;
   code: string;
+  activityType?: "DAILY" | "WEEKLY";
   sortOrder: number;
   isActive: boolean;
   _count?: {
@@ -62,6 +63,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   const [formData, setFormData] = useState({
     name: "",
     code: "",
+    activityType: "DAILY" as "DAILY" | "WEEKLY",
     sortOrder: 0,
     isActive: true,
   });
@@ -79,6 +81,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
     setFormData({
       name: "",
       code: "",
+      activityType: "DAILY",
       sortOrder: activities.length,
       isActive: true,
     });
@@ -91,6 +94,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
     setFormData({
       name: act.name,
       code: act.code,
+      activityType: act.activityType || "DAILY",
       sortOrder: act.sortOrder,
       isActive: act.isActive,
     });
@@ -118,6 +122,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           id: editingActivity.id,
           name: formData.name,
           code: formData.code,
+          activityType: formData.activityType,
           sortOrder: Number(formData.sortOrder),
           isActive: formData.isActive,
         });
@@ -126,6 +131,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
         const res = await createActivity({
           name: formData.name,
           code: formData.code,
+          activityType: formData.activityType,
           sortOrder: Number(formData.sortOrder),
           isActive: formData.isActive,
         });
@@ -209,6 +215,9 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                   Short Code
                 </TableHead>
                 <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
+                  Type
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
                   Assigned Characters
                 </TableHead>
                 <TableHead className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
@@ -224,7 +233,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
               {activities.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="h-28 text-center text-xs text-slate-400 py-6"
                   >
                     No activities configured yet. Click &quot;Add Activity&quot; to create one.
@@ -268,6 +277,18 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                       <Badge variant="outline" className="font-mono text-[10px] py-0 px-2 font-bold text-slate-700 bg-slate-50">
                         {act.code}
                       </Badge>
+                    </TableCell>
+
+                    <TableCell className="py-2.5">
+                      <span
+                        className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          act.activityType === "WEEKLY"
+                            ? "bg-indigo-50 text-indigo-700 border border-indigo-200/80"
+                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                        }`}
+                      >
+                        {act.activityType === "WEEKLY" ? "Weekly" : "Daily"}
+                      </span>
                     </TableCell>
 
                     <TableCell className="text-xs text-slate-500 py-2.5">
@@ -358,6 +379,30 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
             error={formErrors.code}
             placeholder="e.g. MH600"
           />
+
+          <div className="space-y-1.5 pt-1">
+            <label className="text-xs font-semibold text-slate-700 block">
+              Schedule Type
+            </label>
+            <select
+              value={formData.activityType}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  activityType: e.target.value as "DAILY" | "WEEKLY",
+                })
+              }
+              className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+            >
+              <option value="DAILY">Daily Checklist (Repeats everyday)</option>
+              <option value="WEEKLY">Weekly Task (Once per week, reset every Monday)</option>
+            </select>
+            <p className="text-[10px] text-slate-400">
+              {formData.activityType === "WEEKLY"
+                ? "Once checked on any day of the week, it stays completed for the entire week."
+                : "Resets every day at 00:00."}
+            </p>
+          </div>
 
           <div className="flex items-center gap-2 pt-1">
             <Checkbox

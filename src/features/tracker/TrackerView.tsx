@@ -507,14 +507,29 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 <TableHead className="w-[180px] font-semibold text-xs text-slate-900">
                   Account
                 </TableHead>
-                {initialData.activities.map((act) => (
-                  <TableHead
-                    key={act.id}
-                    className="text-center font-semibold text-xs text-slate-700 min-w-[72px]"
-                  >
-                    {act.code || act.name}
-                  </TableHead>
-                ))}
+                {initialData.activities.map((act) => {
+                  const isWeekly = act.activityType === "WEEKLY";
+                  return (
+                    <TableHead
+                      key={act.id}
+                      className="text-center font-semibold text-xs text-slate-700 min-w-[76px] py-2"
+                      title={
+                        isWeekly
+                          ? `${act.name} (Weekly Task — Reset every Monday)`
+                          : `${act.name} (Daily Task)`
+                      }
+                    >
+                      <div className="flex flex-col items-center justify-center">
+                        <span>{act.code || act.name}</span>
+                        {isWeekly && (
+                          <span className="text-[9px] font-bold tracking-wider uppercase text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1 py-0.5 rounded leading-none mt-0.5 shadow-2xs">
+                            Weekly
+                          </span>
+                        )}
+                      </div>
+                    </TableHead>
+                  );
+                })}
                 <TableHead className="text-right w-[110px] font-semibold text-xs text-slate-900">
                   Progress
                 </TableHead>
@@ -711,6 +726,11 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                             aria-label={`Toggle ${act.name}`}
                           />
                           <span>{act.name}</span>
+                          {act.activityType === "WEEKLY" && (
+                            <span className="text-[9px] font-bold uppercase text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1 py-0.2 rounded">
+                              Weekly
+                            </span>
+                          )}
                         </div>
                         <span className="text-[10px] font-mono text-slate-400 uppercase">
                           {act.code}

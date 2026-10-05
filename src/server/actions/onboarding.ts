@@ -58,19 +58,19 @@ export async function completeOnboardingAction(formData: FormData) {
 
     if (userActivities.length === 0) {
       const defaultActivities = [
-        { id: crypto.randomUUID(), name: "Monster Hunt 600", code: "MH600", sortOrder: 0 },
-        { id: crypto.randomUUID(), name: "Monster Hunt 3000", code: "MH3000", sortOrder: 1 },
-        { id: crypto.randomUUID(), name: "Mission Board", code: "MISSION", sortOrder: 2 },
-        { id: crypto.randomUUID(), name: "Guild Daily", code: "GUILD", sortOrder: 3 },
-        { id: crypto.randomUUID(), name: "TC", code: "TC", sortOrder: 4 },
-        { id: crypto.randomUUID(), name: "Arena", code: "ARENA", sortOrder: 5 },
-        { id: crypto.randomUUID(), name: "Final Mirage", code: "FM", sortOrder: 6 },
+        { id: crypto.randomUUID(), name: "Monster Hunt 600", code: "MH600", sortOrder: 0, activityType: "DAILY" },
+        { id: crypto.randomUUID(), name: "Monster Hunt 3000", code: "MH3000", sortOrder: 1, activityType: "DAILY" },
+        { id: crypto.randomUUID(), name: "Mission Board", code: "MISSION", sortOrder: 2, activityType: "DAILY" },
+        { id: crypto.randomUUID(), name: "Guild Daily", code: "GUILD", sortOrder: 3, activityType: "DAILY" },
+        { id: crypto.randomUUID(), name: "TC", code: "TC", sortOrder: 4, activityType: "DAILY" },
+        { id: crypto.randomUUID(), name: "Arena", code: "ARENA", sortOrder: 5, activityType: "DAILY" },
+        { id: crypto.randomUUID(), name: "Final Mirage", code: "FM", sortOrder: 6, activityType: "WEEKLY" },
       ];
 
       for (const act of defaultActivities) {
         await sql`
-          INSERT INTO activities (id, user_id, name, code, sort_order, is_active, created_at, updated_at)
-          VALUES (${act.id}, ${session.id}, ${act.name}, ${act.code}, ${act.sortOrder}, TRUE, NOW(), NOW())
+          INSERT INTO activities (id, user_id, name, code, sort_order, is_active, activity_type, created_at, updated_at)
+          VALUES (${act.id}, ${session.id}, ${act.name}, ${act.code}, ${act.sortOrder}, TRUE, ${act.activityType}, NOW(), NOW())
           ON CONFLICT DO NOTHING;
         `;
       }

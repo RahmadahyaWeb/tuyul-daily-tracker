@@ -158,6 +158,7 @@ export interface TrackerActivityItem {
   id: string;
   name: string;
   code: string;
+  activityType: "DAILY" | "WEEKLY";
   sortOrder: number;
 }
 
@@ -200,9 +201,12 @@ export async function getTrackerData(
   explicitUserId?: string
 ): Promise<TrackerData> {
   const userId = await resolveUserId(explicitUserId);
+  const weekDays = getWeekDays(dateStr);
+  const mondayStr = weekDays[0].dateStr;
+  const sundayStr = weekDays[6].dateStr;
 
   const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
-    sql`SELECT id, name, code, sort_order FROM activities WHERE user_id = ${userId} AND is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
+    sql`SELECT id, name, code, activity_type, sort_order FROM activities WHERE user_id = ${userId} AND is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
     sql`
       SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
       FROM accounts a
@@ -221,7 +225,14 @@ export async function getTrackerData(
       SELECT al.account_id, al.activity_id
       FROM activity_logs al
       JOIN accounts a ON al.account_id = a.id
-      WHERE a.user_id = ${userId} AND al.activity_date = ${dateStr} AND al.is_completed = TRUE;
+      JOIN activities act ON al.activity_id = act.id
+      WHERE a.user_id = ${userId} 
+        AND al.is_completed = TRUE
+        AND (
+          (act.activity_type = 'DAILY' AND al.activity_date = ${dateStr})
+          OR
+          (act.activity_type = 'WEEKLY' AND al.activity_date >= ${mondayStr} AND al.activity_date <= ${sundayStr})
+        );
     `,
   ]);
 
@@ -229,6 +240,7 @@ export async function getTrackerData(
     id: String(a.id),
     name: String(a.name),
     code: String(a.code),
+    activityType: (a.activity_type || "DAILY") as "DAILY" | "WEEKLY",
     sortOrder: Number(a.sort_order),
   }));
 
@@ -588,7 +600,7 @@ export async function getMasterActivities(explicitUserId?: string) {
   const userId = await resolveUserId(explicitUserId);
 
   const [activities, counts] = await (sql as any).transaction([
-    sql`SELECT id, name, code, sort_order, is_active FROM activities WHERE user_id = ${userId} ORDER BY sort_order ASC, created_at ASC;`,
+    sql`SELECT id, name, code, activity_type, sort_order, is_active FROM activities WHERE user_id = ${userId} ORDER BY sort_order ASC, created_at ASC;`,
     sql`
       SELECT aa.activity_id, count(*) as count
       FROM account_activities aa
@@ -607,6 +619,7 @@ export async function getMasterActivities(explicitUserId?: string) {
     id: String(act.id),
     name: String(act.name),
     code: String(act.code),
+    activityType: (act.activity_type || "DAILY") as "DAILY" | "WEEKLY",
     sortOrder: Number(act.sort_order),
     isActive: Boolean(act.is_active),
     _count: {

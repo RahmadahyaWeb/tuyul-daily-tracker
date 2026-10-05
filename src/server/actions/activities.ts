@@ -9,6 +9,7 @@ import crypto from "crypto";
 export async function createActivity(data: {
   name: string;
   code: string;
+  activityType?: "DAILY" | "WEEKLY";
   sortOrder?: number;
   isActive?: boolean;
 }) {
@@ -29,10 +30,11 @@ export async function createActivity(data: {
     const id = crypto.randomUUID();
     const sortOrder = parsed.data.sortOrder ?? 0;
     const isActive = parsed.data.isActive ?? true;
+    const activityType = parsed.data.activityType || "DAILY";
 
     await sql`
-      INSERT INTO activities (id, user_id, name, code, sort_order, is_active)
-      VALUES (${id}, ${session.id}, ${parsed.data.name}, ${parsed.data.code}, ${sortOrder}, ${isActive});
+      INSERT INTO activities (id, user_id, name, code, activity_type, sort_order, is_active)
+      VALUES (${id}, ${session.id}, ${parsed.data.name}, ${parsed.data.code}, ${activityType}, ${sortOrder}, ${isActive});
     `;
 
     revalidatePath("/activities");
@@ -51,6 +53,7 @@ export async function updateActivity(data: {
   id: string;
   name: string;
   code: string;
+  activityType?: "DAILY" | "WEEKLY";
   sortOrder?: number;
   isActive?: boolean;
 }) {
@@ -70,11 +73,13 @@ export async function updateActivity(data: {
 
     const sortOrder = parsed.data.sortOrder ?? 0;
     const isActive = parsed.data.isActive ?? true;
+    const activityType = parsed.data.activityType || "DAILY";
 
     await sql`
       UPDATE activities
       SET name = ${parsed.data.name},
           code = ${parsed.data.code},
+          activity_type = ${activityType},
           sort_order = ${sortOrder},
           is_active = ${isActive},
           updated_at = NOW()
