@@ -10,9 +10,7 @@ import crypto from "crypto";
 export async function createAccount(data: {
   nickname: string;
   username: string;
-  password: string;
   server: string;
-  owner: string;
   job: string;
   level: number;
   startDate: string;
@@ -43,7 +41,6 @@ export async function createAccount(data: {
     }
 
     const id = crypto.randomUUID();
-    const encryptedPassword = encryptPassword(parsed.data.password);
     const startDate = new Date(parsed.data.startDate).toISOString();
     const status = parsed.data.status || "Active";
     const notes = parsed.data.notes || null;
@@ -51,7 +48,7 @@ export async function createAccount(data: {
 
     await sql`
       INSERT INTO accounts (id, user_id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id)
-      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, ${encryptedPassword}, ${parsed.data.server}, ${parsed.data.owner}, ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
+      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, '', ${parsed.data.server}, '', ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
     `;
 
     if (parsed.data.activityIds && parsed.data.activityIds.length > 0) {
@@ -68,6 +65,7 @@ export async function createAccount(data: {
     revalidatePath("/accounts");
     revalidatePath("/tracker");
     revalidatePath("/weekly");
+    revalidatePath("/dashboard");
     revalidatePath("/");
 
     return { success: true };
@@ -81,9 +79,7 @@ export async function updateAccount(data: {
   id: string;
   nickname?: string;
   username?: string;
-  password?: string;
   server?: string;
-  owner?: string;
   job?: string;
   level?: number;
   startDate?: string;
@@ -109,11 +105,7 @@ export async function updateAccount(data: {
 
     const nickname = parsed.data.nickname ?? acc.nickname;
     const username = parsed.data.username ?? acc.username;
-    const password = parsed.data.password && parsed.data.password.trim() !== ""
-      ? encryptPassword(parsed.data.password)
-      : acc.password;
     const server = parsed.data.server ?? acc.server;
-    const owner = parsed.data.owner ?? acc.owner;
     const job = parsed.data.job ?? acc.job;
     const level = parsed.data.level ?? acc.level;
     const startDate = parsed.data.startDate
@@ -127,9 +119,7 @@ export async function updateAccount(data: {
       UPDATE accounts
       SET nickname = ${nickname},
           username = ${username},
-          password = ${password},
           server = ${server},
-          owner = ${owner},
           job = ${job},
           level = ${level},
           start_date = ${startDate},

@@ -56,8 +56,8 @@ export function WeeklyView({
     const q = search.toLowerCase();
     return (
       acc.nickname.toLowerCase().includes(q) ||
-      acc.owner.toLowerCase().includes(q) ||
-      acc.job.toLowerCase().includes(q)
+      acc.job.toLowerCase().includes(q) ||
+      (acc.groupName && acc.groupName.toLowerCase().includes(q))
     );
   });
 

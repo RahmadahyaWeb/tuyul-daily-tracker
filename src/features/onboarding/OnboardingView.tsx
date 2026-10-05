@@ -27,7 +27,6 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
   const [workspaceName, setWorkspaceName] = useState(`${username}'s Workspace`);
   const [nickname, setNickname] = useState("");
   const [accountUsername, setAccountUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [server, setServer] = useState("Prontera-1");
   const [job, setJob] = useState("Assassin Cross");
   const [selectedActivities, setSelectedActivities] = useState<string[]>(
@@ -69,7 +68,6 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
     formData.append("workspaceName", workspaceName);
     formData.append("nickname", nickname);
     formData.append("username", accountUsername);
-    formData.append("password", password);
     formData.append("server", server);
     formData.append("job", job);
     formData.append("activityIds", JSON.stringify(selectedActivities));
@@ -198,15 +196,6 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                     required
                   />
                 </div>
-
-                <Input
-                  label="Password (Optional - Encrypted)"
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Optional game login password"
-                />
               </div>
 
               <div className="pt-4 flex items-center justify-between">

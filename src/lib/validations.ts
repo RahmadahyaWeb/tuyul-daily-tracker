@@ -40,9 +40,7 @@ export const activitySchema = z.object({
 export const accountSchema = z.object({
   nickname: z.string().trim().min(1, "Nickname is required"),
   username: z.string().trim().min(1, "Login username is required"),
-  password: z.string().min(1, "Password is required"),
   server: z.string().trim().min(1, "Server is required"),
-  owner: z.string().trim().min(1, "Owner is required"),
   job: z.string().trim().min(1, "Job / Class is required"),
   level: z.coerce.number().int().min(1).max(999).default(1),
   startDate: z.string().min(1, "Start date is required"),
@@ -54,5 +52,4 @@ export const accountSchema = z.object({
 
 export const accountUpdateSchema = accountSchema.partial().extend({
   id: z.string().min(1),
-  password: z.string().optional(),
 });

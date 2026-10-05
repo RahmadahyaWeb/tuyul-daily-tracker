@@ -7,7 +7,6 @@ import {
   updateAccount,
   deleteAccount,
   toggleAccountStatus,
-  getAccountCredentials,
 } from "@/server/actions/accounts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +55,7 @@ interface AccountItem {
   nickname: string;
   username: string;
   server: string;
-  owner: string;
+  owner?: string;
   job: string;
   level: number;
   startDate: Date;
@@ -102,26 +101,6 @@ export function AccountsView({
   const [editingAccount, setEditingAccount] = useState<AccountItem | null>(null);
   const [planLimitOpen, setPlanLimitOpen] = useState(false);
 
-  // Credentials modal
-  const [credModal, setCredModal] = useState<{
-    isOpen: boolean;
-    nickname: string;
-    username: string;
-    password: string;
-    server: string;
-    isLoading: boolean;
-  }>({
-    isOpen: false,
-    nickname: "",
-    username: "",
-    password: "",
-    server: "",
-    isLoading: false,
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
-
   // Delete modal
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -133,9 +112,7 @@ export function AccountsView({
   const [formData, setFormData] = useState({
     nickname: "",
     username: "",
-    password: "",
     server: "Prontera-1",
-    owner: "",
     job: "",
     level: 1,
     startDate: new Date().toISOString().split("T")[0],
@@ -153,9 +130,7 @@ export function AccountsView({
     setFormData({
       nickname: "",
       username: "",
-      password: "",
       server: "Prontera-1",
-      owner: "",
       job: "",
       level: 1,
       startDate: new Date().toISOString().split("T")[0],
@@ -173,9 +148,7 @@ export function AccountsView({
     setFormData({
       nickname: acc.nickname,
       username: acc.username,
-      password: "",
       server: acc.server,
-      owner: acc.owner,
       job: acc.job,
       level: acc.level,
       startDate: new Date(acc.startDate).toISOString().split("T")[0],
@@ -202,10 +175,6 @@ export function AccountsView({
     const errors: Record<string, string> = {};
     if (!formData.nickname.trim()) errors.nickname = "Nickname is required";
     if (!formData.username.trim()) errors.username = "Username is required";
-    if (!editingAccount && !formData.password.trim()) {
-      errors.password = "Password is required";
-    }
-    if (!formData.owner.trim()) errors.owner = "Owner is required";
     if (!formData.job.trim()) errors.job = "Job is required";
     if (!formData.server.trim()) errors.server = "Server is required";
     if (formData.selectedActivityIds.length === 0) {
@@ -227,7 +196,6 @@ export function AccountsView({
           nickname: formData.nickname,
           username: formData.username,
           server: formData.server,
-          owner: formData.owner,
           job: formData.job,
           level: formData.level,
           startDate: formData.startDate,
@@ -236,9 +204,6 @@ export function AccountsView({
           groupId: formData.groupId || null,
           activityIds: formData.selectedActivityIds,
         };
-        if (formData.password.trim()) {
-          payload.password = formData.password;
-        }
 
         const res = await updateAccount(payload);
         if (!res.success) {
@@ -249,9 +214,7 @@ export function AccountsView({
         const res: any = await createAccount({
           nickname: formData.nickname,
           username: formData.username,
-          password: formData.password,
           server: formData.server,
-          owner: formData.owner,
           job: formData.job,
           level: formData.level,
           startDate: formData.startDate,
@@ -284,38 +247,6 @@ export function AccountsView({
     });
   };
 
-  const handleViewCredentials = async (acc: AccountItem) => {
-    setShowPassword(false);
-    setCredModal({
-      isOpen: true,
-      nickname: acc.nickname,
-      username: acc.username,
-      password: "",
-      server: acc.server,
-      isLoading: true,
-    });
-
-    const res = await getAccountCredentials(acc.id);
-    if (res.success && res.data) {
-      setCredModal({
-        isOpen: true,
-        nickname: acc.nickname,
-        username: res.data.username,
-        password: res.data.password,
-        server: res.data.server,
-        isLoading: false,
-      });
-    } else {
-      setCredModal((prev) => ({ ...prev, isLoading: false }));
-    }
-  };
-
-  const handleCopy = (text: string, field: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
-
   const handleConfirmDelete = async () => {
     if (!deleteDialog.accountId) return;
     try {
@@ -331,7 +262,7 @@ export function AccountsView({
       const match =
         acc.nickname.toLowerCase().includes(q) ||
         acc.username.toLowerCase().includes(q) ||
-        acc.owner.toLowerCase().includes(q) ||
+        (acc.group?.name && acc.group.name.toLowerCase().includes(q)) ||
         acc.job.toLowerCase().includes(q) ||
         acc.server.toLowerCase().includes(q);
       if (!match) return false;
@@ -352,7 +283,7 @@ export function AccountsView({
             Account Management
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Manage Ragnarok character accounts, login credentials, and assigned daily tasks
+            Manage Ragnarok character accounts, groups, and assigned daily tasks
           </p>
         </div>
 
@@ -368,7 +299,7 @@ export function AccountsView({
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search accounts, username, owner..."
+            placeholder="Search accounts, username, group..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs"
@@ -416,9 +347,6 @@ export function AccountsView({
                   Server
                 </TableHead>
                 <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
-                  Owner
-                </TableHead>
-                <TableHead className="text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
                   Group
                 </TableHead>
                 <TableHead className="text-center text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3">
@@ -434,7 +362,7 @@ export function AccountsView({
               {filteredAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={6}
                     className="h-32 text-center text-xs text-slate-400 py-8"
                   >
                     No accounts found.
@@ -471,10 +399,6 @@ export function AccountsView({
                       {acc.server}
                     </TableCell>
 
-                    <TableCell className="text-xs text-slate-600">
-                      {acc.owner}
-                    </TableCell>
-
                     <TableCell className="text-xs text-slate-500">
                       {acc.group?.name ? (
                         <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
@@ -509,10 +433,6 @@ export function AccountsView({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-40">
-                          <DropdownMenuItem onClick={() => handleViewCredentials(acc)}>
-                            <KeyRound className="w-3.5 h-3.5 mr-2" />
-                            <span>Credentials</span>
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleOpenEdit(acc)}>
                             <Edit2 className="w-3.5 h-3.5 mr-2" />
                             <span>Edit Account</span>
@@ -585,13 +505,13 @@ export function AccountsView({
                 placeholder="e.g. Rynzo"
               />
               <Input
-                label="Owner *"
-                value={formData.owner}
+                label="Login Username *"
+                value={formData.username}
                 onChange={(e) =>
-                  setFormData({ ...formData, owner: e.target.value })
+                  setFormData({ ...formData, username: e.target.value })
                 }
-                error={formErrors.owner}
-                placeholder="e.g. Personal"
+                error={formErrors.username}
+                placeholder="Game username"
               />
               <Input
                 label="Job / Class *"
@@ -657,36 +577,6 @@ export function AccountsView({
                   <option value="Finished">Finished</option>
                 </select>
               </div>
-            </div>
-          </div>
-
-          <Separator className="bg-slate-100" />
-
-          {/* Section 2: Credentials */}
-          <div className="space-y-2.5">
-            <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-              Account Credentials
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Input
-                label="Login Username *"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-                error={formErrors.username}
-                placeholder="Username"
-              />
-              <Input
-                label={editingAccount ? "Password (leave blank to keep current)" : "Password *"}
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                error={formErrors.password}
-                placeholder={editingAccount ? "••••••••" : "Password"}
-              />
             </div>
           </div>
 
@@ -780,95 +670,6 @@ export function AccountsView({
             </Button>
           </div>
         </form>
-      </Modal>
-
-      {/* Credentials Modal */}
-      <Modal
-        isOpen={credModal.isOpen}
-        onClose={() => setCredModal((prev) => ({ ...prev, isOpen: false }))}
-        title={`Credentials — ${credModal.nickname}`}
-        maxWidth="sm"
-      >
-        <div className="space-y-4 text-xs">
-          {credModal.isLoading ? (
-            <div className="py-6 text-center text-slate-400">Loading credentials...</div>
-          ) : (
-            <>
-              <div className="space-y-3 bg-slate-50 p-3 rounded-lg border border-slate-200/80">
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Username:</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-semibold text-slate-900">
-                      {credModal.username}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(credModal.username, "username")}
-                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      title="Copy Username"
-                    >
-                      {copiedField === "username" ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Password:</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-semibold text-slate-900">
-                      {showPassword ? credModal.password : "••••••••••••"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      title={showPassword ? "Hide Password" : "Show Password"}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-3.5 h-3.5" />
-                      ) : (
-                        <Eye className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(credModal.password, "password")}
-                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      title="Copy Password"
-                    >
-                      {copiedField === "password" ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500">Server:</span>
-                  <span className="font-semibold text-slate-900">{credModal.server}</span>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setCredModal((prev) => ({ ...prev, isOpen: false }))
-                  }
-                >
-                  Close
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
       </Modal>
 
       {/* Delete Confirmation Dialog */}

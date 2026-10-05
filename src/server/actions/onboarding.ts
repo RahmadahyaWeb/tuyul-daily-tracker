@@ -2,7 +2,6 @@
 
 import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import { encryptPassword } from "@/lib/encryption";
 import { redirect } from "next/navigation";
 import crypto from "crypto";
 
@@ -15,9 +14,7 @@ export async function completeOnboardingAction(formData: FormData) {
   const workspaceName = String(formData.get("workspaceName") || "Personal Workspace").trim();
   const nickname = String(formData.get("nickname") || "").trim();
   const username = String(formData.get("username") || "").trim();
-  const password = String(formData.get("password") || "").trim();
   const server = String(formData.get("server") || "Prontera-1").trim();
-  const owner = String(formData.get("owner") || "Personal").trim();
   const job = String(formData.get("job") || "Novice").trim();
   const activityIdsJson = String(formData.get("activityIds") || "[]");
 
@@ -34,12 +31,11 @@ export async function completeOnboardingAction(formData: FormData) {
 
   try {
     const accountId = crypto.randomUUID();
-    const encryptedPass = encryptPassword(password || "123456");
 
     // 1. Create the first account
     await sql`
       INSERT INTO accounts (id, user_id, nickname, username, password, server, owner, job, level, status, created_at, updated_at)
-      VALUES (${accountId}, ${session.id}, ${nickname}, ${username}, ${encryptedPass}, ${server}, ${owner}, ${job}, 1, 'Active', NOW(), NOW());
+      VALUES (${accountId}, ${session.id}, ${nickname}, ${username}, '', ${server}, '', ${job}, 1, 'Active', NOW(), NOW());
     `;
 
     // 2. Fetch user's activities to link

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   updateAccountNotes,
-  getAccountCredentials,
   toggleAccountStatus,
 } from "@/server/actions/accounts";
 import { Progress } from "@/components/ui/progress";
@@ -32,14 +31,11 @@ import {
   ArrowLeft,
   Copy,
   Check,
-  Eye,
-  EyeOff,
   Save,
-  KeyRound,
-  Shield,
   Activity,
   Calendar,
   FileText,
+  UserCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +46,7 @@ interface AccountDetailProps {
       nickname: string;
       username: string;
       server: string;
-      owner: string;
+      owner?: string;
       job: string;
       level: number;
       startDate: Date;
@@ -88,14 +84,6 @@ export function AccountDetailView({ data }: AccountDetailProps) {
   const [notes, setNotes] = useState(account.notes || "");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
-
-  // Credentials state
-  const [credentials, setCredentials] = useState<{
-    password?: string;
-    loading: boolean;
-    show: boolean;
-    fetched: boolean;
-  }>({ loading: false, show: false, fetched: false });
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Status state
@@ -140,26 +128,6 @@ export function AccountDetailView({ data }: AccountDetailProps) {
       setTimeout(() => setNotesSaved(false), 2000);
     } finally {
       setIsSavingNotes(false);
-    }
-  };
-
-  const handleFetchCredentials = async () => {
-    if (credentials.fetched) {
-      setCredentials((prev) => ({ ...prev, show: !prev.show }));
-      return;
-    }
-
-    setCredentials((prev) => ({ ...prev, loading: true }));
-    const res = await getAccountCredentials(account.id);
-    if (res.success && res.data) {
-      setCredentials({
-        password: res.data.password,
-        loading: false,
-        show: true,
-        fetched: true,
-      });
-    } else {
-      setCredentials((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -217,8 +185,6 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                 <span className="font-medium text-slate-700">{account.job}</span>
                 <span>·</span>
                 <span>Server: <strong className="text-slate-700">{account.server}</strong></span>
-                <span>·</span>
-                <span>Owner: <strong className="text-slate-700">{account.owner}</strong></span>
                 {account.group && (
                   <>
                     <span>·</span>
@@ -282,15 +248,15 @@ export function AccountDetailView({ data }: AccountDetailProps) {
           </CardContent>
         </Card>
 
-        {/* Credentials Card */}
+        {/* Account Information Card */}
         <Card className="saas-card">
           <CardHeader className="p-4 pb-2">
             <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
-              Login Credentials
+              <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+              Account Details
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-2 space-y-3 text-xs">
+          <CardContent className="p-4 pt-2 space-y-2 text-xs">
             <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
               <span className="text-slate-500">Username:</span>
               <div className="flex items-center gap-2">
@@ -312,42 +278,22 @@ export function AccountDetailView({ data }: AccountDetailProps) {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-              <span className="text-slate-500">Password:</span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-semibold text-slate-900">
-                  {credentials.show && credentials.password
-                    ? credentials.password
-                    : "••••••••••••"}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleFetchCredentials}
-                  disabled={credentials.loading}
-                  className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                  title={credentials.show ? "Hide Password" : "Show Password"}
-                >
-                  {credentials.show ? (
-                    <EyeOff className="w-3.5 h-3.5" />
-                  ) : (
-                    <Eye className="w-3.5 h-3.5" />
-                  )}
-                </button>
-                {credentials.password && (
-                  <button
-                    type="button"
-                    onClick={() => handleCopy(credentials.password!, "password")}
-                    className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                    title="Copy Password"
-                  >
-                    {copiedField === "password" ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                )}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/60">
+                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Server</span>
+                <span className="font-medium text-slate-800">{account.server}</span>
               </div>
+              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/60">
+                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Group</span>
+                <span className="font-medium text-slate-800">{account.group?.name || "Ungrouped"}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
+              <span className="text-slate-500">Start Date:</span>
+              <span className="font-medium text-slate-800">
+                {new Date(account.startDate).toLocaleDateString("id-ID", { dateStyle: "medium" })}
+              </span>
             </div>
           </CardContent>
         </Card>
