@@ -42,8 +42,12 @@ export async function requireWorkspace(explicitUserId?: string): Promise<{
   `;
   const accountCount = Number(countRes[0]?.count || 0);
 
-  // Default plan is Free unless role is ADMIN or marked PRO
-  const planType = user.role === "ADMIN" ? "PRO" : "FREE";
+  // Query user plan from database
+  const userPlanRes = await sql`SELECT plan FROM users WHERE id = ${user.id} LIMIT 1;`;
+  const dbPlan = userPlanRes[0]?.plan;
+
+  // Plan is PRO if user role is ADMIN or user plan is PRO in DB
+  const planType = user.role === "ADMIN" || dbPlan === "PRO" ? "PRO" : "FREE";
   const plan = getPlan(planType);
 
   const workspace: Workspace = {

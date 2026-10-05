@@ -15,6 +15,8 @@ import {
   CreditCard,
   Layers,
   ChevronDown,
+  Shield,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/server/actions/auth";
@@ -44,6 +46,11 @@ const managementNavItems = [
   { href: "/accounts", label: "Accounts", icon: Users },
   { href: "/activities", label: "Activities", icon: ListChecks },
   { href: "/groups", label: "Groups", icon: Folder },
+];
+
+const adminNavItems = [
+  { href: "/admin/users", label: "User Management", icon: ShieldAlert },
+  { href: "/admin/billing", label: "Billing Approvals", icon: CreditCard },
 ];
 
 export function Sidebar({ onCloseMobile, user }: SidebarProps) {
@@ -119,6 +126,20 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
           </p>
           {managementNavItems.map(renderLink)}
         </div>
+
+        {/* Admin Console (Only visible to ADMIN role) */}
+        {user?.role === "ADMIN" && (
+          <>
+            <Separator className="bg-slate-100" />
+            <div className="space-y-1">
+              <p className="px-3 pb-1 text-[10px] font-semibold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
+                <Shield className="w-3 h-3" />
+                <span>Admin Console</span>
+              </p>
+              {adminNavItems.map(renderLink)}
+            </div>
+          </>
+        )}
       </nav>
 
       {/* Footer: Workspace & User Dropdown */}
@@ -187,6 +208,19 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
                 <span>Billing</span>
               </Link>
             </DropdownMenuItem>
+
+            {user?.role === "ADMIN" && (
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/admin/users"
+                  onClick={handleNavClick}
+                  className="flex items-center gap-2 text-xs cursor-pointer text-indigo-600 font-medium"
+                >
+                  <Shield className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Admin Console</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
 
             <DropdownMenuSeparator />
 
