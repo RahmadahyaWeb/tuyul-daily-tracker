@@ -1,10 +1,5 @@
-import React from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { PageSkeleton } from "@/components/ui/skeletons";
 
-export default function DashboardLoading() {
-  return (
-    <div className="min-h-[70vh] w-full flex items-center justify-center p-6">
-      <Spinner size="md" />
-    </div>
-  );
+export default function DashboardGroupLoading() {
+  return <PageSkeleton />;
 }

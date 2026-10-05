@@ -11,8 +11,6 @@ import {
   getTodayMakassar,
 } from "@/lib/date-utils";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableHeader,
@@ -21,13 +19,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  Search,
-  CalendarDays,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WeeklyViewProps {
@@ -69,212 +61,243 @@ export function WeeklyView({
     );
   });
 
+  const weekRangeLabel = `${formatDateShort(initialWeekDays[0].dateStr)} – ${formatDateShort(
+    initialWeekDays[6].dateStr
+  )}`;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       {/* Header & Week Controller */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/60">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-200/80">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Weekly Matrix Overview
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            7-day checklist consistency map across all your tuyul characters
-          </p>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">Weekly</h1>
         </div>
 
         {/* Week Navigator */}
-        <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-slate-200/80 shadow-2xs">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-slate-600 hover:text-slate-900"
-            onClick={() => handleWeekNav(-7)}
-            disabled={isPending}
-            title="Previous Week"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-          </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-white border border-slate-200 rounded-lg p-0.5 shadow-2xs">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-slate-600 hover:text-slate-900"
+              onClick={() => handleWeekNav(-7)}
+              disabled={isPending}
+              aria-label="Previous week"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs px-2.5 font-medium text-slate-700 hover:text-slate-900"
-            onClick={handleThisWeek}
-            disabled={isPending}
-          >
-            This Week
-          </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs px-2.5 font-medium text-slate-700"
+              onClick={handleThisWeek}
+              disabled={isPending}
+            >
+              This Week
+            </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-slate-600 hover:text-slate-900"
-            onClick={() => handleWeekNav(7)}
-            disabled={isPending}
-            title="Next Week"
-          >
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-slate-600 hover:text-slate-900"
+              onClick={() => handleWeekNav(7)}
+              disabled={isPending}
+              aria-label="Next week"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
 
-          <div className="h-4 w-px bg-slate-200 mx-0.5" />
-
-          <span className="text-xs font-semibold text-slate-700 px-2">
-            {formatDateShort(initialWeekDays[0].dateStr)} – {formatDateShort(initialWeekDays[6].dateStr)}
-          </span>
+          <div className="text-xs font-semibold text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs">
+            {weekRangeLabel}
+          </div>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="relative w-64">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+      {/* Filter Bar */}
+      <div className="flex items-center justify-between gap-3 p-3 bg-white border border-slate-200/80 rounded-xl shadow-2xs">
+        <div className="relative w-full sm:w-64">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Search character, job..."
+            placeholder="Search accounts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs"
+            className="w-full h-8 pl-8 pr-3 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-900"
           />
         </div>
 
-        {/* Legend */}
-        <div className="hidden sm:flex items-center gap-3 text-[11px] text-slate-500">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span>100% Completed</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-            <span>In Progress</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-slate-300" />
-            <span>Unstarted</span>
-          </div>
-        </div>
+        <span className="text-xs font-medium text-slate-500 shrink-0">
+          {filteredAccounts.length} Accounts
+        </span>
       </div>
 
-      {/* Main Weekly Table */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+      {/* DESKTOP & TABLET MATRIX TABLE (hidden on mobile) */}
+      <div className="hidden md:block bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
-          <Table className="min-w-[700px]">
-            <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+          <Table>
+            <TableHeader className="bg-slate-50/80 border-b border-slate-200">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[220px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4 sticky left-0 z-20 bg-slate-50/90 border-r border-slate-200/60">
-                  Character Account
+                <TableHead className="w-[180px] font-semibold text-xs text-slate-900">
+                  Account
                 </TableHead>
-
                 {initialWeekDays.map((day) => {
                   const isToday = day.dateStr === todayStr;
                   return (
                     <TableHead
                       key={day.dateStr}
                       className={cn(
-                        "text-center min-w-[70px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 px-2",
-                        isToday && "bg-indigo-50/50 text-indigo-700"
+                        "text-center font-semibold text-xs text-slate-700 min-w-[70px]",
+                        isToday && "bg-slate-100 font-bold text-slate-900"
                       )}
                     >
-                      <Link
-                        href={`/tracker?date=${day.dateStr}`}
-                        className="inline-flex flex-col items-center hover:opacity-80 transition-opacity"
-                        title="Open this date in Tracker"
-                      >
-                        <span className="text-[10px] text-slate-400">{day.dayShort}</span>
-                        <span className={cn("text-xs font-semibold", isToday ? "text-indigo-600 font-bold" : "text-slate-800")}>
-                          {day.dateNumber}
-                        </span>
-                      </Link>
+                      <div>{day.dayName}</div>
+                      <div className="text-[10px] font-normal text-slate-400">
+                        {formatDateShort(day.dateStr)}
+                      </div>
                     </TableHead>
                   );
                 })}
               </TableRow>
             </TableHeader>
-
             <TableBody className="divide-y divide-slate-100">
               {filteredAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={8}
-                    className="h-36 text-center text-xs text-slate-400 py-8"
+                    className="text-center py-12 text-xs text-slate-400"
                   >
-                    No accounts found matching your filter.
+                    No accounts found.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAccounts.map((acc) => (
-                  <TableRow
-                    key={acc.id}
-                    className="transition-colors hover:bg-slate-50/60"
-                  >
-                    {/* Sticky Account Column */}
-                    <TableCell className="py-3 pl-4 sticky left-0 z-10 bg-white border-r border-slate-200/60">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar name={acc.nickname} size="sm" />
+                filteredAccounts.map((acc) => {
+                  const dailyMap = new Map(
+                    acc.dailyStatus.map((d) => [d.dateStr, d])
+                  );
+
+                  return (
+                    <TableRow key={acc.id} className="hover:bg-slate-50/60 transition-colors">
+                      <TableCell className="py-3 font-medium">
                         <div className="min-w-0">
                           <Link
                             href={`/accounts/${acc.id}`}
-                            className="font-semibold text-xs text-slate-900 hover:text-indigo-600 hover:underline truncate block"
+                            className="text-xs font-bold text-slate-900 hover:underline truncate block"
                           >
                             {acc.nickname}
                           </Link>
-                          <div className="flex items-center gap-1 text-[10px] text-slate-400 truncate">
-                            <span>{acc.job}</span>
-                            {acc.groupName && (
-                              <>
-                                <span>·</span>
-                                <span className="text-slate-500">{acc.groupName}</span>
-                              </>
-                            )}
-                          </div>
+                          <p className="text-[10px] text-slate-400 truncate leading-tight mt-0.5">
+                            {acc.job}
+                          </p>
                         </div>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    {/* 7 Daily Status Cells */}
-                    {acc.dailyStatus.map((day) => {
-                      const isToday = day.dateStr === todayStr;
+                      {initialWeekDays.map((day) => {
+                        const status = dailyMap.get(day.dateStr) || {
+                          completedCount: 0,
+                          totalAssigned: 0,
+                          status: "NO_TASKS" as const,
+                        };
 
-                      return (
-                        <TableCell
-                          key={day.dateStr}
-                          className={cn(
-                            "text-center p-2 align-middle",
-                            isToday && "bg-indigo-50/20"
-                          )}
-                        >
-                          <Link
-                            href={`/tracker?date=${day.dateStr}`}
-                            className="inline-flex items-center justify-center p-1 rounded-md hover:bg-slate-100 transition-colors"
+                        const isToday = day.dateStr === todayStr;
+
+                        return (
+                          <TableCell
+                            key={day.dateStr}
+                            className={cn("text-center py-3", isToday && "bg-slate-50/50")}
                           >
-                            {day.status === "COMPLETED" && (
-                              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 shadow-2xs">
+                            {status.totalAssigned === 0 ? (
+                              <span className="text-slate-200 font-mono text-xs">-</span>
+                            ) : status.status === "COMPLETED" ? (
+                              <div className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-emerald-50 text-emerald-600">
                                 <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                              </div>
+                            ) : status.status === "PARTIAL" ? (
+                              <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
+                                {status.completedCount}/{status.totalAssigned}
                               </span>
+                            ) : (
+                              <span className="text-slate-300 text-xs">0/{status.totalAssigned}</span>
                             )}
-
-                            {day.status === "PARTIAL" && (
-                              <span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-2xs font-mono">
-                                {day.completedCount}/{day.totalAssigned}
-                              </span>
-                            )}
-
-                            {day.status === "NOT_STARTED" && (
-                              <span className="w-2.5 h-2.5 rounded-full bg-slate-200 inline-block" />
-                            )}
-
-                            {day.status === "NO_TASKS" && (
-                              <span className="text-slate-300 text-xs select-none">—</span>
-                            )}
-                          </Link>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
         </div>
+      </div>
+
+      {/* MOBILE ACCOUNT-ORIENTED WEEK LIST (shown only on mobile < md) */}
+      <div className="md:hidden space-y-3">
+        {filteredAccounts.length === 0 ? (
+          <div className="p-8 bg-white border border-slate-200/80 rounded-xl text-center text-xs text-slate-400">
+            No accounts found.
+          </div>
+        ) : (
+          filteredAccounts.map((acc) => {
+            const dailyMap = new Map(
+              acc.dailyStatus.map((d) => [d.dateStr, d])
+            );
+
+            return (
+              <div
+                key={acc.id}
+                className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Link
+                      href={`/accounts/${acc.id}`}
+                      className="text-xs font-bold text-slate-900 hover:underline"
+                    >
+                      {acc.nickname}
+                    </Link>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{acc.job}</p>
+                  </div>
+                </div>
+
+                {/* 7-day grid */}
+                <div className="grid grid-cols-7 gap-1 pt-2 border-t border-slate-100 text-center">
+                  {initialWeekDays.map((day) => {
+                    const status = dailyMap.get(day.dateStr) || {
+                      completedCount: 0,
+                      totalAssigned: 0,
+                      status: "NO_TASKS" as const,
+                    };
+
+                    return (
+                      <div key={day.dateStr} className="space-y-1">
+                        <span className="text-[10px] font-medium text-slate-400 block">
+                          {day.dayName.slice(0, 3)}
+                        </span>
+                        <div className="flex items-center justify-center h-7">
+                          {status.totalAssigned === 0 ? (
+                            <span className="text-slate-200 text-xs">-</span>
+                          ) : status.status === "COMPLETED" ? (
+                            <span className="w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                              <Check className="w-3 h-3 stroke-[2.5]" />
+                            </span>
+                          ) : status.status === "PARTIAL" ? (
+                            <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1 py-0.5 rounded">
+                              {status.completedCount}
+                            </span>
+                          ) : (
+                            <span className="text-slate-300 text-[10px]">0</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

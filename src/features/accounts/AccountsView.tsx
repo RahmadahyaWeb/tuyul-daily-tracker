@@ -49,6 +49,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PlanLimitDialog } from "@/components/shared/PlanLimitDialog";
 
 interface AccountItem {
   id: string;
@@ -99,6 +100,7 @@ export function AccountsView({
 
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<AccountItem | null>(null);
+  const [planLimitOpen, setPlanLimitOpen] = useState(false);
 
   // Credentials modal
   const [credModal, setCredModal] = useState<{
@@ -244,7 +246,7 @@ export function AccountsView({
           return;
         }
       } else {
-        const res = await createAccount({
+        const res: any = await createAccount({
           nickname: formData.nickname,
           username: formData.username,
           password: formData.password,
@@ -259,6 +261,11 @@ export function AccountsView({
           activityIds: formData.selectedActivityIds,
         });
         if (!res.success) {
+          if (res.planLimitReached) {
+            setFormModalOpen(false);
+            setPlanLimitOpen(true);
+            return;
+          }
           setFormErrors({ form: res.error || "Failed to create account" });
           return;
         }
@@ -873,6 +880,12 @@ export function AccountsView({
         confirmVariant="destructive"
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteDialog({ isOpen: false })}
+      />
+
+      {/* Plan Limit Upgrade Dialog */}
+      <PlanLimitDialog
+        open={planLimitOpen}
+        onOpenChange={setPlanLimitOpen}
       />
     </div>
   );

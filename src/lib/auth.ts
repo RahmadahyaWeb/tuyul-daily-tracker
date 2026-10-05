@@ -124,3 +124,15 @@ export async function getSession(): Promise<SessionUser | null> {
     role: payload.role,
   };
 }
+
+/**
+ * Requires an authenticated user or throws error
+ */
+export async function requireUser(): Promise<SessionUser> {
+  const user = await getSession();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  return user;
+}
+

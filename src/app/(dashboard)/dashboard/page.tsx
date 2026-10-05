@@ -4,7 +4,7 @@ import { getTodayMakassar } from "@/lib/date-utils";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard — Tuyul Tracker",
+  title: "Dashboard",
   description: "Overview of daily tuyul activity progress",
 };
 

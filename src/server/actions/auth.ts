@@ -87,7 +87,7 @@ export async function registerAction(prevState: unknown, formData: FormData) {
     };
   }
 
-  redirect("/");
+  redirect("/onboarding");
 }
 
 export async function loginAction(prevState: unknown, formData: FormData) {
@@ -144,7 +144,7 @@ export async function loginAction(prevState: unknown, formData: FormData) {
     };
   }
 
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function logoutAction() {

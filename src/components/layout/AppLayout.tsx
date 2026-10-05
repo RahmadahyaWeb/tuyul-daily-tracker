@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Menu, Sparkles } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AppLayoutProps {
   children: React.ReactNode;
-  user?: { username: string; role: string } | null;
+  user?: { id?: string; username: string; role: string } | null;
 }
 
 export function AppLayout({ children, user }: AppLayoutProps) {
@@ -24,6 +24,7 @@ export function AppLayout({ children, user }: AppLayoutProps) {
       {/* Mobile Drawer using shadcn Sheet */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetContent side="left" className="p-0 w-[230px] border-r border-slate-200">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <Sidebar onCloseMobile={() => setMobileMenuOpen(false)} user={user} />
         </SheetContent>
       </Sheet>
@@ -31,19 +32,20 @@ export function AppLayout({ children, user }: AppLayoutProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Mobile Header */}
-        <div className="md:hidden h-14 border-b border-slate-200 bg-white px-4 flex items-center justify-between shrink-0 shadow-2xs">
+        <div className="md:hidden h-14 border-b border-slate-200/80 bg-white px-4 flex items-center justify-between shrink-0 shadow-2xs">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setMobileMenuOpen(true)}
             className="h-8 w-8 text-slate-700"
+            aria-label="Open menu"
           >
             <Menu className="w-4 h-4" />
           </Button>
 
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-slate-900 to-indigo-700 flex items-center justify-center text-white">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
+            <div className="w-6 h-6 rounded-md bg-slate-900 flex items-center justify-center text-white text-xs font-bold">
+              T
             </div>
             <span className="font-bold text-xs text-slate-900 tracking-tight">
               Tuyul Tracker

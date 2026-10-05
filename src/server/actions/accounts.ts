@@ -30,6 +30,18 @@ export async function createAccount(data: {
   }
 
   try {
+    // Enforce SaaS plan account limits
+    const { requireWorkspace } = await import("@/lib/workspace");
+    const { workspace } = await requireWorkspace(session.id);
+    if (workspace.accountCount >= workspace.plan.maxAccounts) {
+      return {
+        success: false,
+        error: `Account limit reached. You've reached the ${workspace.plan.maxAccounts}-account limit on the ${workspace.plan.name} plan.`,
+        planLimitReached: true,
+        maxAccounts: workspace.plan.maxAccounts,
+      };
+    }
+
     const id = crypto.randomUUID();
     const encryptedPassword = encryptPassword(parsed.data.password);
     const startDate = new Date(parsed.data.startDate).toISOString();
