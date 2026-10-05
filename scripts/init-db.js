@@ -128,6 +128,8 @@ async function init() {
   await sql`CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities (user_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_account_activities_acc ON account_activities (account_id);`;
   await sql`CREATE INDEX IF NOT EXISTS idx_activities_sort ON activities (sort_order);`;
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_activities_user_code ON activities (user_id, code);`;
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_groups_user_name ON groups (user_id, name);`;
 
   console.log("✅ Tables and indexes ready.");
 
