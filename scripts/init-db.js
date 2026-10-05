@@ -125,18 +125,22 @@ async function init() {
 
   console.log("✅ Tables and indexes ready.");
 
-  // 4. Seed Admin User
-  const adminUsername = process.env.DEFAULT_ADMIN_USERNAME || "admin";
-  const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || "adminpassword123";
-  const hashedPassword = await bcrypt.hash(adminPassword, 10);
-  const adminId = crypto.randomUUID();
+  // 4. Seed Admin User only if users table is empty
+  const existingUsers = await sql`SELECT count(*) as count FROM users;`;
+  if (parseInt(existingUsers[0].count, 10) === 0) {
+    const adminUsername = process.env.DEFAULT_ADMIN_USERNAME || "admin";
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || "adminpassword123";
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const adminId = crypto.randomUUID();
 
-  await sql`
-    INSERT INTO users (id, username, password, role, created_at, updated_at)
-    VALUES (${adminId}, ${adminUsername}, ${hashedPassword}, 'ADMIN', NOW(), NOW())
-    ON CONFLICT (username) DO UPDATE SET password = EXCLUDED.password, updated_at = NOW();
-  `;
-  console.log(`✅ Admin user verified: ${adminUsername}`);
+    await sql`
+      INSERT INTO users (id, username, password, role, created_at, updated_at)
+      VALUES (${adminId}, ${adminUsername}, ${hashedPassword}, 'ADMIN', NOW(), NOW());
+    `;
+    console.log(`✅ Initialized first admin user: ${adminUsername}`);
+  } else {
+    console.log(`ℹ️ Existing user accounts found. Skipping admin seed.`);
+  }
 
   // 5. Seed Master Activities
   const masterActivities = [
