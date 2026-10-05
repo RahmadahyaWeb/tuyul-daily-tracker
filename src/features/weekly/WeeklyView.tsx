@@ -22,6 +22,7 @@ import {
 import { ChevronLeft, ChevronRight, Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface WeeklyViewProps {
   initialWeekDays: ReturnType<typeof getWeekDays>;
@@ -123,9 +124,15 @@ export function WeeklyView({
             </Button>
           </div>
 
-          <div className="text-xs font-semibold text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs">
-            {weekRangeLabel}
-          </div>
+          <DatePicker
+            value={baseDateStr}
+            onChange={(newDate) => {
+              startTransition(() => {
+                router.push(`/weekly?date=${newDate}`);
+              });
+            }}
+            disabled={isPending}
+          />
         </div>
       </div>
 

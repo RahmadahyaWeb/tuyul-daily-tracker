@@ -56,6 +56,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Pagination } from "@/components/ui/pagination";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface TrackerViewProps {
   initialData: TrackerData;
@@ -422,9 +423,11 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             </Button>
           </div>
 
-          <div className="text-xs font-semibold text-slate-700 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs">
-            {formatDateDisplay(currentDate)}
-          </div>
+          <DatePicker
+            value={currentDate}
+            onChange={handleDateChange}
+            disabled={isPending}
+          />
         </div>
       </div>
 
