@@ -21,7 +21,7 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(dateStr: string = getTodayMakassar()): Promise<DashboardStats> {
-  const [accountsRaw, masterActivitiesRaw, assignedRaw, todayLogsRaw] = await Promise.all([
+  const [accountsRaw, masterActivitiesRaw, assignedRaw, todayLogsRaw] = await (sql as any).transaction([
     sql`SELECT id, nickname, owner, job, server, status FROM accounts ORDER BY nickname ASC;`,
     sql`SELECT id FROM activities WHERE is_active = TRUE;`,
     sql`SELECT account_id, activity_id FROM account_activities WHERE is_active = TRUE;`,
@@ -173,7 +173,7 @@ export interface TrackerData {
 }
 
 export async function getTrackerData(dateStr: string = getTodayMakassar()): Promise<TrackerData> {
-  const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await Promise.all([
+  const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
     sql`SELECT id, name, code, sort_order FROM activities WHERE is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
     sql`
       SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
@@ -318,7 +318,7 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
   const startDateStr = weekDays[0].dateStr;
   const endDateStr = weekDays[6].dateStr;
 
-  const [accountsRaw, masterActivitiesRaw, assignedRaw, logsRaw] = await Promise.all([
+  const [accountsRaw, masterActivitiesRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
     sql`
       SELECT a.id, a.nickname, a.server, a.owner, a.job, a.status, g.name as group_name
       FROM accounts a
@@ -417,7 +417,7 @@ export async function getWeeklyData(baseDateStr: string = getTodayMakassar()): P
 }
 
 export async function getAccountsList() {
-  const [accountsRaw, activitiesRaw] = await Promise.all([
+  const [accountsRaw, activitiesRaw] = await (sql as any).transaction([
     sql`
       SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.created_at, a.updated_at, g.name as group_name
       FROM accounts a
@@ -464,7 +464,11 @@ export async function getAccountsList() {
 }
 
 export async function getAccountDetail(id: string) {
-  const [accountRows, activitiesRows, groupRows] = await Promise.all([
+  const todayStr = getTodayMakassar();
+  const last30Days = getLastNDays(30, todayStr);
+  const startDateStr = last30Days[0];
+
+  const [accountRows, activitiesRows, groupRows, logsRaw] = await (sql as any).transaction([
     sql`SELECT * FROM accounts WHERE id = ${id} LIMIT 1;`,
     sql`
       SELECT aa.id, aa.activity_id, aa.is_active, act.name, act.code, act.sort_order
@@ -474,22 +478,18 @@ export async function getAccountDetail(id: string) {
       ORDER BY act.sort_order ASC;
     `,
     sql`SELECT g.id, g.name FROM groups g JOIN accounts a ON a.group_id = g.id WHERE a.id = ${id} LIMIT 1;`,
+    sql`
+      SELECT activity_id, activity_date, is_completed, completed_at
+      FROM activity_logs
+      WHERE account_id = ${id} AND activity_date >= ${startDateStr} AND activity_date <= ${todayStr};
+    `,
   ]);
 
   const accList = accountRows as any[];
   if (accList.length === 0) return null;
   const acc = accList[0];
 
-  const todayStr = getTodayMakassar();
-  const last30Days = getLastNDays(30, todayStr);
-  const startDateStr = last30Days[0];
-
-  const logs = (await sql`
-    SELECT activity_id, activity_date, is_completed, completed_at
-    FROM activity_logs
-    WHERE account_id = ${id} AND activity_date >= ${startDateStr} AND activity_date <= ${todayStr};
-  `) as any[];
-
+  const logs = logsRaw as any[];
   const actList = activitiesRows as any[];
   const grpList = groupRows as any[];
 
@@ -530,7 +530,7 @@ export async function getAccountDetail(id: string) {
 }
 
 export async function getMasterActivities() {
-  const [activities, counts] = await Promise.all([
+  const [activities, counts] = await (sql as any).transaction([
     sql`SELECT id, name, code, sort_order, is_active FROM activities ORDER BY sort_order ASC, created_at ASC;`,
     sql`SELECT activity_id, count(*) as count FROM account_activities GROUP BY activity_id;`,
   ]);
@@ -553,7 +553,7 @@ export async function getMasterActivities() {
 }
 
 export async function getGroups() {
-  const [groups, counts] = await Promise.all([
+  const [groups, counts] = await (sql as any).transaction([
     sql`SELECT id, name, created_at FROM groups ORDER BY name ASC;`,
     sql`SELECT group_id, count(*) as count FROM accounts WHERE group_id IS NOT NULL GROUP BY group_id;`,
   ]);
@@ -572,3 +572,4 @@ export async function getGroups() {
     },
   }));
 }
+

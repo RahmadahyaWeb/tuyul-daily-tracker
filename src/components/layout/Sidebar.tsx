@@ -61,6 +61,7 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               onClick={handleNavClick}
               className={cn(
                 "flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-colors",
