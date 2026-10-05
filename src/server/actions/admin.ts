@@ -3,6 +3,7 @@
 import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 
 async function requireAdmin() {
   const session = await getSession();
@@ -190,3 +191,34 @@ export async function rejectBillingRequestAction(requestId: string) {
     return { success: false, error: "Failed to reject billing request." };
   }
 }
+
+export async function adminResetUserPasswordAction(userId: string, newPassword: string) {
+  await requireAdmin();
+
+  if (!newPassword || newPassword.length < 6) {
+    return { success: false, error: "Password must be at least 6 characters long." };
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const result = await sql`
+      UPDATE users 
+      SET password = ${hashedPassword}, updated_at = NOW() 
+      WHERE id = ${userId}
+      RETURNING id, username;
+    `;
+
+    if (result.length === 0) {
+      return { success: false, error: "User not found." };
+    }
+
+    return {
+      success: true,
+      message: `Password for @${result[0].username} has been reset successfully.`,
+    };
+  } catch (error) {
+    console.error("Failed to reset user password:", error);
+    return { success: false, error: "Failed to reset user password." };
+  }
+}
+

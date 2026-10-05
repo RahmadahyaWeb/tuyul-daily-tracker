@@ -4,6 +4,7 @@ import React, { useState, useTransition } from "react";
 import {
   updateUserPlanAction,
   updateUserRoleAction,
+  adminResetUserPasswordAction,
 } from "@/server/actions/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   Users,
   Shield,
   CreditCard,
@@ -34,6 +43,10 @@ import {
   Calendar,
   Check,
   Sparkles,
+  KeyRound,
+  Eye,
+  EyeOff,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -90,6 +103,47 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
         toast.error(res.error || "Failed to update role");
       }
     });
+  };
+
+  // Reset Password Modal State
+  const [resetModalUser, setResetModalUser] = useState<AdminUserItem | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const generateRandomPassword = () => {
+    const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%";
+    let pwd = "";
+    for (let i = 0; i < 10; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewPassword(pwd);
+    setShowPassword(true);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetModalUser) return;
+    if (!newPassword || newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      const res = await adminResetUserPasswordAction(resetModalUser.id, newPassword);
+      if (res.success) {
+        toast.success(res.message || `Password for @${resetModalUser.username} has been reset.`);
+        setResetModalUser(null);
+        setNewPassword("");
+      } else {
+        toast.error(res.error || "Failed to reset password.");
+      }
+    } catch {
+      toast.error("An unexpected error occurred while resetting password.");
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const filteredUsers = users.filter((u) => {
@@ -382,6 +436,20 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                             <span>Demote to User</span>
                           </DropdownMenuItem>
                         )}
+
+                        <DropdownMenuSeparator />
+
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setResetModalUser(u);
+                            setNewPassword("");
+                            setShowPassword(false);
+                          }}
+                          className="cursor-pointer text-amber-700 hover:text-amber-800 font-medium"
+                        >
+                          <KeyRound className="w-3.5 h-3.5 mr-2 text-amber-600" />
+                          <span>Reset Password</span>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -391,6 +459,101 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
           </TableBody>
         </Table>
       </div>
+
+      {/* Reset Password Dialog */}
+      <Dialog
+        open={!!resetModalUser}
+        onOpenChange={(open) => {
+          if (!open) {
+            setResetModalUser(null);
+            setNewPassword("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
+                <KeyRound className="w-5 h-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-bold text-slate-900">
+                  Reset User Password
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                  Set a new password for <strong className="text-slate-800">@{resetModalUser?.username}</strong>
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <form onSubmit={handleResetPassword} className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-700">
+                  New Password
+                </label>
+                <button
+                  type="button"
+                  onClick={generateRandomPassword}
+                  className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  Generate Random
+                </button>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter at least 6 characters..."
+                  className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 pr-10 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs font-mono"
+                  autoFocus
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                User @{resetModalUser?.username} will immediately be able to log in with this new password.
+              </p>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-slate-100">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setResetModalUser(null)}
+                disabled={isResetting}
+                className="text-xs h-8"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isResetting || !newPassword || newPassword.length < 6}
+                className="text-xs h-8 bg-amber-600 hover:bg-amber-700 text-white font-medium"
+              >
+                {isResetting ? "Updating..." : "Reset Password"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
