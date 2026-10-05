@@ -2,10 +2,10 @@
 
 import React, { useState, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { updateAdminCredentialsAction } from "@/server/actions/auth";
-import { ShieldCheck, KeyRound, User, AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -56,20 +56,20 @@ export function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalPro
       isOpen={isOpen}
       onClose={onClose}
       title="Admin Account Settings"
-      description="Update your administrator username and secure password."
+      description="Update your username and password."
       maxWidth="sm"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2.5 text-xs text-red-700">
-            <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+          <div className="p-2.5 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-destructive" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md flex items-start gap-2.5 text-xs text-emerald-700">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="p-2.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
             <span>{success}</span>
           </div>
         )}
@@ -78,7 +78,7 @@ export function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalPro
           <Input
             label="Current Password *"
             type="password"
-            placeholder="Enter current password"
+            placeholder="Current password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             required
@@ -88,44 +88,41 @@ export function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalPro
           <Input
             label="Username *"
             type="text"
-            placeholder="e.g. rahmadahya_admin"
+            placeholder="Username"
             value={newUsername}
             onChange={(e) => setNewUsername(e.target.value)}
             required
             disabled={isPending}
           />
 
-          <div className="pt-2 border-t border-gray-100">
-            <p className="text-xs text-gray-500 mb-2">
-              Leave password blank if you only want to change your username.
-            </p>
+          <div className="pt-2 border-t border-border space-y-3">
             <Input
               label="New Password"
               type="password"
-              placeholder="Minimum 6 characters"
+              placeholder="Leave blank to keep current"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               disabled={isPending}
             />
-          </div>
 
-          {newPassword && (
-            <Input
-              label="Confirm New Password *"
-              type="password"
-              placeholder="Re-enter new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required={Boolean(newPassword)}
-              disabled={isPending}
-            />
-          )}
+            {newPassword && (
+              <Input
+                label="Confirm New Password *"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required={Boolean(newPassword)}
+                disabled={isPending}
+              />
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={onClose}
             disabled={isPending}
@@ -134,7 +131,6 @@ export function SettingsModal({ isOpen, onClose, currentUser }: SettingsModalPro
           </Button>
           <Button
             type="submit"
-            variant="primary"
             size="sm"
             isLoading={isPending}
           >

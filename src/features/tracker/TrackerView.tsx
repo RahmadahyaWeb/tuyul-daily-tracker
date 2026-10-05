@@ -16,17 +16,24 @@ import {
   formatDateDisplay,
   getTodayMakassar,
 } from "@/lib/date-utils";
-import { Button } from "@/components/ui/Button";
-import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import {
   ChevronLeft,
   ChevronRight,
-  Check,
   RotateCcw,
+  Check,
   Search,
-  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,8 +46,7 @@ type SortOption =
   | "most-progress"
   | "name-asc"
   | "name-desc"
-  | "group"
-  | "default";
+  | "group";
 
 type CompletionFilter = "all" | "completed" | "in-progress" | "not-started";
 
@@ -309,15 +315,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     }
   }, [filteredAccounts, sortBy]);
 
-  // Recalculate summary metrics locally
+  // Summary counts
   const activeList = accounts.filter((a) => a.status === "Active");
-  const totalTasks = activeList.reduce((acc, a) => acc + a.totalAssigned, 0);
-  const completedTasks = activeList.reduce(
-    (acc, a) => acc + a.completedCount,
-    0
-  );
-  const overallPercent =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const completedCountAcc = activeList.filter(
     (a) => a.totalAssigned > 0 && a.completedCount === a.totalAssigned
   ).length;
@@ -326,151 +325,83 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     <div className="space-y-4">
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between">
+        <div className="p-2.5 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center justify-between">
           <span>{errorMessage}</span>
           <button
             onClick={() => setErrorMessage(null)}
-            className="text-red-500 hover:text-red-800 font-bold ml-2"
+            className="text-destructive hover:opacity-80 font-bold ml-2 cursor-pointer"
           >
             ×
           </button>
         </div>
       )}
 
-      {/* Page Header: Title, Date Navigation & Progress Summary */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        {/* Left: Title & Date Controls */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-              Tracker
-            </h1>
-            <p className="text-xs text-gray-500">
-              {formatDateDisplay(currentDate)}
-            </p>
-          </div>
+      {/* Header & Date Navigation */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Tracker
+        </h1>
 
-          <div className="flex items-center gap-1.5 ml-0 sm:ml-2">
-            <div className="flex items-center bg-white border border-gray-200 rounded-md p-0.5 shadow-2xs">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-1.5"
-                onClick={() => handleDateChange(addDays(currentDate, -1))}
-                disabled={isPending}
-                title="Previous Day"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </Button>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleDateChange(addDays(currentDate, -1))}
+            disabled={isPending}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
 
-              <Button
-                variant={isViewingToday ? "secondary" : "ghost"}
-                size="sm"
-                className={cn(
-                  "h-7 px-2.5 text-xs font-medium",
-                  isViewingToday && "bg-blue-50 text-blue-700 border border-blue-200"
-                )}
-                onClick={() => handleDateChange(todayDate)}
-                disabled={isPending || isViewingToday}
-              >
-                Today
-              </Button>
+          <Button
+            variant={isViewingToday ? "secondary" : "outline"}
+            size="sm"
+            className="h-8 text-xs font-medium"
+            onClick={() => handleDateChange(todayDate)}
+            disabled={isPending || isViewingToday}
+          >
+            Today
+          </Button>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-1.5"
-                onClick={() => handleDateChange(addDays(currentDate, 1))}
-                disabled={isPending}
-                title="Next Day"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Button>
-            </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => handleDateChange(addDays(currentDate, 1))}
+            disabled={isPending}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
 
-            <input
-              type="date"
-              value={currentDate}
-              onChange={(e) => {
-                if (e.target.value) handleDateChange(e.target.value);
-              }}
-              disabled={isPending}
-              className="bg-white border border-gray-200 rounded-md px-2 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
-            />
-          </div>
-        </div>
-
-        {/* Right: Progress Metric & Bulk Actions */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Natural Progress Summary */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-500">
-              <span className="font-semibold text-gray-900">
-                {completedCountAcc} of {activeList.length}
-              </span>{" "}
-              accounts completed
-            </span>
-            <div className="w-20">
-              <ProgressBar value={overallPercent} size="sm" />
-            </div>
-            <span className="font-mono font-medium text-gray-700">
-              {overallPercent}%
-            </span>
-          </div>
-
-          <div className="h-4 w-px bg-gray-200 hidden sm:block" />
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleCompleteAll}
-              disabled={isPending || sortedAccounts.length === 0}
-              className="h-8 text-xs font-medium text-gray-700"
-              title="Complete all accounts for today"
-            >
-              Complete All
-            </Button>
-
-            <Button
-              variant="ghost-danger"
-              size="sm"
-              onClick={() =>
-                setConfirmDialog({
-                  isOpen: true,
-                  type: "reset-all",
-                })
-              }
-              disabled={isPending || sortedAccounts.length === 0}
-              className="h-8 text-xs font-medium"
-              title="Reset all checklists for today"
-            >
-              Reset All
-            </Button>
-          </div>
+          <input
+            type="date"
+            value={currentDate}
+            onChange={(e) => {
+              if (e.target.value) handleDateChange(e.target.value);
+            }}
+            disabled={isPending}
+            className="h-8 rounded-md border border-input bg-transparent px-2.5 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
+          />
         </div>
       </div>
 
-      {/* Flat Single Toolbar (Directly above table without big card wrapper) */}
-      <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+      {/* Filters Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search accounts..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-md pl-8 pr-3 py-1.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-blue-500 h-8 shadow-2xs"
+            className="h-8 w-full rounded-md border border-input bg-transparent pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
-        {/* Group Filter */}
         <select
           value={selectedGroup}
           onChange={(e) => setSelectedGroup(e.target.value)}
-          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+          className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
         >
           <option value="all">All Groups</option>
           {initialData.groups.map((g) => (
@@ -480,11 +411,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           ))}
         </select>
 
-        {/* Status Filter */}
         <select
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
-          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+          className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
         >
           <option value="Active">Active</option>
           <option value="Paused">Paused</option>
@@ -492,23 +422,21 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <option value="all">All Status</option>
         </select>
 
-        {/* Progress Filter */}
         <select
           value={completionFilter}
           onChange={(e) => setCompletionFilter(e.target.value as CompletionFilter)}
-          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer"
+          className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
         >
           <option value="all">All Progress</option>
-          <option value="not-started">Not Started (0%)</option>
-          <option value="in-progress">In Progress (1-99%)</option>
-          <option value="completed">Completed (100%)</option>
+          <option value="not-started">Not Started</option>
+          <option value="in-progress">In Progress</option>
+          <option value="completed">Completed</option>
         </select>
 
-        {/* Sort */}
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as SortOption)}
-          className="bg-white border border-gray-200 rounded-md px-2.5 py-1 text-xs text-gray-700 focus:outline-none focus:border-blue-500 h-8 shadow-2xs cursor-pointer font-medium"
+          className="h-8 rounded-md border border-input bg-background px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
         >
           <option value="least-progress">Least Progress</option>
           <option value="most-progress">Most Progress</option>
@@ -518,190 +446,188 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         </select>
       </div>
 
-      {/* Main Table Container */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[760px]">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold sticky top-0 z-20">
-                {/* Sticky Account Header */}
-                <th className="py-2.5 px-3.5 sticky left-0 z-30 bg-gray-50 min-w-[190px] border-r border-gray-200">
-                  Account ({sortedAccounts.length})
-                </th>
-
-                {/* Master Activities Columns */}
-                {initialData.activities.map((act) => (
-                  <th
-                    key={act.id}
-                    className="py-2.5 px-2 text-center min-w-[80px]"
-                  >
-                    <div className="truncate font-medium text-gray-800" title={act.name}>
-                      {act.name}
-                    </div>
-                  </th>
-                ))}
-
-                {/* Progress Column */}
-                <th className="py-2.5 px-3 text-center min-w-[120px]">
-                  Progress
-                </th>
-
-                {/* Actions Column */}
-                <th className="py-2.5 px-2 text-center w-16">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-100 text-xs">
-              {sortedAccounts.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={initialData.activities.length + 3}
-                    className="py-10 text-center text-gray-400"
-                  >
-                    No accounts matching the selected filters.
-                  </td>
-                </tr>
-              ) : (
-                sortedAccounts.map((acc) => {
-                  const is100 = acc.progressPercent === 100;
-
-                  return (
-                    <tr
-                      key={acc.id}
-                      className={cn(
-                        "transition-colors hover:bg-gray-50/80",
-                        is100 && "bg-emerald-50/20"
-                      )}
-                    >
-                      {/* Sticky Account Column */}
-                      <td
-                        className={cn(
-                          "py-2 px-3.5 sticky left-0 z-10 border-r border-gray-200 bg-white transition-colors",
-                          is100 && "bg-emerald-50/30"
-                        )}
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <Link
-                              href={`/accounts/${acc.id}`}
-                              className="font-semibold text-gray-900 hover:text-blue-600 truncate flex items-center gap-1 group"
-                            >
-                              <span>{acc.nickname}</span>
-                              <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-gray-400" />
-                            </Link>
-                            {acc.status !== "Active" && (
-                              <Badge
-                                variant={acc.status === "Paused" ? "warning" : "neutral"}
-                                size="sm"
-                              >
-                                {acc.status}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-gray-500 truncate mt-0.5">
-                            {acc.job} · {acc.server} {acc.groupName && `· ${acc.groupName}`}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Clean Modern Activity Checkboxes */}
-                      {initialData.activities.map((act) => {
-                        const isAssigned = acc.assignedActivityIds.includes(act.id);
-                        const isCompleted = acc.completedActivityIds.includes(act.id);
-
-                        if (!isAssigned) {
-                          return (
-                            <td
-                              key={act.id}
-                              className="py-2 px-2 text-center text-gray-300 select-none"
-                            >
-                              <span>—</span>
-                            </td>
-                          );
-                        }
-
-                        return (
-                          <td
-                            key={act.id}
-                            className="py-2 px-2 text-center"
-                          >
-                            <div className="flex items-center justify-center">
-                              <button
-                                type="button"
-                                onClick={() => handleToggle(acc.id, act.id, isCompleted)}
-                                title={`${acc.nickname}: ${act.name} (${isCompleted ? "Completed" : "Incomplete"})`}
-                                className={cn(
-                                  "w-5 h-5 rounded flex items-center justify-center transition-all cursor-pointer border",
-                                  isCompleted
-                                    ? "bg-blue-600 border-blue-600 text-white shadow-2xs hover:bg-blue-700"
-                                    : "bg-white border-gray-300 text-transparent hover:border-gray-400 hover:bg-gray-50"
-                                )}
-                              >
-                                <Check className={cn("w-3.5 h-3.5 stroke-[2.5]", isCompleted ? "opacity-100" : "opacity-0")} />
-                              </button>
-                            </div>
-                          </td>
-                        );
-                      })}
-
-                      {/* Compact Progress Cell */}
-                      <td className="py-2 px-3 text-center">
-                        <div className="flex flex-col items-center gap-0.5">
-                          <div className="flex items-center justify-between w-full text-[11px] text-gray-600 font-mono">
-                            <span>
-                              {acc.completedCount} / {acc.totalAssigned}
-                            </span>
-                            {is100 ? (
-                              <span className="text-emerald-700 font-bold">✓ 100%</span>
-                            ) : (
-                              <span>{acc.progressPercent}%</span>
-                            )}
-                          </div>
-                          <ProgressBar
-                            value={acc.progressPercent}
-                            size="sm"
-                            showLabel={false}
-                          />
-                        </div>
-                      </td>
-
-                      {/* Action Cell */}
-                      <td className="py-2 px-2 text-center">
-                        <div className="flex items-center justify-center gap-0.5">
-                          <button
-                            type="button"
-                            onClick={() => handleCompleteAccount(acc.id)}
-                            disabled={is100 || acc.totalAssigned === 0}
-                            title="Complete Account"
-                            className="p-1 rounded text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setConfirmDialog({
-                                isOpen: true,
-                                type: "reset-account",
-                                accountId: acc.id,
-                                accountName: acc.nickname,
-                              })
-                            }
-                            disabled={acc.completedCount === 0}
-                            title="Reset Account"
-                            className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+      {/* Sub-header: Count Summary & Actions */}
+      <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+        <div>
+          <span>
+            {activeList.length} Accounts · {completedCountAcc} Completed
+          </span>
         </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={handleCompleteAll}
+            disabled={isPending || sortedAccounts.length === 0}
+          >
+            Complete All
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() =>
+              setConfirmDialog({
+                isOpen: true,
+                type: "reset-all",
+              })
+            }
+            disabled={isPending || sortedAccounts.length === 0}
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          >
+            Reset All
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Tracker Table */}
+      <div className="rounded-md border border-border overflow-hidden bg-background">
+        <Table className="min-w-[720px]">
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="w-[200px] sticky left-0 z-20 bg-background border-r border-border font-medium text-xs">
+                Account
+              </TableHead>
+              {initialData.activities.map((act) => (
+                <TableHead
+                  key={act.id}
+                  className="text-center min-w-[70px] font-medium text-xs px-2"
+                >
+                  {act.code || act.name}
+                </TableHead>
+              ))}
+              <TableHead className="text-center min-w-[110px] font-medium text-xs">
+                Progress
+              </TableHead>
+              <TableHead className="w-16 text-center font-medium text-xs">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {sortedAccounts.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={initialData.activities.length + 3}
+                  className="h-24 text-center text-xs text-muted-foreground"
+                >
+                  No accounts found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              sortedAccounts.map((acc) => {
+                const is100 = acc.progressPercent === 100;
+
+                return (
+                  <TableRow key={acc.id} className="hover:bg-muted/30 transition-colors">
+                    {/* Sticky Account Column */}
+                    <TableCell className="sticky left-0 z-10 bg-background border-r border-border py-2 px-3">
+                      <div className="min-w-0">
+                        <Link
+                          href={`/accounts/${acc.id}`}
+                          className="font-medium text-sm text-foreground hover:underline truncate block"
+                        >
+                          {acc.nickname}
+                        </Link>
+                        <div className="text-xs text-muted-foreground truncate mt-0.5">
+                          {acc.job} · {acc.server} {acc.groupName && `· ${acc.groupName}`}
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    {/* Activity Checkboxes */}
+                    {initialData.activities.map((act) => {
+                      const isAssigned = acc.assignedActivityIds.includes(act.id);
+                      const isCompleted = acc.completedActivityIds.includes(act.id);
+
+                      if (!isAssigned) {
+                        return (
+                          <TableCell
+                            key={act.id}
+                            className="text-center text-muted-foreground/40 select-none py-2 px-2 text-xs"
+                          >
+                            —
+                          </TableCell>
+                        );
+                      }
+
+                      return (
+                        <TableCell
+                          key={act.id}
+                          className="text-center py-2 px-2"
+                        >
+                          <div className="flex items-center justify-center">
+                            <Checkbox
+                              checked={isCompleted}
+                              onCheckedChange={() =>
+                                handleToggle(acc.id, act.id, isCompleted)
+                              }
+                              aria-label={`${acc.nickname} - ${act.name}`}
+                            />
+                          </div>
+                        </TableCell>
+                      );
+                    })}
+
+                    {/* Progress Column */}
+                    <TableCell className="text-center py-2 px-3">
+                      <div className="flex flex-col items-center gap-1 w-full max-w-[120px] mx-auto">
+                        <div className="flex items-center justify-between w-full text-xs text-muted-foreground">
+                          <span>
+                            {acc.completedCount} / {acc.totalAssigned}
+                          </span>
+                          <span className={cn(is100 && "font-medium text-foreground")}>
+                            {acc.progressPercent}%
+                          </span>
+                        </div>
+                        <Progress
+                          value={acc.progressPercent}
+                          className="h-1.5"
+                          indicatorColor={is100 ? "bg-emerald-600" : "bg-primary"}
+                        />
+                      </div>
+                    </TableCell>
+
+                    {/* Row Actions */}
+                    <TableCell className="text-center py-2 px-2">
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleCompleteAccount(acc.id)}
+                          disabled={is100 || acc.totalAssigned === 0}
+                          title="Complete Account"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          onClick={() =>
+                            setConfirmDialog({
+                              isOpen: true,
+                              type: "reset-account",
+                              accountId: acc.id,
+                              accountName: acc.nickname,
+                            })
+                          }
+                          disabled={acc.completedCount === 0}
+                          title="Reset Account"
+                        >
+                          <RotateCcw className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Confirmation Dialog */}
@@ -718,7 +644,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             ? "Reset All Checklists Today?"
             : `Reset Checklist for ${confirmDialog.accountName}?`
         }
-        message={
+        description={
           confirmDialog.type === "reset-all"
             ? `Are you sure you want to reset all activity checks for ALL accounts on ${formatDateDisplay(
                 currentDate
@@ -727,8 +653,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 currentDate
               )}?`
         }
-        confirmText="Reset"
-        cancelText="Cancel"
+        confirmLabel="Reset"
+        cancelLabel="Cancel"
         variant="danger"
         isLoading={dialogLoading}
       />

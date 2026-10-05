@@ -6,11 +6,18 @@ import {
   updateGroup,
   deleteGroup,
 } from "@/server/actions/groups";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { formatDateShort } from "@/lib/date-utils";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 
 interface GroupItem {
@@ -87,132 +94,103 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   };
 
   return (
-    <div className="space-y-4 text-gray-900">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-            Account Groups
-          </h1>
-          <p className="text-xs text-gray-500">
-            Categorize tuyul accounts (e.g. Personal, Client A, Farm Card)
-          </p>
-        </div>
-        <div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleOpenCreate}
-            className="gap-1.5 font-medium"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Group</span>
-          </Button>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Groups
+        </h1>
+        <Button size="sm" onClick={handleOpenCreate}>
+          <Plus className="w-4 h-4 mr-1.5" />
+          <span>Add Group</span>
+        </Button>
       </div>
 
-      {/* Main Table */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[500px]">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold">
-                <th className="py-2.5 px-3.5">Group Name</th>
-                <th className="py-2.5 px-3 text-center">Assigned Accounts</th>
-                <th className="py-2.5 px-3">Created Date</th>
-                <th className="py-2.5 px-3 text-center w-24">Actions</th>
-              </tr>
-            </thead>
+      {/* Main Groups Table */}
+      <div className="rounded-md border border-border overflow-hidden bg-background">
+        <Table className="min-w-[450px]">
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="font-medium text-xs">Name</TableHead>
+              <TableHead className="text-center font-medium text-xs">Accounts</TableHead>
+              <TableHead className="w-20 text-center font-medium text-xs">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
 
-            <tbody className="divide-y divide-gray-100 text-xs">
-              {initialGroups.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-10 text-center text-gray-400">
-                    No groups found. Click &quot;Add Group&quot; to create one.
-                  </td>
-                </tr>
-              ) : (
-                initialGroups.map((g) => (
-                  <tr
-                    key={g.id}
-                    className="hover:bg-gray-50/80 transition-colors"
-                  >
-                    {/* Name */}
-                    <td className="py-2.5 px-3.5 font-semibold text-gray-900">
-                      {g.name}
-                    </td>
-
-                    {/* Count */}
-                    <td className="py-2.5 px-3 text-center text-gray-700 font-mono">
-                      {g._count?.accounts ?? 0}
-                    </td>
-
-                    {/* Created */}
-                    <td className="py-2.5 px-3 text-gray-500">
-                      {formatDateShort(new Date(g.createdAt).toISOString().split("T")[0])}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="py-2.5 px-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(g)}
-                          title="Edit Group"
-                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDeleteDialog({
-                              isOpen: true,
-                              groupId: g.id,
-                              groupName: g.name,
-                            })
-                          }
-                          title="Delete Group"
-                          className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+          <TableBody>
+            {initialGroups.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={3} className="h-24 text-center text-xs text-muted-foreground">
+                  No groups yet.
+                </TableCell>
+              </TableRow>
+            ) : (
+              initialGroups.map((g) => (
+                <TableRow key={g.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-medium text-sm text-foreground">
+                    {g.name}
+                  </TableCell>
+                  <TableCell className="text-center text-xs font-mono text-muted-foreground">
+                    {g._count?.accounts ?? 0}
+                  </TableCell>
+                  <TableCell className="text-center py-2">
+                    <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleOpenEdit(g)}
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() =>
+                          setDeleteDialog({
+                            isOpen: true,
+                            groupId: g.id,
+                            groupName: g.name,
+                          })
+                        }
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Add / Edit Group Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingGroup ? `Edit Group: ${editingGroup.name}` : "Add New Group"}
+        title={editingGroup ? "Edit Group" : "Add Group"}
         maxWidth="sm"
       >
         <form onSubmit={handleSubmit} className="space-y-3 text-xs">
           {error && (
-            <div className="p-2 rounded bg-red-50 border border-red-200 text-red-600">
+            <div className="p-2 rounded bg-destructive/10 text-destructive border border-destructive/20">
               {error}
             </div>
           )}
 
           <Input
-            label="Group Name"
-            required
+            label="Group Name *"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Farm Card / Client A"
+            placeholder="e.g. Farm Card"
           />
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="sm"
               onClick={() => setModalOpen(false)}
               disabled={isSubmitting}
@@ -221,7 +199,6 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
             </Button>
             <Button
               type="submit"
-              variant="primary"
               size="sm"
               isLoading={isSubmitting}
             >
@@ -236,10 +213,10 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false })}
         onConfirm={handleConfirmDelete}
-        title={`Delete Group: ${deleteDialog.groupName}?`}
-        message="Are you sure you want to delete this group? Accounts assigned to this group will become unassigned."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="Delete Group?"
+        description={`Are you sure you want to delete ${deleteDialog.groupName}? Accounts assigned to this group will become unassigned.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
         variant="danger"
       />
     </div>

@@ -6,29 +6,33 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   CheckSquare,
-  Calendar,
+  CalendarDays,
   Users,
-  ListTodo,
-  FolderKanban,
+  ListChecks,
+  Folder,
   LogOut,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/server/actions/auth";
 import { SettingsModal } from "./SettingsModal";
+import { Separator } from "@/components/ui/separator";
 
 interface SidebarProps {
   onCloseMobile?: () => void;
   user?: { username: string; role: string } | null;
 }
 
-const navItems = [
+const mainNavItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/tracker", label: "Tracker", icon: CheckSquare },
-  { href: "/weekly", label: "Weekly", icon: Calendar },
+  { href: "/weekly", label: "Weekly", icon: CalendarDays },
+];
+
+const managementNavItems = [
   { href: "/accounts", label: "Accounts", icon: Users },
-  { href: "/activities", label: "Activities", icon: ListTodo },
-  { href: "/groups", label: "Groups", icon: FolderKanban },
+  { href: "/activities", label: "Activities", icon: ListChecks },
+  { href: "/groups", label: "Groups", icon: Folder },
 ];
 
 export function Sidebar({ onCloseMobile, user }: SidebarProps) {
@@ -39,83 +43,89 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
     if (onCloseMobile) onCloseMobile();
   };
 
+  const renderLink = (item: { href: string; label: string; icon: any }) => {
+    const Icon = item.icon;
+    const isActive =
+      item.href === "/"
+        ? pathname === "/"
+        : pathname === item.href || pathname.startsWith(item.href + "/");
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        prefetch={true}
+        onClick={handleNavClick}
+        className={cn(
+          "flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm transition-colors",
+          isActive
+            ? "bg-accent text-accent-foreground font-medium"
+            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+        )}
+      >
+        <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-foreground" : "text-muted-foreground")} />
+        <span>{item.label}</span>
+      </Link>
+    );
+  };
+
   return (
     <>
-      <aside className="w-[220px] bg-white border-r border-gray-200 flex flex-col h-full select-none">
+      <aside className="w-[220px] bg-background border-r border-border flex flex-col h-full select-none">
         {/* Brand Header */}
-        <div className="h-14 px-4 flex items-center gap-2.5 border-b border-gray-100">
-          <div className="w-6 h-6 rounded-md bg-blue-600 flex items-center justify-center font-bold text-white text-xs tracking-tight">
-            TT
-          </div>
-          <span className="font-semibold text-sm tracking-tight text-gray-900">
+        <div className="h-12 px-4 flex items-center border-b border-border">
+          <span className="font-semibold text-sm tracking-tight text-foreground">
             Tuyul Tracker
           </span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname === item.href || pathname.startsWith(item.href + "/");
+        <nav className="flex-1 px-2.5 py-3 space-y-4 overflow-y-auto">
+          {/* Main Links */}
+          <div className="space-y-0.5">
+            {mainNavItems.map(renderLink)}
+          </div>
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch={true}
-                onClick={handleNavClick}
-                className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-colors",
-                  isActive
-                    ? "bg-blue-50 text-blue-700 font-semibold"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "w-4 h-4 shrink-0",
-                    isActive ? "text-blue-600" : "text-gray-400"
-                  )}
-                />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+          <Separator />
+
+          {/* Management Section */}
+          <div className="space-y-0.5">
+            <p className="px-3 pb-1 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              Management
+            </p>
+            {managementNavItems.map(renderLink)}
+          </div>
         </nav>
 
-        {/* User Info & Actions Footer */}
-        <div className="p-3 border-t border-gray-100 bg-gray-50/50">
-          <div className="flex items-center justify-between px-1 py-1">
+        {/* Footer: User & Logout */}
+        <div className="p-3 border-t border-border">
+          <div className="flex items-center justify-between px-1">
             <button
               type="button"
               onClick={() => setSettingsOpen(true)}
               className="text-left truncate min-w-0 pr-2 hover:opacity-80 transition-opacity cursor-pointer group"
-              title="Click to edit account credentials"
+              title="Edit credentials"
             >
-              <p className="text-xs font-semibold text-gray-800 truncate group-hover:text-blue-600">
+              <p className="text-xs font-medium text-foreground truncate group-hover:underline">
                 {user?.username || "Admin"}
               </p>
-              <p className="text-[11px] text-gray-500">Administrator</p>
             </button>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
                 title="Account Settings"
-                className="p-1.5 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="p-1.5 rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-3.5 h-3.5" />
               </button>
               <form action={logoutAction}>
                 <button
                   type="submit"
                   title="Logout"
-                  className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                  className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                 </button>
               </form>
             </div>
@@ -132,4 +142,5 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
     </>
   );
 }
+
 

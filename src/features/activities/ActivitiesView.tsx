@@ -8,19 +8,26 @@ import {
   deleteActivity,
   reorderActivities,
 } from "@/server/actions/activities";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
-import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/Modal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 import {
   Plus,
   Edit2,
   Trash2,
   ArrowUp,
   ArrowDown,
-  Check,
-  X,
 } from "lucide-react";
 
 interface ActivityItem {
@@ -165,165 +172,147 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   };
 
   return (
-    <div className="space-y-4 text-gray-900">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-            Master Activities
-          </h1>
-          <p className="text-xs text-gray-500">
-            Define daily repeatable checklist activities and display order
-          </p>
-        </div>
-        <div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleOpenCreate}
-            className="gap-1.5 font-medium"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Activity</span>
-          </Button>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Activities
+        </h1>
+        <Button size="sm" onClick={handleOpenCreate}>
+          <Plus className="w-4 h-4 mr-1.5" />
+          <span>Add Activity</span>
+        </Button>
       </div>
 
-      {/* Main Table */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-2xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50 text-gray-600 text-xs font-semibold">
-                <th className="py-2.5 px-3.5 w-16 text-center">Order</th>
-                <th className="py-2.5 px-3">Activity Name</th>
-                <th className="py-2.5 px-3">Code</th>
-                <th className="py-2.5 px-3 text-center">Assigned Accounts</th>
-                <th className="py-2.5 px-3 text-center">Status</th>
-                <th className="py-2.5 px-3 text-center w-28">Actions</th>
-              </tr>
-            </thead>
+      {/* Main Activities Table */}
+      <div className="rounded-md border border-border overflow-hidden bg-background">
+        <Table className="min-w-[550px]">
+          <TableHeader>
+            <TableRow className="bg-muted/40 hover:bg-muted/40">
+              <TableHead className="w-16 text-center font-medium text-xs">Order</TableHead>
+              <TableHead className="font-medium text-xs">Name</TableHead>
+              <TableHead className="font-medium text-xs">Code</TableHead>
+              <TableHead className="text-center font-medium text-xs">Accounts</TableHead>
+              <TableHead className="text-center font-medium text-xs">Status</TableHead>
+              <TableHead className="w-20 text-center font-medium text-xs">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
 
-            <tbody className="divide-y divide-gray-100 text-xs">
-              {activities.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="py-10 text-center text-gray-400">
-                    No activities defined. Click &quot;Add Activity&quot; to create one.
-                  </td>
-                </tr>
-              ) : (
-                activities.map((act, idx) => (
-                  <tr
-                    key={act.id}
-                    className="hover:bg-gray-50/80 transition-colors"
-                  >
-                    {/* Reorder Buttons */}
-                    <td className="py-2 px-3 text-center">
-                      <div className="flex items-center justify-center gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleMove(idx, "up")}
-                          disabled={idx === 0}
-                          title="Move Up"
-                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 cursor-pointer"
-                        >
-                          <ArrowUp className="w-3 h-3" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleMove(idx, "down")}
-                          disabled={idx === activities.length - 1}
-                          title="Move Down"
-                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-20 cursor-pointer"
-                        >
-                          <ArrowDown className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </td>
-
-                    {/* Name */}
-                    <td className="py-2.5 px-3 font-semibold text-gray-900">
-                      {act.name}
-                    </td>
-
-                    {/* Code */}
-                    <td className="py-2.5 px-3 font-mono text-gray-600">
-                      {act.code}
-                    </td>
-
-                    {/* Count */}
-                    <td className="py-2.5 px-3 text-center text-gray-600 font-mono">
-                      {act._count?.accountActivities ?? 0}
-                    </td>
-
-                    {/* Status Toggle */}
-                    <td className="py-2.5 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleStatus(act.id, act.isActive)}
-                        className="cursor-pointer"
+          <TableBody>
+            {activities.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center text-xs text-muted-foreground">
+                  No activities yet.
+                </TableCell>
+              </TableRow>
+            ) : (
+              activities.map((act, idx) => (
+                <TableRow key={act.id} className="hover:bg-muted/30 transition-colors">
+                  {/* Reorder */}
+                  <TableCell className="text-center py-2">
+                    <div className="flex items-center justify-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleMove(idx, "up")}
+                        disabled={idx === 0}
                       >
-                        <Badge
-                          variant={act.isActive ? "success" : "neutral"}
-                          size="sm"
-                        >
-                          {act.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </button>
-                    </td>
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleMove(idx, "down")}
+                        disabled={idx === activities.length - 1}
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
 
-                    {/* Actions */}
-                    <td className="py-2.5 px-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(act)}
-                          title="Edit Activity"
-                          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setDeleteDialog({
-                              isOpen: true,
-                              activityId: act.id,
-                              activityName: act.name,
-                            })
-                          }
-                          title="Delete Activity"
-                          className="p-1 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                  {/* Name */}
+                  <TableCell className="font-medium text-sm text-foreground">
+                    {act.name}
+                  </TableCell>
+
+                  {/* Code */}
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {act.code}
+                  </TableCell>
+
+                  {/* Count */}
+                  <TableCell className="text-center text-xs font-mono text-muted-foreground">
+                    {act._count?.accountActivities ?? 0}
+                  </TableCell>
+
+                  {/* Status */}
+                  <TableCell className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(act.id, act.isActive)}
+                      className="cursor-pointer"
+                    >
+                      <Badge
+                        variant={act.isActive ? "success" : "neutral"}
+                        size="sm"
+                      >
+                        {act.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </button>
+                  </TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="text-center py-2">
+                    <div className="flex items-center justify-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleOpenEdit(act)}
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() =>
+                          setDeleteDialog({
+                            isOpen: true,
+                            activityId: act.id,
+                            activityName: act.name,
+                          })
+                        }
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Add / Edit Activity Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingActivity ? `Edit Activity: ${editingActivity.name}` : "Add Activity"}
+        title={editingActivity ? "Edit Activity" : "Add Activity"}
         maxWidth="sm"
       >
         <form onSubmit={handleSubmit} className="space-y-3 text-xs">
           {formErrors.form && (
-            <div className="p-2 rounded bg-red-50 border border-red-200 text-red-600">
+            <div className="p-2 rounded bg-destructive/10 text-destructive border border-destructive/20">
               {formErrors.form}
             </div>
           )}
 
           <Input
-            label="Activity Name"
-            required
+            label="Activity Name *"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             error={formErrors.name}
@@ -331,8 +320,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           />
 
           <Input
-            label="Short Code"
-            required
+            label="Short Code *"
             value={formData.code}
             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
             error={formErrors.code}
@@ -349,21 +337,19 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           />
 
           <label className="flex items-center gap-2 pt-1 cursor-pointer select-none">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={formData.isActive}
-              onChange={(e) =>
-                setFormData({ ...formData, isActive: e.target.checked })
+              onCheckedChange={(c) =>
+                setFormData({ ...formData, isActive: Boolean(c) })
               }
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <span className="font-medium text-gray-700">Active Activity</span>
+            <span className="text-xs font-medium text-foreground">Active Activity</span>
           </label>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               size="sm"
               onClick={() => setModalOpen(false)}
               disabled={isSubmitting}
@@ -372,7 +358,6 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
             </Button>
             <Button
               type="submit"
-              variant="primary"
               size="sm"
               isLoading={isSubmitting}
             >
@@ -387,10 +372,10 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
         isOpen={deleteDialog.isOpen}
         onClose={() => setDeleteDialog({ isOpen: false })}
         onConfirm={handleConfirmDelete}
-        title={`Delete Activity: ${deleteDialog.activityName}?`}
-        message="Are you sure you want to delete this activity? It will be removed from all account checklists and historical logs."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={`Delete Activity?`}
+        description={`Are you sure you want to delete ${deleteDialog.activityName}? It will be removed from all account checklists.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
         variant="danger"
       />
     </div>
