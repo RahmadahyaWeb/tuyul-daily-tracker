@@ -1,0 +1,29 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Allow static files, next internals, and login page
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api/auth") ||
+    pathname === "/login" ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  const sessionCookie = request.cookies.get("tuyul_tracker_session");
+
+  if (!sessionCookie?.value) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+};
