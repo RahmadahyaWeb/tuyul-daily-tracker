@@ -102,7 +102,7 @@ export function WeeklyView({
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs px-2.5 font-bold font-pixel text-[#3d3326]"
+              className="h-7 text-xs px-2.5 font-bold text-[#3d3326]"
               onClick={handleThisWeek}
               disabled={isPending}
             >
@@ -146,7 +146,7 @@ export function WeeklyView({
           />
         </div>
 
-        <span className="text-xs font-semibold text-[#736350] shrink-0 font-pixel">
+        <span className="text-xs font-bold text-[#4a3b2c] shrink-0 tracking-wide font-sans">
           {filteredAccounts.length} ACCOUNTS
         </span>
       </div>
@@ -157,7 +157,7 @@ export function WeeklyView({
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[180px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="w-[180px] font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   ACCOUNT
                 </TableHead>
                 {initialWeekDays.map((day) => {
@@ -166,7 +166,7 @@ export function WeeklyView({
                     <TableHead
                       key={day.dateStr}
                       className={cn(
-                        "text-center font-bold text-xs text-[#5a4c3a] min-w-[70px] font-pixel tracking-wider",
+                        "text-center font-bold text-xs text-[#2c261e] min-w-[70px] tracking-wider uppercase font-sans",
                         isToday && "bg-[#FAF2E1] text-[#664b28]"
                       )}
                     >

@@ -420,28 +420,28 @@ export function AccountsView({
           <Table className="min-w-[750px]">
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pl-4 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 pl-4 font-sans">
                   Character Nickname
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Username
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Password
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Job / Class
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Server
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Group
                 </TableHead>
-                <TableHead className="text-center text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-center text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Status
                 </TableHead>
-                <TableHead className="w-12 text-right text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pr-4 font-pixel">
+                <TableHead className="w-12 text-right text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 pr-4 font-sans">
                   Actions
                 </TableHead>
               </TableRow>

@@ -447,7 +447,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             <Button
               variant={isViewingToday ? "secondary" : "ghost"}
               size="sm"
-              className="h-7 text-xs px-2.5 font-bold font-pixel text-[#3d3326]"
+              className="h-7 text-xs px-2.5 font-bold text-[#3d3326]"
               onClick={() => handleDateChange(todayDate)}
               disabled={isPending || isViewingToday}
             >
@@ -544,7 +544,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
 
         {/* Right: Counter & Actions */}
         <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#ebd7b2]">
-          <span className="text-xs font-semibold text-[#736350] shrink-0 font-pixel">
+          <span className="text-xs font-bold text-[#4a3b2c] shrink-0 tracking-wide font-sans">
             {totalActive} ACCOUNTS · {completedAccountsCount} DONE
           </span>
 
@@ -577,13 +577,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[170px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="w-[170px] font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   ACCOUNT
                 </TableHead>
-                <TableHead className="w-[130px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="w-[130px] font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   USERNAME
                 </TableHead>
-                <TableHead className="w-[130px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="w-[130px] font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   PASSWORD
                 </TableHead>
                 {initialData.activities.map((act) => {
@@ -591,7 +591,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                   return (
                     <TableHead
                       key={act.id}
-                      className="text-center font-bold text-xs text-[#5a4c3a] min-w-[76px] py-2 font-pixel tracking-wide"
+                      className="text-center font-bold text-xs text-[#2c261e] min-w-[76px] py-2 tracking-wide font-sans"
                       title={
                         isWeekly
                           ? `${act.name} (Weekly Task — Reset every Monday)`
@@ -599,9 +599,11 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       }
                     >
                       <div className="flex flex-col items-center justify-center">
-                        <span>{act.code || act.name}</span>
+                        <span className="font-bold text-xs text-[#1a1510] tracking-tight font-sans">
+                          {act.code || act.name}
+                        </span>
                         {isWeekly && (
-                          <span className="text-[9px] font-bold tracking-wider uppercase text-[#664b28] bg-[#FAF2E1] border border-[#cfbeaa] px-1 py-0.5 rounded-none leading-none mt-0.5 shadow-[0.5px_0.5px_0px_#baa892]">
+                          <span className="text-[9px] font-bold tracking-wider uppercase text-[#664b28] bg-[#FAF2E1] border border-[#cfbeaa] px-1 py-0.5 rounded-none leading-none mt-0.5 shadow-[0.5px_0.5px_0px_#baa892] font-sans">
                             WEEKLY
                           </span>
                         )}
@@ -609,10 +611,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                     </TableHead>
                   );
                 })}
-                <TableHead className="text-right w-[110px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="text-right w-[110px] font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   PROGRESS
                 </TableHead>
-                <TableHead className="w-[50px] text-right pr-4 font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="w-[50px] text-right pr-4 font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   ACTION
                 </TableHead>
               </TableRow>
@@ -887,7 +889,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 {/* Mobile Credentials Row */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
                   <div className="inline-flex items-center gap-1 bg-[#FAF6F0] px-2 py-0.5 rounded-xs border border-[#cfbeaa]">
-                    <span className="text-[10px] text-[#736350] font-medium font-pixel">USER:</span>
+                    <span className="text-[10px] text-[#5c4a35] font-bold uppercase font-sans">USER:</span>
                     <span className="font-mono text-xs font-semibold text-[#2c261e]">{acc.username}</span>
                     <button
                       type="button"
@@ -904,7 +906,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                   </div>
                   {acc.password ? (
                     <div className="inline-flex items-center gap-1 bg-[#FAF6F0] px-2 py-0.5 rounded-xs border border-[#cfbeaa]">
-                      <span className="text-[10px] text-[#736350] font-pixel">PASS:</span>
+                      <span className="text-[10px] text-[#5c4a35] font-bold uppercase font-sans">PASS:</span>
                       <span className="font-mono text-xs text-[#5a4c3a]">
                         {visiblePasswords[acc.id] ? acc.password : "••••••"}
                       </span>
@@ -963,12 +965,12 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                           />
                           <span>{act.name}</span>
                           {act.activityType === "WEEKLY" && (
-                            <span className="text-[9px] font-bold uppercase text-[#664b28] bg-[#FAF2E1] border border-[#cfbeaa] px-1 py-0.2 rounded-none font-pixel">
+                            <span className="text-[9px] font-bold uppercase text-[#664b28] bg-[#FAF2E1] border border-[#cfbeaa] px-1 py-0.2 rounded-none font-sans">
                               Weekly
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] font-mono text-[#8a7b68] uppercase">
+                        <span className="text-[10px] font-mono font-bold text-[#3d3326] uppercase">
                           {act.code}
                         </span>
                       </div>
