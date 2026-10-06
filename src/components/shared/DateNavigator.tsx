@@ -28,12 +28,12 @@ export function DateNavigator({
   className,
 }: DateNavigatorProps) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div className="flex items-center bg-white border border-[#cfc3b0] rounded-xs p-0.5 shadow-[1px_1px_0px_#e5ddd0]">
+    <div className={cn("flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:gap-2", className)}>
+      <div className="flex items-center bg-white border border-[#cfc3b0] rounded-xs p-0.5 shadow-[1px_1px_0px_#e5ddd0] shrink-0">
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
+          className="h-7 w-6 sm:w-7 text-[#736350] hover:text-[#231b12]"
           onClick={onPrev}
           disabled={disabled}
           aria-label="Previous"
@@ -44,7 +44,7 @@ export function DateNavigator({
         <Button
           variant={isCurrentActive ? "secondary" : "ghost"}
           size="sm"
-          className="h-7 text-xs px-2.5 font-bold text-[#3d3326] font-sans"
+          className="h-7 text-[11px] sm:text-xs px-2 sm:px-2.5 font-bold text-[#3d3326] font-sans"
           onClick={onJumpCurrent}
           disabled={disabled || isCurrentActive}
         >
@@ -54,7 +54,7 @@ export function DateNavigator({
         <Button
           variant="ghost"
           size="icon"
-          className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
+          className="h-7 w-6 sm:w-7 text-[#736350] hover:text-[#231b12]"
           onClick={onNext}
           disabled={disabled}
           aria-label="Next"
@@ -63,7 +63,7 @@ export function DateNavigator({
         </Button>
       </div>
 
-      <DatePicker value={currentDate} onChange={onDateChange} disabled={disabled} />
+      <DatePicker value={currentDate} onChange={onDateChange} disabled={disabled} className="shrink-0" />
     </div>
   );
 }

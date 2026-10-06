@@ -444,7 +444,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       {/* Unified Page Toolbar */}
       <PageToolbar>
         {/* Left: Search & Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full lg:w-auto">
           {/* Search */}
           <div className="relative w-full sm:w-44">
             <Search className="w-3.5 h-3.5 text-[#8a7b68] absolute left-2.5 top-1/2 -translate-y-1/2" />
@@ -457,71 +457,73 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             />
           </div>
 
-          {/* Group Filter */}
-          <select
-            value={selectedGroup}
-            onChange={(e) => setSelectedGroup(e.target.value)}
-            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-          >
-            <option value="all">All Groups</option>
-            {initialData.groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name}
-              </option>
-            ))}
-            <option value="ungrouped">Ungrouped</option>
-          </select>
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+            {/* Group Filter */}
+            <select
+              value={selectedGroup}
+              onChange={(e) => setSelectedGroup(e.target.value)}
+              className="w-full sm:w-auto h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="all">All Groups</option>
+              {initialData.groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+              <option value="ungrouped">Ungrouped</option>
+            </select>
 
-          {/* Status Filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-          >
-            <option value="Active">Active</option>
-            <option value="all">All Status</option>
-            <option value="Paused">Paused</option>
-            <option value="Finished">Finished</option>
-          </select>
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full sm:w-auto h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="Active">Active</option>
+              <option value="all">All Status</option>
+              <option value="Paused">Paused</option>
+              <option value="Finished">Finished</option>
+            </select>
 
-          {/* Progress Filter */}
-          <select
-            value={completionFilter}
-            onChange={(e) => setCompletionFilter(e.target.value as CompletionFilter)}
-            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-          >
-            <option value="all">All Progress</option>
-            <option value="completed">Completed</option>
-            <option value="in-progress">In Progress</option>
-            <option value="not-started">Not Started</option>
-          </select>
+            {/* Progress Filter */}
+            <select
+              value={completionFilter}
+              onChange={(e) => setCompletionFilter(e.target.value as CompletionFilter)}
+              className="w-full sm:w-auto h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="all">All Progress</option>
+              <option value="completed">Completed</option>
+              <option value="in-progress">In Progress</option>
+              <option value="not-started">Not Started</option>
+            </select>
 
-          {/* Sort Filter */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-          >
-            <option value="name-asc">Name (A-Z)</option>
-            <option value="least-progress">Least Progress</option>
-            <option value="most-progress">Most Progress</option>
-            <option value="group">Group</option>
-          </select>
+            {/* Sort Filter */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="w-full sm:w-auto h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="least-progress">Least Progress</option>
+              <option value="most-progress">Most Progress</option>
+              <option value="group">Group</option>
+            </select>
+          </div>
         </div>
 
         {/* Right: Counter & Actions */}
-        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 w-full lg:w-auto border-t lg:border-t-0 border-[#ebd7b2]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between lg:justify-end gap-2.5 pt-2 lg:pt-0 w-full lg:w-auto border-t lg:border-t-0 border-[#ebd7b2]">
           <span className="text-xs text-[#5c4e3b] font-medium shrink-0">
             {totalActive} accounts · {completedAccountsCount} completed
           </span>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={handleCompleteAll}
               disabled={actionLoading}
-              className="h-8 text-xs font-medium"
+              className="h-8 text-xs font-medium flex-1 sm:flex-initial"
             >
               <CheckCheck className="w-3.5 h-3.5 mr-1 text-[#1E5D2F]" /> Complete All
             </Button>
@@ -530,7 +532,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               size="sm"
               onClick={() => setConfirmResetAllOpen(true)}
               disabled={actionLoading}
-              className="h-8 text-xs font-medium text-[#8a7b68] hover:text-[#A82A1E] hover:bg-[#FDECEB]"
+              className="h-8 text-xs font-medium text-[#8a7b68] hover:text-[#A82A1E] hover:bg-[#FDECEB] flex-1 sm:flex-initial"
             >
               <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset All
             </Button>
@@ -826,30 +828,78 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 )}
               >
                 {/* Account Header */}
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
                     <Link
                       href={`/accounts/${acc.id}`}
-                      className="text-xs font-bold text-[#231b12] hover:text-[#3B6EA8]"
+                      className="text-xs font-bold text-[#231b12] hover:text-[#3B6EA8] truncate block"
                     >
                       {acc.nickname}
                     </Link>
-                    <p className="text-[11px] text-[#8a7b68] mt-0.5">
+                    <p className="text-[11px] text-[#8a7b68] mt-0.5 truncate">
                       {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
                     </p>
                   </div>
 
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-[#231b12] font-mono">
-                      {acc.completedCount} / {acc.totalAssigned}
-                    </span>
-                    <div className="w-16 mt-1">
-                      <Progress
-                        value={acc.progressPercent}
-                        className="h-1.5 bg-[#f0eae1]"
-                        indicatorColor={acc.progressPercent === 100 ? "bg-[#347A46]" : "bg-[#3B6EA8]"}
-                      />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-[#231b12] font-mono">
+                        {acc.completedCount} / {acc.totalAssigned}
+                      </span>
+                      <div className="w-16 mt-1">
+                        <Progress
+                          value={acc.progressPercent}
+                          className="h-1.5 bg-[#f0eae1]"
+                          indicatorColor={acc.progressPercent === 100 ? "bg-[#347A46]" : "bg-[#3B6EA8]"}
+                        />
+                      </div>
                     </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-[#8a7b68] hover:text-[#231b12]">
+                          <MoreHorizontal className="w-3.5 h-3.5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 text-xs rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[3px_3px_0px_#baa892]">
+                        <DropdownMenuItem
+                          onClick={() => handleCopy(acc.username, "Username", `m-menu-user-${acc.id}`)}
+                          className="cursor-pointer text-[#2c261e] hover:bg-[#F3ECE0]"
+                        >
+                          <Copy className="w-3.5 h-3.5 mr-2 text-[#736350]" />
+                          <span>Copy Username</span>
+                        </DropdownMenuItem>
+                        {acc.password && (
+                          <DropdownMenuItem
+                            onClick={() => handleCopy(acc.password || "", "Password", `m-menu-pass-${acc.id}`)}
+                            className="cursor-pointer text-[#2c261e] hover:bg-[#F3ECE0]"
+                          >
+                            <KeyRound className="w-3.5 h-3.5 mr-2 text-[#736350]" />
+                            <span>Copy Password</span>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem
+                          onClick={() => handleCompleteAccount(acc)}
+                          className="cursor-pointer text-[#1E5D2F] hover:bg-[#F2FAF4]"
+                        >
+                          <Check className="w-3.5 h-3.5 mr-2 text-[#1E5D2F]" />
+                          <span>Complete All</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleResetAccount(acc)}
+                          className="cursor-pointer text-[#8C580B] hover:bg-[#FFF8EB]"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5 mr-2 text-[#8C580B]" />
+                          <span>Reset Today</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/accounts/${acc.id}`} className="cursor-pointer text-[#2c261e] hover:bg-[#F3ECE0]">
+                            <ExternalLink className="w-3.5 h-3.5 mr-2 text-[#736350]" />
+                            <span>View Account</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 

@@ -218,17 +218,17 @@ export function AccountDetailView({ data }: AccountDetailProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-[#ebd7b2]">
             <Button
               variant="outline"
               size="sm"
               onClick={handleStatusToggle}
-              className="text-xs h-8"
+              className="text-xs h-8 flex-1 sm:flex-initial"
             >
               {status === "Active" ? "Pause Account" : "Activate Account"}
             </Button>
-            <Link href="/tracker">
-              <Button size="sm" className="text-xs h-8">
+            <Link href="/tracker" className="flex-1 sm:flex-initial">
+              <Button size="sm" className="text-xs h-8 w-full">
                 Daily Tracker
               </Button>
             </Link>
@@ -384,7 +384,12 @@ export function AccountDetailView({ data }: AccountDetailProps) {
 
       {/* 30-Day Activity History Heatmap Matrix */}
       <section className="space-y-3">
-        <SectionHeader title="30-Day Activity History" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <SectionHeader title="30-Day Activity History" />
+          <span className="text-[11px] text-[#8a7b68] sm:hidden font-medium">
+            ← Geser tabel ke samping untuk melihat seluruh 30 hari →
+          </span>
+        </div>
 
         <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
           <div className="overflow-x-auto">

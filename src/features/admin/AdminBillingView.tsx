@@ -134,8 +134,8 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
       </div>
 
       {/* Toolbar / Filters */}
-      <div className="flex flex-wrap items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
+        <div className="relative w-full sm:w-64">
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
           <input
             type="text"
@@ -146,11 +146,11 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-white p-0.5 rounded-xs border border-[#cfc3b0]">
+        <div className="flex items-center gap-1 bg-white p-0.5 rounded-xs border border-[#cfc3b0] overflow-x-auto w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setStatusFilter("all")}
-            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors shrink-0 whitespace-nowrap ${
               statusFilter === "all"
                 ? "bg-[#3B6EA8] text-white shadow-[0.5px_0.5px_0px_#1e3b60]"
                 : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
@@ -161,7 +161,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <button
             type="button"
             onClick={() => setStatusFilter("PENDING")}
-            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors shrink-0 whitespace-nowrap ${
               statusFilter === "PENDING"
                 ? "bg-[#B57C1E] text-white shadow-[0.5px_0.5px_0px_#785112]"
                 : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
@@ -172,7 +172,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <button
             type="button"
             onClick={() => setStatusFilter("APPROVED")}
-            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors shrink-0 whitespace-nowrap ${
               statusFilter === "APPROVED"
                 ? "bg-[#347A46] text-white shadow-[0.5px_0.5px_0px_#1b4b27]"
                 : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
@@ -183,7 +183,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <button
             type="button"
             onClick={() => setStatusFilter("REJECTED")}
-            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors ${
+            className={`px-2.5 py-1 text-xs rounded-none font-pixel uppercase transition-colors shrink-0 whitespace-nowrap ${
               statusFilter === "REJECTED"
                 ? "bg-[#A82A1E] text-white shadow-[0.5px_0.5px_0px_#78180e]"
                 : "text-[#5c4e3b] hover:bg-[#FAF7F2]"
@@ -196,7 +196,8 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
 
       {/* Requests Table */}
       <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
-        <Table>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[700px]">
           <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
             <TableRow>
               <TableHead className="py-2.5 pl-4 text-xs font-bold text-[#5a4c3a] font-pixel">
@@ -322,6 +323,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
             )}
           </TableBody>
         </Table>
+        </div>
 
         <Pagination
           currentPage={currentPage}

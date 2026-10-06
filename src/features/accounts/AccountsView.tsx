@@ -372,44 +372,52 @@ export function AccountsView({
 
       {/* Unified Page Toolbar */}
       <PageToolbar>
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
-          <input
-            type="text"
-            placeholder="Search accounts, username, group..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-xs border border-[#cfc3b0] bg-white pl-8 pr-3 text-xs text-[#2c261e] placeholder:text-[#9c8e7b] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0]"
-          />
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full lg:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
+            <input
+              type="text"
+              placeholder="Search accounts, username, group..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 w-full rounded-xs border border-[#cfc3b0] bg-white pl-8 pr-3 text-xs text-[#2c261e] placeholder:text-[#9c8e7b] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0]"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
+            <select
+              value={groupFilter}
+              onChange={(e) => setGroupFilter(e.target.value)}
+              className="h-8 w-full sm:w-auto rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="all">All Groups</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-8 w-full sm:w-auto rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="all">All Statuses</option>
+              <option value="Active">Active Only</option>
+              <option value="Paused">Paused</option>
+              <option value="Finished">Finished</option>
+            </select>
+          </div>
         </div>
 
-        <select
-          value={groupFilter}
-          onChange={(e) => setGroupFilter(e.target.value)}
-          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-        >
-          <option value="all">All Groups</option>
-          {groups.map((g) => (
-            <option key={g.id} value={g.id}>
-              {g.name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-        >
-          <option value="all">All Statuses</option>
-          <option value="Active">Active Only</option>
-          <option value="Paused">Paused</option>
-          <option value="Finished">Finished</option>
-        </select>
+        <div className="text-xs text-[#5c4e3b] font-medium pt-1 sm:pt-0 border-t sm:border-t-0 border-[#ebd7b2] flex items-center justify-between sm:justify-end">
+          <span>{filteredAccounts.length} accounts found</span>
+        </div>
       </PageToolbar>
 
-      {/* Main Accounts Table */}
-      <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
+      {/* DESKTOP TABLE (hidden on mobile < md) */}
+      <div className="hidden md:block rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
         <div className="overflow-x-auto">
           <Table className="min-w-[750px]">
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -632,6 +640,191 @@ export function AccountsView({
           pageSizeOptions={[10, 25, 50, 100]}
           itemLabel="accounts"
         />
+      </div>
+
+      {/* MOBILE CARD LIST (shown only on mobile < md) */}
+      <div className="md:hidden space-y-3">
+        {filteredAccounts.length === 0 ? (
+          <div className="p-8 bg-white border border-[#ded5c5] rounded-xs text-center text-xs text-[#8a7b68]">
+            No accounts found matching filters.
+          </div>
+        ) : (
+          paginatedAccounts.map((acc) => (
+            <div
+              key={acc.id}
+              className="bg-white border-2 border-[#cfbeaa] rounded-xs p-4 shadow-[2px_2px_0px_#dfd5c5] space-y-3"
+            >
+              {/* Card Header */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Avatar name={acc.nickname} size="sm" />
+                  <div className="min-w-0">
+                    <Link
+                      href={`/accounts/${acc.id}`}
+                      className="font-bold text-xs text-[#231b12] hover:text-[#3B6EA8] truncate block"
+                    >
+                      {acc.nickname}
+                    </Link>
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#8a7b68] mt-0.5">
+                      <span className="font-mono">Lv.{acc.level}</span>
+                      <span>·</span>
+                      <span className="truncate">{acc.job}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Badge
+                    variant={
+                      acc.status === "Active"
+                        ? "success"
+                        : acc.status === "Paused"
+                        ? "warning"
+                        : "neutral"
+                    }
+                    size="sm"
+                  >
+                    {acc.status}
+                  </Badge>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-800">
+                        <MoreHorizontal className="w-3.5 h-3.5" />
+                        <span className="sr-only">Actions</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44 text-xs">
+                      <DropdownMenuItem onClick={() => handleCopy(acc.username, "Username", `m-acc-user-${acc.id}`)}>
+                        <Copy className="w-3.5 h-3.5 mr-2" />
+                        <span>Copy Username</span>
+                      </DropdownMenuItem>
+                      {acc.password && (
+                        <DropdownMenuItem onClick={() => handleCopy(acc.password || "", "Password", `m-acc-pass-${acc.id}`)}>
+                          <KeyRound className="w-3.5 h-3.5 mr-2" />
+                          <span>Copy Password</span>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => handleOpenEdit(acc)}>
+                        <Edit2 className="w-3.5 h-3.5 mr-2" />
+                        <span>Edit Account</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleStatus(acc.id, acc.status)}>
+                        {acc.status === "Active" ? (
+                          <>
+                            <Pause className="w-3.5 h-3.5 mr-2" />
+                            <span>Pause</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3.5 h-3.5 mr-2" />
+                            <span>Activate</span>
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="text-rose-600 focus:text-rose-600 focus:bg-rose-50"
+                        onClick={() =>
+                          setDeleteDialog({
+                            isOpen: true,
+                            accountId: acc.id,
+                            nickname: acc.nickname,
+                          })
+                        }
+                      >
+                        <Trash2 className="w-3.5 h-3.5 mr-2" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+
+              {/* Server & Group Meta */}
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#736350] pt-1 border-t border-[#eee7dc]">
+                <span className="font-medium text-[#2c261e]">Server: {acc.server}</span>
+                {acc.group?.name && (
+                  <>
+                    <span>·</span>
+                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
+                      {acc.group.name}
+                    </Badge>
+                  </>
+                )}
+              </div>
+
+              {/* Credentials Row */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+                <div className="inline-flex items-center gap-1 bg-[#FAF6F0] px-2 py-0.5 rounded-xs border border-[#cfbeaa]">
+                  <span className="text-[10px] text-[#5c4a35] font-bold uppercase font-sans">USER:</span>
+                  <span className="font-mono text-xs font-semibold text-[#2c261e]">{acc.username}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(acc.username, "Username", `acc-card-user-${acc.id}`)}
+                    className="p-0.5 text-[#8a7b68] hover:text-[#231b12]"
+                    title="Copy Username"
+                  >
+                    {copiedField === `acc-card-user-${acc.id}` ? (
+                      <Check className="w-3 h-3 text-[#1E5D2F]" />
+                    ) : (
+                      <Copy className="w-3 h-3" />
+                    )}
+                  </button>
+                </div>
+
+                {acc.password ? (
+                  <div className="inline-flex items-center gap-1 bg-[#FAF6F0] px-2 py-0.5 rounded-xs border border-[#cfbeaa]">
+                    <span className="text-[10px] text-[#5c4a35] font-bold uppercase font-sans">PASS:</span>
+                    <span className="font-mono text-xs text-[#5a4c3a]">
+                      {visiblePasswords[acc.id] ? acc.password : "••••••"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility(acc.id)}
+                      className="p-0.5 text-[#8a7b68] hover:text-[#231b12]"
+                      title="Toggle Visibility"
+                    >
+                      {visiblePasswords[acc.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(acc.password || "", "Password", `acc-card-pass-${acc.id}`)}
+                      className="p-0.5 text-[#8a7b68] hover:text-[#231b12]"
+                      title="Copy Password"
+                    >
+                      {copiedField === `acc-card-pass-${acc.id}` ? (
+                        <Check className="w-3 h-3 text-[#1E5D2F]" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-[10px] text-[#a89b88] italic px-1">No password</span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+
+        {filteredAccounts.length > 0 && (
+          <div className="bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
+            <DataTablePagination
+              currentPage={currentPage}
+              totalItems={filteredAccounts.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              itemLabel="accounts"
+            />
+          </div>
+        )}
       </div>
 
       {/* Add / Edit Account Modal */}

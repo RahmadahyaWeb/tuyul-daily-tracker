@@ -255,8 +255,8 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
       </div>
 
       {/* Toolbar / Filters */}
-      <div className="flex flex-wrap items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
-        <div className="relative flex-1 min-w-[200px] max-w-xs">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
+        <div className="relative w-full sm:w-64">
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
           <input
             type="text"
@@ -267,27 +267,29 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
           />
         </div>
 
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-        >
-          <option value="all">All Roles</option>
-          <option value="USER">User</option>
-          <option value="ADMIN">Admin</option>
-        </select>
+        <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="h-8 w-full sm:w-auto rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+          >
+            <option value="all">All Roles</option>
+            <option value="USER">User</option>
+            <option value="ADMIN">Admin</option>
+          </select>
 
-        <select
-          value={planFilter}
-          onChange={(e) => setPlanFilter(e.target.value)}
-          className="h-8 rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
-        >
-          <option value="all">All Plans</option>
-          <option value="FREE">Free Plan</option>
-          <option value="PRO">Pro Plan</option>
-        </select>
+          <select
+            value={planFilter}
+            onChange={(e) => setPlanFilter(e.target.value)}
+            className="h-8 w-full sm:w-auto rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+          >
+            <option value="all">All Plans</option>
+            <option value="FREE">Free Plan</option>
+            <option value="PRO">Pro Plan</option>
+          </select>
+        </div>
 
-        <div className="ml-auto text-xs text-[#736350] font-pixel">
+        <div className="text-xs text-[#736350] font-pixel pt-1 sm:pt-0 sm:ml-auto text-left sm:text-right border-t sm:border-t-0 border-[#ebd7b2]">
           SHOWING <strong>{filteredUsers.length}</strong> OF{" "}
           <strong>{users.length}</strong> USERS
         </div>
@@ -295,7 +297,8 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
 
       {/* Users Table */}
       <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
-        <Table>
+        <div className="overflow-x-auto">
+          <Table className="min-w-[650px]">
           <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
             <TableRow>
               <TableHead className="py-2.5 pl-4 text-xs font-bold text-[#5a4c3a] font-pixel">
@@ -472,6 +475,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
             )}
           </TableBody>
         </Table>
+        </div>
 
         <Pagination
           currentPage={currentPage}

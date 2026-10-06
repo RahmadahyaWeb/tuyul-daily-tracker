@@ -29,7 +29,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
 
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Settings Navigation Tabs */}
-        <nav className="w-full md:w-56 shrink-0 flex md:flex-col gap-1 p-1 bg-[#F4EFE6] md:bg-transparent rounded-xs">
+        <nav className="w-full md:w-56 shrink-0 flex md:flex-col gap-1.5 p-1 bg-[#F4EFE6] md:bg-transparent rounded-xs overflow-x-auto flex-nowrap">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -41,13 +41,13 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-xs text-xs font-medium transition-colors w-full select-none",
+                  "flex items-center gap-2 px-3 py-2 rounded-xs text-xs font-medium transition-colors shrink-0 md:w-full select-none whitespace-nowrap",
                   isActive
                     ? "bg-[#3B6EA8] text-white shadow-[1.5px_1.5px_0px_#1e3b60]"
                     : "text-[#5c4e3b] hover:text-[#231b12] hover:bg-[#F3ECE0]"
                 )}
               >
-                <Icon className={cn("w-4 h-4", isActive ? "text-white" : "text-[#736350]")} />
+                <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-white" : "text-[#736350]")} />
                 <span>{item.label}</span>
               </Link>
             );

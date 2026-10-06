@@ -124,8 +124,8 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
         }
       />
 
-      {/* Main Groups Table */}
-      <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
+      {/* DESKTOP TABLE (hidden on mobile < md) */}
+      <div className="hidden md:block rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -216,6 +216,79 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
           pageSizeOptions={[5, 10, 25, 50]}
           itemLabel="groups"
         />
+      </div>
+
+      {/* MOBILE CARD LIST (shown only on mobile < md) */}
+      <div className="md:hidden space-y-3">
+        {initialGroups.length === 0 ? (
+          <div className="p-8 bg-white border border-[#ded5c5] rounded-xs text-center text-xs text-[#8a7b68]">
+            No groups created yet. Click &quot;Add Group&quot; to create one.
+          </div>
+        ) : (
+          initialGroups
+            .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+            .map((g) => (
+              <div
+                key={g.id}
+                className="bg-white border-2 border-[#cfbeaa] rounded-xs p-4 shadow-[2px_2px_0px_#dfd5c5] space-y-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-none bg-[#f4efe6] border border-[#ded4c4] flex items-center justify-center text-[#736350] shrink-0">
+                      <Folder className="w-4 h-4" />
+                    </div>
+                    <span className="font-bold text-xs text-[#231b12] truncate">{g.name}</span>
+                  </div>
+
+                  <span className="text-[10px] font-mono py-0.5 px-2 bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28] font-bold rounded-none shrink-0">
+                    {g._count?.accounts ?? 0} accounts
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-end gap-1.5 pt-2 border-t border-[#eee7dc]">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2.5 text-[#5c4e3b]"
+                    onClick={() => handleOpenEdit(g)}
+                  >
+                    <Edit2 className="w-3.5 h-3.5 mr-1" /> Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2.5 text-[#A82A1E] hover:bg-[#FDECEB] hover:text-[#A82A1E]"
+                    onClick={() =>
+                      setDeleteDialog({
+                        isOpen: true,
+                        groupId: g.id,
+                        groupName: g.name,
+                      })
+                    }
+                  >
+                    <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete
+                  </Button>
+                </div>
+              </div>
+            ))
+        )}
+
+        {initialGroups.length > 0 && (
+          <div className="bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
+            <DataTablePagination
+              currentPage={currentPage}
+              totalItems={initialGroups.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[5, 10, 25, 50]}
+              itemLabel="groups"
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal */}

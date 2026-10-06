@@ -113,13 +113,15 @@ export default async function LandingPage() {
 
             {/* Simulated Clean SaaS RPG Table */}
             <div className="border border-[#ded4c4] rounded-xs overflow-hidden bg-white">
-              <div className="grid grid-cols-12 bg-[#F4EFE6] border-b border-[#ded4c4] px-3 py-2 text-[11px] font-bold text-[#5a4c3a]">
-                <div className="col-span-4 sm:col-span-3">ACCOUNT / CLASS</div>
-                <div className="col-span-3 sm:col-span-2 text-center">DAILY EXP</div>
-                <div className="col-span-2 text-center">DUNGEON</div>
-                <div className="col-span-2 text-center">BOSS HUNT</div>
-                <div className="col-span-1 sm:col-span-3 text-right">PROGRESS</div>
-              </div>
+              <div className="overflow-x-auto">
+                <div className="min-w-[520px]">
+                  <div className="grid grid-cols-12 bg-[#F4EFE6] border-b border-[#ded4c4] px-3 py-2 text-[11px] font-bold text-[#5a4c3a]">
+                    <div className="col-span-4 sm:col-span-3">ACCOUNT / CLASS</div>
+                    <div className="col-span-3 sm:col-span-2 text-center">DAILY EXP</div>
+                    <div className="col-span-2 text-center">DUNGEON</div>
+                    <div className="col-span-2 text-center">BOSS HUNT</div>
+                    <div className="col-span-1 sm:col-span-3 text-right">PROGRESS</div>
+                  </div>
 
               {/* Row 1 */}
               <div className="grid grid-cols-12 items-center px-3 py-2.5 border-b border-[#eee7dc] hover:bg-[#FAF6F0] text-xs">
@@ -219,6 +221,8 @@ export default async function LandingPage() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
 
         {/* 3 Core Benefits */}
         <div className="max-w-4xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-3 gap-5">

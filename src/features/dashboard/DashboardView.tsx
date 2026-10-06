@@ -30,16 +30,16 @@ export function DashboardView({ stats }: DashboardViewProps) {
       <PageHeader
         title="Dashboard"
         action={
-          <Button asChild>
+          <Button asChild size="sm" className="h-8 text-xs w-full sm:w-auto">
             <Link href="/tracker">
-              Open Tracker <ArrowRight className="w-4 h-4 ml-1.5" />
+              Open Tracker <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Link>
           </Button>
         }
       />
 
       {/* Unified Overview Panel */}
-      <div className="bg-[#FCFAF7] border border-[#cfbeaa] rounded-xs p-5 shadow-[2px_2px_0px_#cfbeaa] space-y-4">
+      <div className="bg-[#FCFAF7] border border-[#cfbeaa] rounded-xs p-4 sm:p-5 shadow-[2px_2px_0px_#cfbeaa] space-y-4">
         {/* Panel Header */}
         <div className="flex items-center justify-between border-b border-[#ebd7b2] pb-2.5">
           <span className="text-xs font-semibold text-[#8a7b68] uppercase tracking-wide">
@@ -50,9 +50,9 @@ export function DashboardView({ stats }: DashboardViewProps) {
           </span>
         </div>
 
-        {/* Standard Statistics Typography (Rule #20) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-[#eee7dc]">
-          <div>
+        {/* Standard Statistics Typography */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 sm:divide-x divide-[#eee7dc]">
+          <div className="p-1 sm:p-0">
             <span className="text-xs text-[#8a7b68] font-medium block">
               Accounts
             </span>
@@ -61,7 +61,7 @@ export function DashboardView({ stats }: DashboardViewProps) {
             </span>
           </div>
 
-          <div className="pt-3 sm:pt-0 sm:pl-6">
+          <div className="p-1 sm:p-0 sm:pl-6">
             <span className="text-xs text-[#1E5D2F] font-medium block">
               Completed
             </span>
@@ -70,7 +70,7 @@ export function DashboardView({ stats }: DashboardViewProps) {
             </span>
           </div>
 
-          <div className="pt-3 sm:pt-0 sm:pl-6">
+          <div className="p-1 sm:p-0 sm:pl-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#eee7dc]">
             <span className="text-xs text-[#8C580B] font-medium block">
               In Progress
             </span>
@@ -79,7 +79,7 @@ export function DashboardView({ stats }: DashboardViewProps) {
             </span>
           </div>
 
-          <div className="pt-3 sm:pt-0 sm:pl-6">
+          <div className="p-1 sm:p-0 sm:pl-6 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#eee7dc]">
             <span className="text-xs text-[#8a7b68] font-medium block">
               Not Started
             </span>

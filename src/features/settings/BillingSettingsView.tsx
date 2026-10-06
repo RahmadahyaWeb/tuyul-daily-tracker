@@ -133,14 +133,14 @@ export function BillingSettingsView({
         </div>
 
         {!isPro && (
-          <div className="pt-2 flex items-center justify-between">
+          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-xs text-[#736350]">
               Need to manage more characters? Upgrade to unlock 100 accounts.
             </span>
             <Button
               onClick={() => setUpgradeModalOpen(true)}
               disabled={billingRequest?.status === "PENDING"}
-              className="text-xs gap-1.5"
+              className="text-xs gap-1.5 w-full sm:w-auto shrink-0"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#FDEECA]" />
               <span>

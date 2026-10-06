@@ -213,8 +213,8 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
         }
       />
 
-      {/* Main Activities Table */}
-      <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
+      {/* DESKTOP TABLE (hidden on mobile < md) */}
+      <div className="hidden md:block rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -377,6 +377,133 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           pageSizeOptions={[5, 10, 25, 50]}
           itemLabel="activities"
         />
+      </div>
+
+      {/* MOBILE CARD LIST (shown only on mobile < md) */}
+      <div className="md:hidden space-y-3">
+        {activities.length === 0 ? (
+          <div className="p-8 bg-white border border-[#ded5c5] rounded-xs text-center text-xs text-[#8a7b68]">
+            No activities configured yet. Click &quot;Add Activity&quot; to create one.
+          </div>
+        ) : (
+          activities
+            .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+            .map((act, localIndex) => {
+              const globalIndex = (currentPage - 1) * pageSize + localIndex;
+              return (
+                <div
+                  key={act.id}
+                  className="bg-white border-2 border-[#cfbeaa] rounded-xs p-4 shadow-[2px_2px_0px_#dfd5c5] space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[10px] font-bold text-[#8a7b68] bg-[#f4efe6] px-1.5 py-0.5 rounded-none border border-[#ded4c4]">
+                          #{globalIndex + 1}
+                        </span>
+                        <h3 className="font-bold text-xs text-[#231b12]">{act.name}</h3>
+                      </div>
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        <span className="font-mono text-[10px] py-0.5 px-1.5 font-bold text-[#5c4a35] bg-[#FAF2E1] border border-[#cfbeaa] rounded-none">
+                          {act.code}
+                        </span>
+                        <span
+                          className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-none uppercase font-sans ${
+                            act.activityType === "WEEKLY"
+                              ? "bg-[#FAF2E1] text-[#664b28] border border-[#cfbeaa]"
+                              : "bg-[#f4efe6] text-[#5c4e3b] border border-[#ded4c4]"
+                          }`}
+                        >
+                          {act.activityType === "WEEKLY" ? "Weekly" : "Daily"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(act.id, act.isActive)}
+                      className="cursor-pointer shrink-0"
+                      title="Click to toggle status"
+                    >
+                      <Badge variant={act.isActive ? "success" : "neutral"} size="sm">
+                        {act.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#eee7dc] text-xs">
+                    <span className="text-[11px] text-[#736350]">
+                      {act._count?.accountActivities || 0} characters assigned
+                    </span>
+
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 text-[#736350] disabled:opacity-30"
+                        disabled={globalIndex === 0}
+                        onClick={() => handleMove(globalIndex, "up")}
+                        title="Move Up"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 text-[#736350] disabled:opacity-30"
+                        disabled={globalIndex === activities.length - 1}
+                        onClick={() => handleMove(globalIndex, "down")}
+                        title="Move Down"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
+                        onClick={() => handleOpenEdit(act)}
+                        title="Edit Activity"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 text-[#736350] hover:text-[#A82A1E] hover:bg-[#FDECEB]"
+                        onClick={() =>
+                          setDeleteDialog({
+                            isOpen: true,
+                            activityId: act.id,
+                            activityName: act.name,
+                          })
+                        }
+                        title="Delete Activity"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+        )}
+
+        {activities.length > 0 && (
+          <div className="bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
+            <DataTablePagination
+              currentPage={currentPage}
+              totalItems={activities.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[5, 10, 25, 50]}
+              itemLabel="activities"
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal */}

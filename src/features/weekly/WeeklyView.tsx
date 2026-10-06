@@ -268,21 +268,33 @@ export function WeeklyView({
                       totalAssigned: 0,
                       status: "NO_TASKS" as const,
                     };
+                    const isToday = day.dateStr === todayStr;
 
                     return (
-                      <div key={day.dateStr} className="space-y-1">
-                        <span className="text-[10px] font-semibold text-[#8a7b68] block uppercase">
+                      <div
+                        key={day.dateStr}
+                        className={cn(
+                          "space-y-1 p-0.5 rounded-xs transition-colors",
+                          isToday && "bg-[#FAF2E1] border border-[#cfbeaa]"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "text-[10px] font-semibold text-[#8a7b68] block uppercase",
+                            isToday && "text-[#664b28] font-bold"
+                          )}
+                        >
                           {day.dayName.slice(0, 3)}
                         </span>
                         <div className="flex items-center justify-center h-7">
                           {status.totalAssigned === 0 ? (
                             <span className="text-[#cfc3b0] text-xs">-</span>
                           ) : status.status === "COMPLETED" ? (
-                            <span className="w-5 h-5 rounded-xs bg-[#ECFDF3] border border-[#a3ddb4] text-[#1E5D2F] flex items-center justify-center">
+                            <span className="w-5 h-5 rounded-xs bg-[#ECFDF3] border border-[#a3ddb4] text-[#1E5D2F] flex items-center justify-center shadow-[0.5px_0.5px_0px_#a3ddb4]">
                               <Check className="w-3 h-3 stroke-[2.5]" />
                             </span>
                           ) : status.status === "PARTIAL" ? (
-                            <span className="text-[10px] font-bold text-[#8C580B] bg-[#FFF8EB] border border-[#cfbeaa] px-1 py-0.5 rounded-xs font-mono">
+                            <span className="text-[10px] font-bold text-[#8C580B] bg-[#FFF8EB] border border-[#cfbeaa] px-1 py-0.5 rounded-xs font-mono shadow-[0.5px_0.5px_0px_#e5ddd0]">
                               {status.completedCount}
                             </span>
                           ) : (
