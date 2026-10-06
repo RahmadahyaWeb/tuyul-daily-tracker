@@ -57,10 +57,10 @@ export default async function PricingPage() {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
           {/* FREE Plan */}
-          <div className="p-8 rounded-xs border-2 border-[#cfbeaa] bg-white flex flex-col justify-between space-y-6 shadow-[3px_3px_0px_#baa892]">
+          <div className="p-8 rounded-xs border border-[#cfbeaa] bg-white flex flex-col justify-between space-y-6 shadow-[2px_2px_0px_#ded5c5]">
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-bold text-[#231b12] font-pixel tracking-wider uppercase">{PLANS.FREE.name}</h3>
+                <h3 className="text-lg font-bold text-[#231b12]">{PLANS.FREE.name}</h3>
                 <p className="text-xs text-[#736350] mt-1">{PLANS.FREE.description}</p>
               </div>
 
@@ -87,14 +87,14 @@ export default async function PricingPage() {
           </div>
 
           {/* PRO Plan */}
-          <div className="p-8 rounded-xs border-2 border-[#3B6EA8] bg-[#F2F7FC] flex flex-col justify-between space-y-6 relative shadow-[4px_4px_0px_#2a5082]">
-            <div className="absolute -top-3 right-6 bg-[#3B6EA8] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-none font-pixel shadow-[1px_1px_0px_#1e3b60]">
+          <div className="p-8 rounded-xs border-2 border-[#3B6EA8] bg-[#F2F7FC] flex flex-col justify-between space-y-6 relative shadow-[2px_2px_0px_#2a5082]">
+            <div className="absolute -top-3 right-6 bg-[#3B6EA8] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-none shadow-[1px_1px_0px_#1e3b60]">
               Recommended
             </div>
 
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-bold text-[#231b12] font-pixel tracking-wider uppercase">{PLANS.PRO.name}</h3>
+                <h3 className="text-lg font-bold text-[#231b12]">{PLANS.PRO.name}</h3>
                 <p className="text-xs text-[#736350] mt-1">{PLANS.PRO.description}</p>
               </div>
 

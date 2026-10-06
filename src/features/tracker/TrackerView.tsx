@@ -44,8 +44,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  ChevronLeft,
-  ChevronRight,
   RotateCcw,
   Check,
   Search,
@@ -59,8 +57,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Pagination } from "@/components/ui/pagination";
-import { DatePicker } from "@/components/ui/date-picker";
+import { AppPage } from "@/components/shared/AppPage";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { PageToolbar } from "@/components/shared/PageToolbar";
+import { DateNavigator } from "@/components/shared/DateNavigator";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
 
 interface TrackerViewProps {
   initialData: TrackerData;
@@ -422,60 +423,26 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   ).length;
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Header & Date Controller */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[#dfd5c5]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
-          <h1 className="text-xl font-bold tracking-tight text-[#231b12]">Tracker</h1>
-        </div>
-
-        {/* Date Controller: ‹ Today ›  Oct 5, 2026 */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white border border-[#cfc3b0] rounded-xs p-0.5 shadow-[1px_1px_0px_#e5ddd0]">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
-              onClick={() => handleDateChange(addDays(currentDate, -1))}
-              disabled={isPending}
-              aria-label="Previous day"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </Button>
-
-            <Button
-              variant={isViewingToday ? "secondary" : "ghost"}
-              size="sm"
-              className="h-7 text-xs px-2.5 font-bold text-[#3d3326]"
-              onClick={() => handleDateChange(todayDate)}
-              disabled={isPending || isViewingToday}
-            >
-              TODAY
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
-              onClick={() => handleDateChange(addDays(currentDate, 1))}
-              disabled={isPending}
-              aria-label="Next day"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-
-          <DatePicker
-            value={currentDate}
-            onChange={handleDateChange}
+    <AppPage>
+      {/* Unified Page Header with Date Navigator */}
+      <PageHeader
+        title="Tracker"
+        action={
+          <DateNavigator
+            currentDate={currentDate}
+            onDateChange={handleDateChange}
+            onJumpCurrent={() => handleDateChange(todayDate)}
+            jumpLabel="TODAY"
+            isCurrentActive={isViewingToday}
+            onPrev={() => handleDateChange(addDays(currentDate, -1))}
+            onNext={() => handleDateChange(addDays(currentDate, 1))}
             disabled={isPending}
           />
-        </div>
-      </div>
+        }
+      />
 
-      {/* Filter & Action Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 p-3 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
+      {/* Unified Page Toolbar */}
+      <PageToolbar>
         {/* Left: Search & Filter Dropdowns */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
@@ -543,9 +510,9 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         </div>
 
         {/* Right: Counter & Actions */}
-        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#ebd7b2]">
-          <span className="text-xs font-bold text-[#4a3b2c] shrink-0 tracking-wide font-sans">
-            {totalActive} ACCOUNTS · {completedAccountsCount} DONE
+        <div className="flex items-center justify-between lg:justify-end gap-3 pt-2 lg:pt-0 w-full lg:w-auto border-t lg:border-t-0 border-[#ebd7b2]">
+          <span className="text-xs text-[#5c4e3b] font-medium shrink-0">
+            {totalActive} accounts · {completedAccountsCount} completed
           </span>
 
           <div className="flex items-center gap-1.5">
@@ -569,10 +536,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             </Button>
           </div>
         </div>
-      </div>
+      </PageToolbar>
 
       {/* DESKTOP & TABLET MATRIX TABLE (hidden on mobile) */}
-      <div className="hidden md:block bg-white border-2 border-[#cfbeaa] rounded-xs overflow-hidden shadow-[3px_3px_0px_#baa892]">
+      <div className="hidden md:block bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -824,7 +791,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           </Table>
         </div>
 
-        <Pagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={sortedAccounts.length}
           pageSize={pageSize}
@@ -983,8 +950,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         )}
 
         {sortedAccounts.length > 0 && (
-          <div className="rounded-xl overflow-hidden border border-slate-200/80 shadow-2xs">
-            <Pagination
+          <div className="bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
+            <DataTablePagination
               currentPage={currentPage}
               totalItems={sortedAccounts.length}
               pageSize={pageSize}
@@ -1022,6 +989,6 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </AppPage>
   );
 }

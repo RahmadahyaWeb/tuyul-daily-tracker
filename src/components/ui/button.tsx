@@ -10,28 +10,28 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-slate-900 text-white border border-slate-950 shadow-[1.5px_1.5px_0px_#0f172a] hover:bg-slate-800 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#3B6EA8] text-white border border-[#234c7a] shadow-[1px_1px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
         primary:
-          "bg-blue-600 text-white border border-blue-800 shadow-[1.5px_1.5px_0px_#1e3a8a] hover:bg-blue-700 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#3B6EA8] text-white border border-[#234c7a] shadow-[1px_1px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
         destructive:
-          "bg-rose-600 text-white border border-rose-800 shadow-[1.5px_1.5px_0px_#9f1239] hover:bg-rose-700 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#A82A1E] text-white border border-[#7a1e15] shadow-[1px_1px_0px_#591610] hover:bg-[#8f2419] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
         outline:
-          "border border-[#D4CDC5] bg-white text-slate-800 shadow-[1px_1px_0px_rgba(0,0,0,0.06)] hover:bg-[#F5EFEA] hover:border-slate-400 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "border border-[#cfbeaa] bg-white text-[#2c261e] shadow-[1px_1px_0px_#e5ddd0] hover:bg-[#FAF6F0] hover:border-[#b5a38f] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
         secondary:
-          "bg-[#F2ECE4] text-slate-800 border border-[#E2DCD5] shadow-[1px_1px_0px_rgba(0,0,0,0.05)] hover:bg-[#EAE2D8] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
-        ghost: "hover:bg-[#F2ECE4] text-slate-700",
-        link: "text-blue-600 underline-offset-4 hover:underline",
+          "bg-[#F4EEE7] text-[#2c261e] border border-[#cfbeaa] shadow-[1px_1px_0px_#e5ddd0] hover:bg-[#EAE2D8] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+        ghost: "hover:bg-[#F3ECE0] text-[#5c4e3b] hover:text-[#231b12]",
+        link: "text-[#3B6EA8] underline-offset-4 hover:underline",
         rpg:
-          "bg-amber-500 text-slate-950 font-bold border border-amber-700 shadow-[1.5px_1.5px_0px_#78350f] hover:bg-amber-400 active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#3B6EA8] text-white font-bold border border-[#234c7a] shadow-[1px_1px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
         "ghost-danger":
-          "text-slate-500 hover:text-rose-600 hover:bg-rose-50",
+          "text-[#736350] hover:text-[#A82A1E] hover:bg-[#FDECEB]",
       },
       size: {
-        default: "h-8.5 px-3.5 py-1.5",
-        sm: "h-7.5 px-2.5 text-xs",
+        default: "h-9 px-4 py-2",
+        sm: "h-8 px-3 text-xs",
         lg: "h-10 px-5 text-sm",
-        icon: "h-7.5 w-7.5",
-        xs: "h-6.5 px-2 text-[11px]",
+        icon: "h-8 w-8",
+        xs: "h-7 px-2 text-[11px]",
       },
     },
     defaultVariants: {

@@ -27,22 +27,22 @@ export default function PrivacyPage() {
         </div>
 
         <section className="space-y-3 text-xs leading-relaxed text-[#5c4e3b]">
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide">1. DATA WE COLLECT</h2>
+          <h2 className="text-sm font-semibold text-[#231b12]">1. DATA WE COLLECT</h2>
           <p>
             We collect minimal account information necessary to provide the tracking service, such as your username, hashed password, and game account metadata (nicknames, servers, jobs).
           </p>
 
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide pt-3">2. CREDENTIAL SECURITY & ENCRYPTION</h2>
+          <h2 className="text-sm font-semibold text-[#231b12] pt-3">2. CREDENTIAL SECURITY & ENCRYPTION</h2>
           <p>
             Account metadata stored in Dituyulin is safeguarded with strict access controls. We never store plain text passwords in our database.
           </p>
 
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide pt-3">3. DATA ISOLATION</h2>
+          <h2 className="text-sm font-semibold text-[#231b12] pt-3">3. DATA ISOLATION</h2>
           <p>
             All user data is strictly scoped to your tenant workspace. We do not sell or share your personal data with any third parties.
           </p>
 
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide pt-3">4. COOKIES & AUTHENTICATION</h2>
+          <h2 className="text-sm font-semibold text-[#231b12] pt-3">4. COOKIES & AUTHENTICATION</h2>
           <p>
             We use secure, HttpOnly session cookies solely for authentication and session management.
           </p>

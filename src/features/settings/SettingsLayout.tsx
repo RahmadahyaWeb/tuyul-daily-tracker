@@ -6,6 +6,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { User, Layers, CreditCard } from "lucide-react";
 
+import { AppPage } from "@/components/shared/AppPage";
+import { PageHeader } from "@/components/shared/PageHeader";
+
 interface SettingsLayoutProps {
   children: React.ReactNode;
 }
@@ -20,19 +23,9 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
   const pathname = usePathname();
 
   return (
-    <div className="w-full space-y-6">
-      {/* Page Header */}
-      <div className="pb-3 border-b border-[#dfd5c5]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">Settings</h1>
-            <p className="text-xs text-[#736350] mt-0.5">
-              Manage your personal account, workspace preferences, and billing.
-            </p>
-          </div>
-        </div>
-      </div>
+    <AppPage>
+      {/* Unified Page Header */}
+      <PageHeader title="Settings" />
 
       <div className="flex flex-col md:flex-row gap-8 items-start">
         {/* Settings Navigation Tabs */}
@@ -64,6 +57,6 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
         {/* Content View */}
         <div className="flex-1 w-full max-w-2xl">{children}</div>
       </div>
-    </div>
+    </AppPage>
   );
 }

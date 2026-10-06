@@ -27,22 +27,22 @@ export default function TermsPage() {
         </div>
 
         <section className="space-y-3 text-xs leading-relaxed text-[#5c4e3b]">
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide">1. ACCEPTANCE OF TERMS</h2>
+          <h2 className="text-sm font-semibold text-[#231b12]">1. ACCEPTANCE OF TERMS</h2>
           <p>
             By accessing or using Dituyulin, you agree to be bound by these Terms of Service. If you do not agree, please do not use the application.
           </p>
 
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide pt-3">2. USER ACCOUNTS & RESPONSIBILITIES</h2>
+          <h2 className="text-sm font-semibold text-[#231b12] pt-3">2. USER ACCOUNTS & RESPONSIBILITIES</h2>
           <p>
             You are responsible for maintaining the confidentiality of your login credentials and for all activities that occur under your account.
           </p>
 
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide pt-3">3. USAGE LIMITS & PLANS</h2>
+          <h2 className="text-sm font-semibold text-[#231b12] pt-3">3. USAGE LIMITS & PLANS</h2>
           <p>
             Free tier accounts are limited to 5 managed character accounts. Upgrading to Pro unlocks additional quota and priority capabilities in accordance with our pricing schedule.
           </p>
 
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide pt-3">4. LIMITATION OF LIABILITY</h2>
+          <h2 className="text-sm font-semibold text-[#231b12] pt-3">4. LIMITATION OF LIABILITY</h2>
           <p>
             Dituyulin is provided &quot;as is&quot; without warranty of any kind. We are not liable for any indirect or consequential damages arising from your use of the service.
           </p>

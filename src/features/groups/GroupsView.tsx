@@ -20,8 +20,10 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus, Edit2, Trash2, Folder } from "lucide-react";
-import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
+import { AppPage } from "@/components/shared/AppPage";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
 
 interface GroupItem {
   id: string;
@@ -110,29 +112,20 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
   };
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#dfd5c5]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
-              Account Groups
-            </h1>
-            <p className="text-xs text-[#736350] mt-0.5">
-              Organize and categorize your character accounts (e.g., Client A, Personal, Card Farm)
-            </p>
-          </div>
-        </div>
-
-        <Button size="sm" onClick={handleOpenCreate} className="gap-1 text-xs">
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add Group</span>
-        </Button>
-      </div>
+    <AppPage>
+      {/* Unified Page Header */}
+      <PageHeader
+        title="Groups"
+        action={
+          <Button onClick={handleOpenCreate}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            <span>Add Group</span>
+          </Button>
+        }
+      />
 
       {/* Main Groups Table */}
-      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
+      <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -149,10 +142,10 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-slate-100">
+            <TableBody className="divide-y divide-[#eee7dc]">
               {initialGroups.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-28 text-center text-xs text-slate-400 py-6">
+                  <TableCell colSpan={3} className="h-28 text-center text-xs text-[#8a7b68] py-6">
                     No groups created yet. Click &quot;Add Group&quot; to create one.
                   </TableCell>
                 </TableRow>
@@ -160,10 +153,10 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
                 initialGroups
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((g) => (
-                  <TableRow key={g.id} className="hover:bg-slate-50/60 transition-colors">
-                    <TableCell className="font-semibold text-xs text-slate-900 py-3 pl-4">
+                  <TableRow key={g.id} className="hover:bg-[#FAF6F0] transition-colors">
+                    <TableCell className="font-semibold text-xs text-[#231b12] py-3 pl-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center text-slate-500">
+                        <div className="w-6 h-6 rounded-none bg-[#f4efe6] border border-[#ded4c4] flex items-center justify-center text-[#736350]">
                           <Folder className="w-3.5 h-3.5" />
                         </div>
                         <span>{g.name}</span>
@@ -171,9 +164,9 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
                     </TableCell>
 
                     <TableCell className="text-center py-3">
-                      <Badge variant="secondary" className="text-[10px] font-mono py-0 px-2">
+                      <span className="text-[10px] font-mono py-0.5 px-2 bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28] font-bold rounded-none">
                         {g._count?.accounts ?? 0} accounts
-                      </Badge>
+                      </span>
                     </TableCell>
 
                     <TableCell className="text-right py-3 pr-4">
@@ -181,7 +174,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-slate-400 hover:text-slate-800"
+                          className="h-7 w-7 text-[#8a7b68] hover:text-[#231b12]"
                           onClick={() => handleOpenEdit(g)}
                           title="Edit group"
                         >
@@ -190,7 +183,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                          className="h-7 w-7 text-[#8a7b68] hover:text-[#A82A1E] hover:bg-[#FDECEB]"
                           onClick={() =>
                             setDeleteDialog({
                               isOpen: true,
@@ -211,7 +204,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
           </Table>
         </div>
 
-        <Pagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={initialGroups.length}
           pageSize={pageSize}
@@ -255,7 +248,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
             >
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button type="submit" isLoading={isSubmitting}>
               {editingGroup ? "Save Changes" : "Create Group"}
             </Button>
           </div>
@@ -272,6 +265,6 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteDialog({ isOpen: false })}
       />
-    </div>
+    </AppPage>
   );
 }

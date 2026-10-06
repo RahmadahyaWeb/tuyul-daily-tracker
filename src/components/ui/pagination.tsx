@@ -78,8 +78,8 @@ export function Pagination({
 
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 ml-2">
-            <span className="text-[11px] text-[#8a7b68] hidden sm:inline font-pixel">
-              Per page:
+            <span className="text-xs text-[#8a7b68] hidden sm:inline font-medium">
+              Rows per page:
             </span>
             <select
               value={pageSize}
@@ -102,7 +102,7 @@ export function Pagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 text-slate-600 hover:text-slate-900 disabled:opacity-40"
+          className="h-7 w-7 text-[#736350] hover:text-[#231b12] border-[#cfc3b0] disabled:opacity-40"
           onClick={() => onPageChange(1)}
           disabled={safeCurrentPage <= 1}
           title="First Page"
@@ -114,7 +114,7 @@ export function Pagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 text-slate-600 hover:text-slate-900 disabled:opacity-40"
+          className="h-7 w-7 text-[#736350] hover:text-[#231b12] border-[#cfc3b0] disabled:opacity-40"
           onClick={() => onPageChange(safeCurrentPage - 1)}
           disabled={safeCurrentPage <= 1}
           title="Previous Page"
@@ -129,7 +129,7 @@ export function Pagination({
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  className="px-1 text-slate-400 select-none text-xs"
+                  className="px-1 text-[#8a7b68] select-none text-xs"
                 >
                   ...
                 </span>
@@ -144,8 +144,8 @@ export function Pagination({
                 size="sm"
                 className={`h-7 min-w-7 px-2 text-xs font-medium transition-colors ${
                   isCurrent
-                    ? "bg-slate-900 text-white hover:bg-slate-800"
-                    : "text-slate-700 hover:bg-slate-100"
+                    ? "bg-[#3B6EA8] text-white hover:bg-[#325d8f]"
+                    : "text-[#5c4e3b] hover:bg-[#FAF6F0] hover:text-[#231b12] border-[#cfc3b0]"
                 }`}
                 onClick={() => onPageChange(p as number)}
               >
@@ -156,7 +156,7 @@ export function Pagination({
         </div>
 
         {/* Mobile current page indicator */}
-        <span className="sm:hidden px-2 text-xs font-medium text-slate-700">
+        <span className="sm:hidden px-2 text-xs font-medium text-[#5c4e3b]">
           {safeCurrentPage} / {totalPages}
         </span>
 
@@ -164,7 +164,7 @@ export function Pagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 text-slate-600 hover:text-slate-900 disabled:opacity-40"
+          className="h-7 w-7 text-[#736350] hover:text-[#231b12] border-[#cfc3b0] disabled:opacity-40"
           onClick={() => onPageChange(safeCurrentPage + 1)}
           disabled={safeCurrentPage >= totalPages}
           title="Next Page"
@@ -176,7 +176,7 @@ export function Pagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-7 w-7 text-slate-600 hover:text-slate-900 disabled:opacity-40"
+          className="h-7 w-7 text-[#736350] hover:text-[#231b12] border-[#cfc3b0] disabled:opacity-40"
           onClick={() => onPageChange(totalPages)}
           disabled={safeCurrentPage >= totalPages}
           title="Last Page"

@@ -30,24 +30,24 @@ export function ProfileSettingsView({ user }: ProfileSettingsViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 shadow-[3px_3px_0px_#baa892] space-y-5">
+      <div className="bg-white border border-[#cfbeaa] rounded-xs p-6 shadow-[2px_2px_0px_#ded5c5] space-y-5">
         <div>
-          <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wider uppercase">Profile Information</h2>
+          <h2 className="text-sm font-semibold text-[#231b12]">Profile Information</h2>
           <p className="text-xs text-[#736350] mt-0.5">
             Update your account credentials and login information.
           </p>
         </div>
 
         {state?.error && (
-          <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+          <div className="p-3 rounded-xs bg-[#FDECEB] border border-[#f5c6cb] text-[#A82A1E] text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-[#A82A1E]" />
             <span>{state.error}</span>
           </div>
         )}
 
         {state?.success && (
-          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <div className="p-3 rounded-xs bg-[#EDF7ED] border border-[#c3e6cb] text-[#1E5D2F] text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-[#1E5D2F]" />
             <span>{state.message}</span>
           </div>
         )}
@@ -61,10 +61,10 @@ export function ProfileSettingsView({ user }: ProfileSettingsViewProps) {
             required
           />
 
-          <div className="pt-2 border-t border-slate-100 space-y-4">
+          <div className="pt-2 border-t border-[#eee7dc] space-y-4">
             <div>
-              <h3 className="text-xs font-semibold text-slate-900">Change Password</h3>
-              <p className="text-[11px] text-slate-500">Leave blank if you don&apos;t want to change your password.</p>
+              <h3 className="text-xs font-semibold text-[#231b12]">Change Password</h3>
+              <p className="text-[11px] text-[#736350]">Leave blank if you don&apos;t want to change your password.</p>
             </div>
 
             <Input
@@ -97,7 +97,6 @@ export function ProfileSettingsView({ user }: ProfileSettingsViewProps) {
           <div className="pt-3 flex justify-end">
             <Button
               type="submit"
-              className="bg-slate-900 hover:bg-slate-800 text-white text-xs"
               isLoading={isPending}
             >
               Save Changes

@@ -97,15 +97,15 @@ export default async function LandingPage() {
 
         {/* Product Preview Section (Tavern Quest Board / RPG UI Window Frame) */}
         <div className="max-w-4xl mx-auto mt-14 sm:mt-16 w-full">
-          <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-2 sm:p-3 shadow-[4px_5px_0px_#baa892]">
+          <div className="rounded-xs border border-[#cfbeaa] bg-[#FCFAF7] p-2 sm:p-3 shadow-[2px_2px_0px_#ded5c5]">
             {/* Window title bar */}
             <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#dfd5c5] bg-[#F4EFE6] rounded-xs mb-2">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 bg-[#A82A1E] rounded-none border border-[#78180e]" />
                 <div className="w-2.5 h-2.5 bg-[#B57C1E] rounded-none border border-[#785112]" />
                 <div className="w-2.5 h-2.5 bg-[#347A46] rounded-none border border-[#1b4b27]" />
-                <span className="text-[11px] font-bold text-[#5c4a35] font-pixel tracking-wider uppercase ml-1">
-                  DAILY QUEST TRACKER — NOTICE BOARD
+                <span className="text-[11px] font-bold text-[#5c4a35] tracking-wider uppercase ml-1">
+                  Daily Quest Tracker — Notice Board
                 </span>
               </div>
               <span className="text-[10px] text-[#8c7456] font-mono">SERVER: PRONTERA-01</span>
@@ -124,7 +124,7 @@ export default async function LandingPage() {
               {/* Row 1 */}
               <div className="grid grid-cols-12 items-center px-3 py-2.5 border-b border-[#eee7dc] hover:bg-[#FAF6F0] text-xs">
                 <div className="col-span-4 sm:col-span-3 font-medium text-[#2c261e] flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-xs bg-[#FAF2E1] border border-[#d2c0aa] flex items-center justify-center text-[10px] font-pixel text-[#664b28]">
+                  <div className="w-5 h-5 rounded-none bg-[#FAF2E1] border border-[#d2c0aa] flex items-center justify-center text-[10px] font-mono font-bold text-[#664b28]">
                     99
                   </div>
                   <div>
@@ -133,22 +133,22 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <div className="col-span-3 sm:col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-none border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-none border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-none border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
                 </div>
                 <div className="col-span-1 sm:col-span-3 flex items-center justify-end gap-2">
-                  <div className="hidden sm:block w-20 h-2 bg-[#f0eae1] rounded-xs border border-[#cfc3b0] overflow-hidden">
+                  <div className="hidden sm:block w-20 h-2 bg-[#f0eae1] rounded-none border border-[#cfc3b0] overflow-hidden">
                     <div className="h-full bg-[#347A46] w-full" />
                   </div>
                   <span className="text-[11px] font-bold text-[#1E5D2F] font-mono">100%</span>
@@ -158,7 +158,7 @@ export default async function LandingPage() {
               {/* Row 2 */}
               <div className="grid grid-cols-12 items-center px-3 py-2.5 border-b border-[#eee7dc] hover:bg-[#FAF6F0] text-xs">
                 <div className="col-span-4 sm:col-span-3 font-medium text-[#2c261e] flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-xs bg-[#F2F7FC] border border-[#aec3db] flex items-center justify-center text-[10px] font-pixel text-[#204E85]">
+                  <div className="w-5 h-5 rounded-none bg-[#F2F7FC] border border-[#aec3db] flex items-center justify-center text-[10px] font-mono font-bold text-[#204E85]">
                     85
                   </div>
                   <div>
@@ -167,20 +167,20 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <div className="col-span-3 sm:col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-none border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-none border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#cfc3b0] bg-white" />
+                  <div className="w-4 h-4 rounded-none border border-[#cfc3b0] bg-white" />
                 </div>
                 <div className="col-span-1 sm:col-span-3 flex items-center justify-end gap-2">
-                  <div className="hidden sm:block w-20 h-2 bg-[#f0eae1] rounded-xs border border-[#cfc3b0] overflow-hidden">
+                  <div className="hidden sm:block w-20 h-2 bg-[#f0eae1] rounded-none border border-[#cfc3b0] overflow-hidden">
                     <div className="h-full bg-[#3B6EA8] w-2/3" />
                   </div>
                   <span className="text-[11px] font-bold text-[#3B6EA8] font-mono">67%</span>
@@ -190,7 +190,7 @@ export default async function LandingPage() {
               {/* Row 3 */}
               <div className="grid grid-cols-12 items-center px-3 py-2.5 hover:bg-[#FAF6F0] text-xs">
                 <div className="col-span-4 sm:col-span-3 font-medium text-[#2c261e] flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-xs bg-[#FDF4F3] border border-[#e5b8b4] flex items-center justify-center text-[10px] font-pixel text-[#A82A1E]">
+                  <div className="w-5 h-5 rounded-none bg-[#FDF4F3] border border-[#e5b8b4] flex items-center justify-center text-[10px] font-mono font-bold text-[#A82A1E]">
                     72
                   </div>
                   <div>
@@ -199,18 +199,18 @@ export default async function LandingPage() {
                   </div>
                 </div>
                 <div className="col-span-3 sm:col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
+                  <div className="w-4 h-4 rounded-none border border-[#347A46] bg-[#347A46] text-white flex items-center justify-center">
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#cfc3b0] bg-white" />
+                  <div className="w-4 h-4 rounded-none border border-[#cfc3b0] bg-white" />
                 </div>
                 <div className="col-span-2 flex justify-center">
-                  <div className="w-4 h-4 rounded-xs border border-[#cfc3b0] bg-white" />
+                  <div className="w-4 h-4 rounded-none border border-[#cfc3b0] bg-white" />
                 </div>
                 <div className="col-span-1 sm:col-span-3 flex items-center justify-end gap-2">
-                  <div className="hidden sm:block w-20 h-2 bg-[#f0eae1] rounded-xs border border-[#cfc3b0] overflow-hidden">
+                  <div className="hidden sm:block w-20 h-2 bg-[#f0eae1] rounded-none border border-[#cfc3b0] overflow-hidden">
                     <div className="h-full bg-[#B57C1E] w-1/3" />
                   </div>
                   <span className="text-[11px] font-bold text-[#8C580B] font-mono">33%</span>
@@ -223,11 +223,11 @@ export default async function LandingPage() {
         {/* 3 Core Benefits */}
         <div className="max-w-4xl mx-auto mt-20 grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="p-5 rounded-xs border border-[#ded5c5] bg-white shadow-[2px_2px_0px_#e2d9cd] space-y-2.5">
-            <div className="w-8 h-8 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] flex items-center justify-center text-[#5A4122]">
+            <div className="w-8 h-8 rounded-none bg-[#FAF2E1] border border-[#cfbeaa] flex items-center justify-center text-[#5A4122]">
               <CheckCircle2 className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide uppercase">
-              DAILY QUEST CHECKLIST
+            <h3 className="text-sm font-semibold text-[#231b12]">
+              Daily Activities Checklist
             </h3>
             <p className="text-xs leading-relaxed text-[#685744]">
               High-speed matrix checklist with instant optimistic updates and real-time completion gauge across all accounts.
@@ -235,11 +235,11 @@ export default async function LandingPage() {
           </div>
 
           <div className="p-5 rounded-xs border border-[#ded5c5] bg-white shadow-[2px_2px_0px_#e2d9cd] space-y-2.5">
-            <div className="w-8 h-8 rounded-xs bg-[#F2F7FC] border border-[#aec3db] flex items-center justify-center text-[#204E85]">
+            <div className="w-8 h-8 rounded-none bg-[#F2F7FC] border border-[#aec3db] flex items-center justify-center text-[#204E85]">
               <Layers className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide uppercase">
-              GUILD ROSTER & GROUPS
+            <h3 className="text-sm font-semibold text-[#231b12]">
+              Account Groups & Categories
             </h3>
             <p className="text-xs leading-relaxed text-[#685744]">
               Group accounts by server, character job class, level brackets, and role without messy spreadsheet formulas.
@@ -247,11 +247,11 @@ export default async function LandingPage() {
           </div>
 
           <div className="p-5 rounded-xs border border-[#ded5c5] bg-white shadow-[2px_2px_0px_#e2d9cd] space-y-2.5">
-            <div className="w-8 h-8 rounded-xs bg-[#ECFDF3] border border-[#a3ddb4] flex items-center justify-center text-[#1E5D2F]">
+            <div className="w-8 h-8 rounded-none bg-[#ECFDF3] border border-[#a3ddb4] flex items-center justify-center text-[#1E5D2F]">
               <Calendar className="w-4 h-4" />
             </div>
-            <h3 className="text-sm font-bold text-[#231b12] font-pixel tracking-wide uppercase">
-              WEEKLY ADVENTURE LOG
+            <h3 className="text-sm font-semibold text-[#231b12]">
+              Weekly Progress Audit
             </h3>
             <p className="text-xs leading-relaxed text-[#685744]">
               7-day visual audit log to review completion consistency, streak records, and discover accounts falling behind.
@@ -261,7 +261,7 @@ export default async function LandingPage() {
 
         {/* CTA Section */}
         <div className="max-w-3xl mx-auto mt-20 w-full">
-          <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#F7F2E9]/70 p-8 sm:p-10 text-center space-y-4 shadow-[3px_4px_0px_#cfbeaa]">
+          <div className="rounded-xs border border-[#cfbeaa] bg-[#F7F2E9]/70 p-8 sm:p-10 text-center space-y-4 shadow-[2px_2px_0px_#ded5c5]">
             <h2 className="text-2xl sm:text-3xl font-bold text-[#231b12]">
               Ready to start tracking?
             </h2>

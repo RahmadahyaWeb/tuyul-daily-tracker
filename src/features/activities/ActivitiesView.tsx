@@ -32,8 +32,10 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
+import { AppPage } from "@/components/shared/AppPage";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
 
 interface ActivityItem {
   id: string;
@@ -199,52 +201,43 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
   };
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#dfd5c5]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
-              Daily Activities Matrix
-            </h1>
-            <p className="text-xs text-[#736350] mt-0.5">
-              Configure repeatable daily checklist tasks and sort orders for your characters
-            </p>
-          </div>
-        </div>
-
-        <Button size="sm" onClick={handleOpenCreate} className="gap-1 text-xs">
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add Activity</span>
-        </Button>
-      </div>
+    <AppPage>
+      {/* Unified Page Header */}
+      <PageHeader
+        title="Activities"
+        action={
+          <Button onClick={handleOpenCreate}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            <span>Add Activity</span>
+          </Button>
+        }
+      />
 
       {/* Main Activities Table */}
-      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
+      <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-16 text-center text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="w-16 text-center text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Order
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Activity Name
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Short Code
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Type
                 </TableHead>
-                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Assigned Characters
                 </TableHead>
-                <TableHead className="text-center text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                <TableHead className="text-center text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Status
                 </TableHead>
-                <TableHead className="w-24 text-right text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 pr-4 font-pixel">
+                <TableHead className="w-24 text-right text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 pr-4 font-sans">
                   Actions
                 </TableHead>
               </TableRow>
@@ -266,7 +259,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                   .map((act, localIndex) => {
                     const globalIndex = (currentPage - 1) * pageSize + localIndex;
                     return (
-                  <TableRow key={act.id} className="hover:bg-slate-50/60 transition-colors">
+                  <TableRow key={act.id} className="hover:bg-[#FAF6F0] transition-colors">
                     {/* Sort Order Cell with Up/Down buttons */}
                     <TableCell className="py-2.5 text-center">
                       <div className="flex items-center justify-center gap-0.5">
@@ -274,19 +267,19 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                           type="button"
                           disabled={globalIndex === 0}
                           onClick={() => handleMove(globalIndex, "up")}
-                          className="p-1 text-slate-400 hover:text-slate-800 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+                          className="p-1 text-[#8a7b68] hover:text-[#231b12] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                           title="Move up"
                         >
                           <ArrowUp className="w-3 h-3" />
                         </button>
-                        <span className="font-mono text-xs text-slate-400 font-semibold w-4 text-center">
+                        <span className="font-mono text-xs text-[#8a7b68] font-semibold w-4 text-center">
                           {globalIndex + 1}
                         </span>
                         <button
                           type="button"
                           disabled={globalIndex === activities.length - 1}
                           onClick={() => handleMove(globalIndex, "down")}
-                          className="p-1 text-slate-400 hover:text-slate-800 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
+                          className="p-1 text-[#8a7b68] hover:text-[#231b12] disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
                           title="Move down"
                         >
                           <ArrowDown className="w-3 h-3" />
@@ -294,29 +287,29 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                       </div>
                     </TableCell>
 
-                    <TableCell className="font-semibold text-xs text-slate-900 py-2.5">
+                    <TableCell className="font-semibold text-xs text-[#231b12] py-2.5">
                       {act.name}
                     </TableCell>
 
                     <TableCell className="py-2.5">
-                      <Badge variant="outline" className="font-mono text-[10px] py-0 px-2 font-bold text-slate-700 bg-slate-50">
+                      <span className="font-mono text-[10px] py-0.5 px-1.5 font-bold text-[#5c4a35] bg-[#FAF2E1] border border-[#cfbeaa] rounded-none">
                         {act.code}
-                      </Badge>
+                      </span>
                     </TableCell>
 
                     <TableCell className="py-2.5">
                       <span
-                        className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-none uppercase font-sans ${
                           act.activityType === "WEEKLY"
-                            ? "bg-indigo-50 text-indigo-700 border border-indigo-200/80"
-                            : "bg-slate-100 text-slate-600 border border-slate-200"
+                            ? "bg-[#FAF2E1] text-[#664b28] border border-[#cfbeaa]"
+                            : "bg-[#f4efe6] text-[#5c4e3b] border border-[#ded4c4]"
                         }`}
                       >
                         {act.activityType === "WEEKLY" ? "Weekly" : "Daily"}
                       </span>
                     </TableCell>
 
-                    <TableCell className="text-xs text-slate-500 py-2.5">
+                    <TableCell className="text-xs text-[#736350] py-2.5">
                       {act._count?.accountActivities || 0} characters
                     </TableCell>
 
@@ -341,7 +334,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-slate-400 hover:text-slate-800"
+                          className="h-7 w-7 text-[#8a7b68] hover:text-[#231b12]"
                           onClick={() => handleOpenEdit(act)}
                           title="Edit activity"
                         >
@@ -350,7 +343,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                          className="h-7 w-7 text-[#8a7b68] hover:text-[#A82A1E] hover:bg-[#FDECEB]"
                           onClick={() =>
                             setDeleteDialog({
                               isOpen: true,
@@ -372,7 +365,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
           </Table>
         </div>
 
-        <Pagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={activities.length}
           pageSize={pageSize}
@@ -431,7 +424,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                   activityType: e.target.value as "DAILY" | "WEEKLY",
                 })
               }
-              className="h-8 w-full rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer shadow-2xs"
+              className="h-8 w-full rounded-xs border border-[#cfc3b0] bg-white px-2.5 text-xs text-[#2c261e] focus:outline-none focus:border-[#3B6EA8] cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
             >
               <option value="DAILY">Daily Checklist (Repeats everyday)</option>
               <option value="WEEKLY">Weekly Task (Once per week, reset every Monday)</option>
@@ -467,7 +460,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
             >
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button type="submit" isLoading={isSubmitting}>
               {editingActivity ? "Save Changes" : "Create Activity"}
             </Button>
           </div>
@@ -484,6 +477,6 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteDialog({ isOpen: false })}
       />
-    </div>
+    </AppPage>
   );
 }

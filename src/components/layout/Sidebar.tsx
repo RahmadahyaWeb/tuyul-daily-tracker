@@ -75,9 +75,9 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
         prefetch={true}
         onClick={handleNavClick}
         className={cn(
-          "group flex items-center justify-between px-3 py-2 rounded-xs text-xs font-medium transition-all select-none",
+          "group flex items-center px-3 py-2 rounded-xs text-xs font-medium transition-all select-none",
           isActive
-            ? "bg-[#3B6EA8] text-white shadow-[1.5px_1.5px_0px_#1e3b60]"
+            ? "bg-[#3B6EA8] text-white shadow-[1px_1px_0px_#1e3b60]"
             : "text-[#5c4e3b] hover:text-[#231b12] hover:bg-[#F3ECE0]"
         )}
       >
@@ -90,9 +90,6 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
           />
           <span className="truncate">{item.label}</span>
         </div>
-        {isActive && (
-          <div className="w-1.5 h-1.5 bg-[#FDEECA] rounded-none shrink-0 shadow-[0.5px_0.5px_0px_#1e3b60]" />
-        )}
       </Link>
     );
   };
@@ -114,8 +111,8 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
       <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
         {/* Core Links */}
         <div className="space-y-1">
-          <p className="px-3 pb-1 text-[10px] font-bold text-[#8f7e68] uppercase tracking-wider font-pixel">
-            MAIN BOARD
+          <p className="px-3 pb-1 text-[10px] font-bold text-[#8f7e68] uppercase tracking-wider font-sans">
+            MAIN
           </p>
           {mainNavItems.map(renderLink)}
         </div>
@@ -124,7 +121,7 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
 
         {/* Management Section */}
         <div className="space-y-1">
-          <p className="px-3 pb-1 text-[10px] font-bold text-[#8f7e68] uppercase tracking-wider font-pixel">
+          <p className="px-3 pb-1 text-[10px] font-bold text-[#8f7e68] uppercase tracking-wider font-sans">
             MANAGEMENT
           </p>
           {managementNavItems.map(renderLink)}
@@ -135,9 +132,9 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
           <>
             <div className="border-b border-[#ebd7b2] my-2" />
             <div className="space-y-1">
-              <p className="px-3 pb-1 text-[10px] font-bold text-[#3B6EA8] uppercase tracking-wider flex items-center gap-1.5 font-pixel">
+              <p className="px-3 pb-1 text-[10px] font-bold text-[#3B6EA8] uppercase tracking-wider flex items-center gap-1.5 font-sans">
                 <Shield className="w-3 h-3 text-[#3B6EA8]" />
-                <span>ADMIN GUILD</span>
+                <span>ADMINISTRATION</span>
               </p>
               {adminNavItems.map(renderLink)}
             </div>
@@ -146,12 +143,12 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
       </nav>
 
       {/* Footer: Workspace & User Dropdown */}
-      <div className="p-3 border-t border-[#dfd5c5] bg-[#F7F2E9]/60">
+      <div className="p-2.5 border-t border-[#dfd5c5] bg-[#F7F2E9]/60">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="w-full flex items-center justify-between p-2 rounded-xs bg-white border border-[#cfc3b0] shadow-[1px_1px_0px_#e5ddd0] hover:bg-[#FAF7F2] transition-colors cursor-pointer text-left"
+              className="w-full flex items-center justify-between p-1.5 rounded-xs hover:bg-[#F0E8DC] transition-colors cursor-pointer text-left"
             >
               <div className="flex items-center gap-2 min-w-0 pr-1">
                 <Avatar name={user?.username || "User"} size="sm" />
@@ -159,8 +156,8 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
                   <p className="text-xs font-semibold text-[#2c261e] truncate leading-tight">
                     {user?.username || "User"}
                   </p>
-                  <p className="text-[10px] text-[#8a7b68] truncate leading-none mt-0.5 font-pixel">
-                    WORKSPACE
+                  <p className="text-[10px] text-[#8a7b68] truncate leading-none mt-0.5 font-sans font-medium uppercase">
+                    Workspace
                   </p>
                 </div>
               </div>
@@ -168,12 +165,12 @@ export function Sidebar({ onCloseMobile, user }: SidebarProps) {
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" side="top" className="w-52 mb-1 rounded-xs border-2 border-[#cfc3b0] bg-[#FCFAF7] shadow-[3px_3px_0px_#baa892]">
+          <DropdownMenuContent align="end" side="top" className="w-52 mb-1 rounded-xs border-2 border-[#cfc3b0] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892]">
             <DropdownMenuLabel className="font-normal py-1.5 px-2">
               <div className="flex flex-col space-y-0.5">
                 <p className="text-xs font-bold text-[#2c261e]">{user?.username || "User"}</p>
-                <p className="text-[10px] text-[#8a7b68] font-pixel">
-                  {user?.role === "ADMIN" ? "GUILD MASTER" : "ADVENTURER"}
+                <p className="text-[10px] text-[#8a7b68] font-sans uppercase">
+                  {user?.role === "ADMIN" ? "Administrator" : "Member"}
                 </p>
               </div>
             </DropdownMenuLabel>

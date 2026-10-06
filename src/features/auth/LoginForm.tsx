@@ -39,7 +39,7 @@ export function LoginForm() {
         </div>
 
         {/* Card Surface */}
-        <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-6 shadow-[3px_4px_0px_#cfbeaa] space-y-4">
+        <div className="rounded-xs border border-[#cfbeaa] bg-white p-6 shadow-[2px_2px_0px_#ded5c5] space-y-4">
           {state?.error && (
             <div className="p-3 rounded-xs bg-[#FDF4F3] border border-[#e5b8b4] text-[#A82A1E] text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 text-[#A82A1E]" />

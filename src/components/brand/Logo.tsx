@@ -86,7 +86,7 @@ export function Logo({
 
       {withText && (
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center">
             <span
               className={cn(
                 "font-pixel font-bold tracking-tight text-slate-900 leading-none",
@@ -94,9 +94,6 @@ export function Logo({
               )}
             >
               Dituyulin
-            </span>
-            <span className="font-pixel text-[9px] uppercase px-1 py-0.2 rounded-xs bg-amber-100 text-amber-800 border border-amber-300 font-bold leading-none">
-              SaaS
             </span>
           </div>
           {withTagline && (

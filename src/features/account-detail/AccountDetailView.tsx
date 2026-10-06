@@ -40,8 +40,10 @@ import {
   EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
+import { AppPage } from "@/components/shared/AppPage";
+import { SectionHeader } from "@/components/shared/SectionHeader";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
 
 interface AccountDetailProps {
   data: {
@@ -163,7 +165,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <AppPage>
       {/* Top Breadcrumb & Back button */}
       <div>
         <Link
@@ -175,7 +177,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
         </Link>
 
         {/* Character Profile Card */}
-        <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-5 shadow-[3px_3px_0px_#baa892] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-xs border border-[#cfbeaa] bg-[#FCFAF7] p-5 shadow-[2px_2px_0px_#ded5c5] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <Avatar name={account.nickname} size="lg" />
             <div>
@@ -207,7 +209,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                 {account.group && (
                   <>
                     <span>·</span>
-                    <span className="px-1.5 py-0.5 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28] font-bold text-[10px] font-pixel">
+                    <span className="px-1.5 py-0.5 rounded-none bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28] font-bold text-[10px]">
                       {account.group.name}
                     </span>
                   </>
@@ -237,18 +239,16 @@ export function AccountDetailView({ data }: AccountDetailProps) {
       {/* 2-Column KPI & Credentials */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Today & Weekly Progress Stats */}
-        <Card className="saas-card">
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-indigo-600" />
-              Checklist Performance
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-2 space-y-4">
+        <div className="rounded-xs border border-[#cfbeaa] bg-white p-4 shadow-[2px_2px_0px_#ded5c5] space-y-4">
+          <div className="text-xs font-bold uppercase tracking-wider text-[#8a7b68] flex items-center gap-1.5 border-b border-[#eee7dc] pb-2">
+            <Activity className="w-3.5 h-3.5 text-[#3B6EA8]" />
+            Checklist Performance
+          </div>
+          <div className="space-y-4">
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-600">Today&apos;s Progress</span>
-                <span className="font-bold text-slate-900">
+                <span className="text-[#5c4e3b]">Today&apos;s Progress</span>
+                <span className="font-semibold text-[#231b12]">
                   {todayCompletedCount} / {totalAssigned} ({todayProgressPercent}%)
                 </span>
               </div>
@@ -257,149 +257,141 @@ export function AccountDetailView({ data }: AccountDetailProps) {
 
             <div className="space-y-1.5">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-600">This Week Consistency</span>
-                <span className="font-bold text-slate-900">
+                <span className="text-[#5c4e3b]">This Week Consistency</span>
+                <span className="font-semibold text-[#231b12]">
                   {weekLogs.length} / {weekTotalExpected} ({weekProgressPercent}%)
                 </span>
               </div>
               <Progress value={weekProgressPercent} className="h-2" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Account Information Card */}
-        <Card className="saas-card">
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
-              Account Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-2 space-y-2 text-xs">
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-              <span className="text-slate-500">Username:</span>
-              <div className="flex items-center gap-2">
-                <span className="font-mono font-semibold text-slate-900">
-                  {account.username}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleCopy(account.username, "Username")}
-                  className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                  title="Copy Username"
-                >
-                  {copiedField === "Username" ? (
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                </button>
-              </div>
-            </div>
+        <div className="rounded-xs border border-[#cfbeaa] bg-white p-4 shadow-[2px_2px_0px_#ded5c5] space-y-2 text-xs">
+          <div className="text-xs font-bold uppercase tracking-wider text-[#8a7b68] flex items-center gap-1.5 border-b border-[#eee7dc] pb-2">
+            <UserCheck className="w-3.5 h-3.5 text-[#3B6EA8]" />
+            Account Details
+          </div>
 
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-              <span className="text-slate-500">Password:</span>
-              <div className="flex items-center gap-2">
-                {account.password ? (
-                  <>
-                    <span className="font-mono font-semibold text-slate-900">
-                      {showPassword ? account.password : "••••••••"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      title={showPassword ? "Hide Password" : "Show Password"}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-3.5 h-3.5" />
-                      ) : (
-                        <Eye className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(account.password || "", "Password")}
-                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      title="Copy Password"
-                    >
-                      {copiedField === "Password" ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <span className="text-slate-400 italic">No password set</span>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Server</span>
-                <span className="font-medium text-slate-800">{account.server}</span>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Group</span>
-                <span className="font-medium text-slate-800">{account.group?.name || "Ungrouped"}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-              <span className="text-slate-500">Start Date:</span>
-              <span className="font-medium text-slate-800">
-                {new Date(account.startDate).toLocaleDateString("id-ID", { dateStyle: "medium" })}
+          <div className="flex items-center justify-between p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">
+            <span className="text-[#736350]">Username:</span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-semibold text-[#231b12]">
+                {account.username}
               </span>
+              <button
+                type="button"
+                onClick={() => handleCopy(account.username, "Username")}
+                className="p-1 text-[#8a7b68] hover:text-[#231b12] cursor-pointer"
+                title="Copy Username"
+              >
+                {copiedField === "Username" ? (
+                  <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
+              </button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">
+            <span className="text-[#736350]">Password:</span>
+            <div className="flex items-center gap-2">
+              {account.password ? (
+                <>
+                  <span className="font-mono font-semibold text-[#231b12]">
+                    {showPassword ? account.password : "••••••••"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="p-1 text-[#8a7b68] hover:text-[#231b12] cursor-pointer"
+                    title={showPassword ? "Hide Password" : "Show Password"}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(account.password || "", "Password")}
+                    className="p-1 text-[#8a7b68] hover:text-[#231b12] cursor-pointer"
+                    title="Copy Password"
+                  >
+                    {copiedField === "Password" ? (
+                      <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                </>
+              ) : (
+                <span className="text-[#8a7b68] italic">No password set</span>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">
+              <span className="text-[10px] text-[#8a7b68] uppercase font-semibold block">Server</span>
+              <span className="font-medium text-[#231b12]">{account.server}</span>
+            </div>
+            <div className="p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">
+              <span className="text-[10px] text-[#8a7b68] uppercase font-semibold block">Group</span>
+              <span className="font-medium text-[#231b12]">{account.group?.name || "Ungrouped"}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">
+            <span className="text-[#736350]">Start Date:</span>
+            <span className="font-medium text-[#231b12]">
+              {new Date(account.startDate).toLocaleDateString("id-ID", { dateStyle: "medium" })}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Notes / Remarks Editor */}
-      <Card className="saas-card">
-        <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-          <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-            <FileText className="w-3.5 h-3.5 text-indigo-600" />
+      <div className="rounded-xs border border-[#cfbeaa] bg-white p-4 shadow-[2px_2px_0px_#ded5c5] space-y-3">
+        <div className="flex items-center justify-between border-b border-[#eee7dc] pb-2">
+          <div className="text-xs font-bold uppercase tracking-wider text-[#8a7b68] flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5 text-[#3B6EA8]" />
             Character Notes & Instructions
-          </CardTitle>
+          </div>
           <Button
             size="sm"
             onClick={handleSaveNotes}
             isLoading={isSavingNotes}
-            className="h-7 text-xs bg-slate-900 hover:bg-slate-800 text-white gap-1"
+            className="h-8 text-xs gap-1"
           >
             {notesSaved ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Save className="w-3.5 h-3.5" />}
             <span>{notesSaved ? "Saved" : "Save Notes"}</span>
           </Button>
-        </CardHeader>
-        <CardContent className="p-4 pt-2">
+        </div>
+        <div>
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Type any character settings, farm target, level targets, or equipment gear setups here..."
             rows={3}
-            className="text-xs bg-slate-50/50"
+            className="text-xs bg-[#FAF6F0]/60 border-[#cfbeaa]"
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* 30-Day Activity History Heatmap Matrix */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-indigo-600" />
-            30-Day Activity History Matrix
-          </h2>
-        </div>
+      <section className="space-y-3">
+        <SectionHeader title="30-Day Activity History" />
 
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+        <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="min-w-[750px]">
-              <TableHeader className="bg-slate-50/80 border-b border-slate-200/70">
+              <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[180px] text-[11px] font-bold text-slate-600 uppercase tracking-wider py-3 pl-4 sticky left-0 z-20 bg-slate-50/90 border-r border-slate-200/60">
+                  <TableHead className="w-[180px] text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 pl-4 sticky left-0 z-20 bg-[#F4EFE6] border-r border-[#ded4c4] font-sans">
                     Activity
                   </TableHead>
 
@@ -409,8 +401,8 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                       <TableHead
                         key={dateStr}
                         className={cn(
-                          "text-center text-[10px] font-bold text-slate-500 py-2 px-1 min-w-[32px]",
-                          isToday && "bg-indigo-50/50 text-indigo-700"
+                          "text-center text-[10px] font-bold text-[#5c4e3b] py-2 px-1 min-w-[32px] font-sans",
+                          isToday && "bg-[#FAF2E1] text-[#664b28]"
                         )}
                       >
                         <span title={formatDateDisplay(dateStr)}>
@@ -422,12 +414,12 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                 </TableRow>
               </TableHeader>
 
-              <TableBody className="divide-y divide-slate-100">
+              <TableBody className="divide-y divide-[#eee7dc]">
                 {activeActivities.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={last30Days.length + 1}
-                      className="h-28 text-center text-xs text-slate-400 py-6"
+                      className="h-28 text-center text-xs text-[#8a7b68] py-6"
                     >
                       No activities assigned to this character.
                     </TableCell>
@@ -436,8 +428,8 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                   activeActivities
                     .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                     .map((act) => (
-                    <TableRow key={act.id} className="hover:bg-slate-50/60 transition-colors">
-                      <TableCell className="py-2.5 pl-4 sticky left-0 z-10 bg-white border-r border-slate-200/60 text-xs font-semibold text-slate-900">
+                    <TableRow key={act.id} className="hover:bg-[#FAF6F0] transition-colors">
+                      <TableCell className="py-2.5 pl-4 sticky left-0 z-10 bg-white border-r border-[#eee7dc] text-xs font-semibold text-[#231b12]">
                         {act.name}
                       </TableCell>
 
@@ -450,15 +442,15 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                             key={dateStr}
                             className={cn(
                               "text-center p-1 align-middle",
-                              isToday && "bg-indigo-50/20"
+                              isToday && "bg-[#FAF2E1]/30"
                             )}
                           >
                             <span
                               className={cn(
-                                "w-4 h-4 rounded-sm inline-flex items-center justify-center transition-colors",
+                                "w-4 h-4 rounded-none inline-flex items-center justify-center transition-colors",
                                 isDone
-                                  ? "bg-emerald-500 text-white shadow-2xs"
-                                  : "bg-slate-100 text-slate-300"
+                                  ? "bg-[#1E5D2F] text-white"
+                                  : "bg-[#eee7dc] text-transparent"
                               )}
                               title={`${act.name} on ${dateStr}: ${isDone ? "Done" : "Not Done"}`}
                             >
@@ -475,7 +467,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
           </div>
 
           {activeActivities.length > 0 && (
-            <Pagination
+            <DataTablePagination
               currentPage={currentPage}
               totalItems={activeActivities.length}
               pageSize={pageSize}
@@ -489,7 +481,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
             />
           )}
         </div>
-      </div>
-    </div>
+      </section>
+    </AppPage>
   );
 }

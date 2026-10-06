@@ -49,8 +49,11 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PlanLimitDialog } from "@/components/shared/PlanLimitDialog";
-import { Pagination } from "@/components/ui/pagination";
 import { toast } from "sonner";
+import { AppPage } from "@/components/shared/AppPage";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { PageToolbar } from "@/components/shared/PageToolbar";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
 
 interface AccountItem {
   id: string;
@@ -355,29 +358,20 @@ export function AccountsView({
   );
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#dfd5c5]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-[#231b12]">
-              Account Management
-            </h1>
-            <p className="text-xs text-[#736350] mt-0.5">
-              Manage character accounts, groups, and assigned daily tasks
-            </p>
-          </div>
-        </div>
+    <AppPage>
+      {/* Unified Page Header */}
+      <PageHeader
+        title="Accounts"
+        action={
+          <Button onClick={handleOpenCreate}>
+            <Plus className="w-4 h-4 mr-1.5" />
+            <span>Add Account</span>
+          </Button>
+        }
+      />
 
-        <Button size="sm" onClick={handleOpenCreate} className="gap-1 text-xs">
-          <Plus className="w-3.5 h-3.5" />
-          <span>Add Account</span>
-        </Button>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 text-xs p-2.5 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
+      {/* Unified Page Toolbar */}
+      <PageToolbar>
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68]" />
           <input
@@ -412,10 +406,10 @@ export function AccountsView({
           <option value="Paused">Paused</option>
           <option value="Finished">Finished</option>
         </select>
-      </div>
+      </PageToolbar>
 
       {/* Main Accounts Table */}
-      <div className="rounded-xs border-2 border-[#cfbeaa] bg-white shadow-[3px_3px_0px_#baa892] overflow-hidden">
+      <div className="rounded-xs border border-[#cfbeaa] bg-white shadow-[2px_2px_0px_#ded5c5] overflow-hidden">
         <div className="overflow-x-auto">
           <Table className="min-w-[750px]">
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -626,7 +620,7 @@ export function AccountsView({
           </Table>
         </div>
 
-        <Pagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={filteredAccounts.length}
           pageSize={pageSize}
@@ -857,7 +851,7 @@ export function AccountsView({
             >
               Cancel
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <Button type="submit" isLoading={isSubmitting}>
               {editingAccount ? "Save Changes" : "Create Account"}
             </Button>
           </div>
@@ -880,6 +874,6 @@ export function AccountsView({
         open={planLimitOpen}
         onOpenChange={setPlanLimitOpen}
       />
-    </div>
+    </AppPage>
   );
 }

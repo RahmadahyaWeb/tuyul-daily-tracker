@@ -10,7 +10,6 @@ import {
   formatDateShort,
   getTodayMakassar,
 } from "@/lib/date-utils";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableHeader,
@@ -19,10 +18,13 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Check, Search } from "lucide-react";
+import { Check, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Pagination } from "@/components/ui/pagination";
-import { DatePicker } from "@/components/ui/date-picker";
+import { AppPage } from "@/components/shared/AppPage";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { PageToolbar } from "@/components/shared/PageToolbar";
+import { DateNavigator } from "@/components/shared/DateNavigator";
+import { DataTablePagination } from "@/components/shared/DataTablePagination";
 
 interface WeeklyViewProps {
   initialWeekDays: ReturnType<typeof getWeekDays>;
@@ -77,64 +79,30 @@ export function WeeklyView({
   );
 
   return (
-    <div className="space-y-4 w-full">
-      {/* Header & Week Controller */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-[#dfd5c5]">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#3B6EA8] rounded-none shadow-[0.5px_0.5px_0px_#1e3b60]" />
-          <h1 className="text-xl font-bold tracking-tight text-[#231b12]">Weekly</h1>
-        </div>
-
-        {/* Week Navigator */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white border border-[#cfc3b0] rounded-xs p-0.5 shadow-[1px_1px_0px_#e5ddd0]">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
-              onClick={() => handleWeekNav(-7)}
-              disabled={isPending}
-              aria-label="Previous week"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs px-2.5 font-bold text-[#3d3326]"
-              onClick={handleThisWeek}
-              disabled={isPending}
-            >
-              THIS WEEK
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-[#736350] hover:text-[#231b12]"
-              onClick={() => handleWeekNav(7)}
-              disabled={isPending}
-              aria-label="Next week"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </Button>
-          </div>
-
-          <DatePicker
-            value={baseDateStr}
-            onChange={(newDate) => {
+    <AppPage>
+      {/* Unified Page Header & Week Controller */}
+      <PageHeader
+        title="Weekly"
+        action={
+          <DateNavigator
+            currentDate={baseDateStr}
+            onDateChange={(newDate) => {
               startTransition(() => {
                 router.push(`/weekly?date=${newDate}`);
               });
             }}
+            onJumpCurrent={handleThisWeek}
+            jumpLabel="THIS WEEK"
+            isCurrentActive={baseDateStr === todayStr}
+            onPrev={() => handleWeekNav(-7)}
+            onNext={() => handleWeekNav(7)}
             disabled={isPending}
           />
-        </div>
-      </div>
+        }
+      />
 
-      {/* Filter Bar */}
-      <div className="flex items-center justify-between gap-3 p-3 bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs shadow-[2px_2px_0px_#dfd5c5]">
+      {/* Unified Page Toolbar */}
+      <PageToolbar>
         <div className="relative w-full sm:w-64">
           <Search className="w-3.5 h-3.5 text-[#8a7b68] absolute left-2.5 top-1/2 -translate-y-1/2" />
           <input
@@ -146,13 +114,13 @@ export function WeeklyView({
           />
         </div>
 
-        <span className="text-xs font-bold text-[#4a3b2c] shrink-0 tracking-wide font-sans">
-          {filteredAccounts.length} ACCOUNTS
+        <span className="text-xs text-[#5c4e3b] font-medium shrink-0">
+          {filteredAccounts.length} accounts
         </span>
-      </div>
+      </PageToolbar>
 
       {/* DESKTOP & TABLET MATRIX TABLE (hidden on mobile) */}
-      <div className="hidden md:block bg-white border-2 border-[#cfbeaa] rounded-xs overflow-hidden shadow-[3px_3px_0px_#baa892]">
+      <div className="hidden md:block bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
@@ -249,7 +217,7 @@ export function WeeklyView({
           </Table>
         </div>
 
-        <Pagination
+        <DataTablePagination
           currentPage={currentPage}
           totalItems={filteredAccounts.length}
           pageSize={pageSize}
@@ -278,7 +246,7 @@ export function WeeklyView({
             return (
               <div
                 key={acc.id}
-                className="bg-white border-2 border-[#cfbeaa] rounded-xs p-4 shadow-[2px_2px_0px_#dfd5c5] space-y-3"
+                className="bg-white border border-[#cfbeaa] rounded-xs p-4 shadow-[2px_2px_0px_#dfd5c5] space-y-3"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -303,7 +271,7 @@ export function WeeklyView({
 
                     return (
                       <div key={day.dateStr} className="space-y-1">
-                        <span className="text-[10px] font-bold text-[#8a7b68] block font-pixel uppercase">
+                        <span className="text-[10px] font-semibold text-[#8a7b68] block uppercase">
                           {day.dayName.slice(0, 3)}
                         </span>
                         <div className="flex items-center justify-center h-7">
@@ -331,8 +299,8 @@ export function WeeklyView({
         )}
 
         {filteredAccounts.length > 0 && (
-          <div className="rounded-xs overflow-hidden border border-[#ded5c5] shadow-[1px_1px_0px_#e5ddd0]">
-            <Pagination
+          <div className="bg-white border border-[#cfbeaa] rounded-xs overflow-hidden shadow-[2px_2px_0px_#ded5c5]">
+            <DataTablePagination
               currentPage={currentPage}
               totalItems={filteredAccounts.length}
               pageSize={pageSize}
@@ -347,6 +315,6 @@ export function WeeklyView({
           </div>
         )}
       </div>
-    </div>
+    </AppPage>
   );
 }

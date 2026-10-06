@@ -40,14 +40,14 @@ export function ForgotPasswordForm() {
           </div>
         </div>
 
-        <div className="rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] p-6 shadow-[3px_4px_0px_#cfbeaa] space-y-4">
+        <div className="rounded-xs border border-[#cfbeaa] bg-white p-6 shadow-[2px_2px_0px_#ded5c5] space-y-4">
           {submitted ? (
             <div className="space-y-4 text-center py-2">
               <div className="w-10 h-10 bg-[#ECFDF3] border border-[#a3ddb4] text-[#1E5D2F] rounded-xs flex items-center justify-center mx-auto shadow-[1px_1px_0px_#a3ddb4]">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-bold text-[#231b12] font-pixel tracking-wide uppercase">Request Sent</p>
+                <p className="text-sm font-semibold text-[#231b12]">Request Sent</p>
                 <p className="text-xs text-[#736350] leading-relaxed">
                   If an account exists for <span className="font-semibold text-[#231b12]">@{username}</span>, contact your guild administrator to complete reset.
                 </p>

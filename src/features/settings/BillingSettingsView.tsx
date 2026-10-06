@@ -74,10 +74,10 @@ export function BillingSettingsView({
     <div className="space-y-6">
       {/* Pending Approval Notice */}
       {!isPro && billingRequest?.status === "PENDING" && (
-        <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FFF8EB] text-[#8C580B] shadow-[2px_2px_0px_#e5ddd0] flex items-start gap-3">
+        <div className="p-4 rounded-xs border border-[#cfbeaa] bg-[#FFF8EB] text-[#8C580B] shadow-[2px_2px_0px_#e5ddd0] flex items-start gap-3">
           <Clock className="w-5 h-5 text-[#8C580B] shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-[#8C580B] font-pixel">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-[#8C580B]">
               Upgrade Request Pending Approval
             </h4>
             <p className="text-xs text-[#8C580B] leading-relaxed">
@@ -88,15 +88,15 @@ export function BillingSettingsView({
       )}
 
       {/* Current Plan Overview */}
-      <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 shadow-[3px_3px_0px_#baa892] space-y-5">
+      <div className="bg-white border border-[#cfbeaa] rounded-xs p-6 shadow-[2px_2px_0px_#ded5c5] space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-[#231b12] font-pixel tracking-wider uppercase">{plan.name} Plan</h2>
+              <h2 className="text-sm font-semibold text-[#231b12]">{plan.name} Plan</h2>
               <span
-                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-none font-pixel ${
+                className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-none font-sans ${
                   isPro
-                    ? "bg-[#3B6EA8] text-white shadow-[0.5px_0.5px_0px_#1e3b60]"
+                    ? "bg-[#3B6EA8] text-white"
                     : "bg-[#FAF2E1] text-[#664b28] border border-[#cfbeaa]"
                 }`}
               >
@@ -107,13 +107,13 @@ export function BillingSettingsView({
           </div>
 
           <div className="text-left sm:text-right">
-            <span className="text-2xl font-bold text-[#231b12]">{plan.price}</span>
+            <span className="text-2xl font-semibold text-[#231b12]">{plan.price}</span>
             <span className="text-xs text-[#736350]"> / {plan.billingPeriod}</span>
           </div>
         </div>
 
         {/* Usage Progress */}
-        <div className="p-4 bg-white border border-[#cfc3b0] rounded-xs space-y-2 shadow-[1px_1px_0px_#e5ddd0]">
+        <div className="p-4 bg-[#FAF6F0] border border-[#cfc3b0] rounded-xs space-y-2 shadow-[1px_1px_0px_#e5ddd0]">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-[#5c4e3b]">Account Usage</span>
             <span className="font-mono font-bold text-[#231b12]">
@@ -122,7 +122,7 @@ export function BillingSettingsView({
           </div>
           <Progress
             value={usagePercent}
-            className="h-2.5 bg-[#f0eae1]"
+            className="h-2 bg-[#f0eae1]"
             indicatorColor={usagePercent >= 100 ? "bg-[#A82A1E]" : "bg-[#3B6EA8]"}
           />
           {count >= limit && (
@@ -154,8 +154,8 @@ export function BillingSettingsView({
       </div>
 
       {/* Plan Features */}
-      <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 shadow-[3px_3px_0px_#baa892] space-y-4">
-        <h3 className="text-xs font-bold text-[#5a4c3a] uppercase tracking-wider font-pixel">
+      <div className="bg-white border border-[#cfbeaa] rounded-xs p-6 shadow-[2px_2px_0px_#ded5c5] space-y-4">
+        <h3 className="text-xs font-semibold text-[#5a4c3a] uppercase tracking-wider">
           Plan Capabilities
         </h3>
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-[#5c4e3b]">
@@ -172,32 +172,32 @@ export function BillingSettingsView({
       <Dialog open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center mb-2">
-              <Sparkles className="w-4 h-4 text-indigo-300" />
+            <div className="w-9 h-9 rounded-xs bg-[#3B6EA8] text-white flex items-center justify-center mb-2">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <DialogTitle className="text-lg font-bold">Upgrade to Pro Plan</DialogTitle>
-            <DialogDescription className="text-xs text-slate-500">
+            <DialogTitle className="text-lg font-bold text-[#231b12]">Upgrade to Pro Plan</DialogTitle>
+            <DialogDescription className="text-xs text-[#736350]">
               Unlock up to 100 accounts, priority cloud sync, and enhanced character monitoring.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-3 border-y border-slate-100 text-xs text-slate-700">
-            <div className="flex justify-between items-baseline font-bold text-slate-900">
+          <div className="space-y-4 py-3 border-y border-[#eee7dc] text-xs text-[#5c4e3b]">
+            <div className="flex justify-between items-baseline font-bold text-[#231b12]">
               <span>Pro Subscription</span>
-              <span className="text-base text-indigo-600">{PLANS.PRO.price} / month</span>
+              <span className="text-base text-[#3B6EA8]">{PLANS.PRO.price} / month</span>
             </div>
 
-            <ul className="space-y-1.5 text-slate-600 text-[11px]">
+            <ul className="space-y-1.5 text-[#736350] text-[11px]">
               {PLANS.PRO.features.slice(0, 4).map((f, i) => (
                 <li key={i} className="flex items-center gap-2">
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
                   <span>{f}</span>
                 </li>
               ))}
             </ul>
 
             <div className="space-y-1.5 pt-1">
-              <label className="text-[11px] font-semibold text-slate-700 block">
+              <label className="text-[11px] font-semibold text-[#5c4e3b] block">
                 Billing Notes / Payment Confirmation (Optional):
               </label>
               <Textarea
@@ -205,7 +205,7 @@ export function BillingSettingsView({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
-                className="text-xs bg-slate-50/50"
+                className="text-xs bg-[#FAF6F0] border-[#cfbeaa]"
               />
             </div>
           </div>
@@ -223,7 +223,7 @@ export function BillingSettingsView({
               size="sm"
               onClick={handleConfirmUpgrade}
               disabled={isPending}
-              className="bg-slate-900 text-white hover:bg-slate-800 text-xs font-medium"
+              className="text-xs font-medium"
             >
               Submit Upgrade Request <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
             </Button>

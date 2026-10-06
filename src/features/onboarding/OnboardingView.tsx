@@ -96,11 +96,11 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
         {/* Progress indicator */}
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#8a7b68] font-pixel">
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#8a7b68]">
               Setup Workspace & First Character
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-[#8a7b68] font-medium font-pixel">
+          <div className="flex items-center gap-1.5 text-xs text-[#8a7b68] font-medium font-mono">
             Step {step} of 3
           </div>
         </div>
@@ -125,7 +125,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
         </div>
 
         {/* Card Body */}
-        <div className="bg-[#FCFAF7] border-2 border-[#cfbeaa] rounded-xs p-6 sm:p-8 shadow-[3px_4px_0px_#baa892]">
+        <div className="bg-white border border-[#cfbeaa] rounded-xs p-6 sm:p-8 shadow-[2px_2px_0px_#ded5c5]">
           {/* STEP 1: Workspace Name */}
           {step === 1 && (
             <form onSubmit={handleNextStep1} className="space-y-5">
