@@ -36,6 +36,8 @@ import {
   Calendar,
   FileText,
   UserCheck,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/ui/pagination";
@@ -47,6 +49,7 @@ interface AccountDetailProps {
       id: string;
       nickname: string;
       username: string;
+      password?: string;
       server: string;
       owner?: string;
       job: string;
@@ -87,6 +90,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Pagination for activities matrix
   const [currentPage, setCurrentPage] = useState(1);
@@ -280,16 +284,55 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                 </span>
                 <button
                   type="button"
-                  onClick={() => handleCopy(account.username, "username")}
+                  onClick={() => handleCopy(account.username, "Username")}
                   className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
                   title="Copy Username"
                 >
-                  {copiedField === "username" ? (
+                  {copiedField === "Username" ? (
                     <Check className="w-3.5 h-3.5 text-emerald-600" />
                   ) : (
                     <Copy className="w-3.5 h-3.5" />
                   )}
                 </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/60">
+              <span className="text-slate-500">Password:</span>
+              <div className="flex items-center gap-2">
+                {account.password ? (
+                  <>
+                    <span className="font-mono font-semibold text-slate-900">
+                      {showPassword ? account.password : "••••••••"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      title={showPassword ? "Hide Password" : "Show Password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(account.password || "", "Password")}
+                      className="p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      title="Copy Password"
+                    >
+                      {copiedField === "Password" ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-slate-400 italic">No password set</span>
+                )}
               </div>
             </div>
 

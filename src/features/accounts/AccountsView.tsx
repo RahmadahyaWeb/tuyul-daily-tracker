@@ -56,6 +56,7 @@ interface AccountItem {
   id: string;
   nickname: string;
   username: string;
+  password?: string;
   server: string;
   owner?: string;
   job: string;
@@ -118,6 +119,7 @@ export function AccountsView({
   const [formData, setFormData] = useState({
     nickname: "",
     username: "",
+    password: "",
     server: "Prontera-1",
     job: "",
     level: 1,
@@ -128,14 +130,54 @@ export function AccountsView({
     selectedActivityIds: activities.map((a) => a.id),
   });
 
+  const [showFormPassword, setShowFormPassword] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
+  const handleCopy = async (text: string, label: string, key: string) => {
+    if (!text) {
+      toast.info(`${label} is empty`);
+      return;
+    }
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      setCopiedField(key);
+      toast.success(`${label} copied to clipboard!`);
+      setTimeout(() => setCopiedField((curr) => (curr === key ? null : curr)), 2000);
+    } catch {
+      toast.error(`Failed to copy ${label}`);
+    }
+  };
+
+  const togglePasswordVisibility = (accountId: string) => {
+    setVisiblePasswords((prev) => ({
+      ...prev,
+      [accountId]: !prev[accountId],
+    }));
+  };
+
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleOpenCreate = () => {
     setEditingAccount(null);
+    setShowFormPassword(false);
     setFormData({
       nickname: "",
       username: "",
+      password: "",
       server: "Prontera-1",
       job: "",
       level: 1,
@@ -151,9 +193,11 @@ export function AccountsView({
 
   const handleOpenEdit = (acc: AccountItem) => {
     setEditingAccount(acc);
+    setShowFormPassword(false);
     setFormData({
       nickname: acc.nickname,
       username: acc.username,
+      password: "",
       server: acc.server,
       job: acc.job,
       level: acc.level,
@@ -210,6 +254,9 @@ export function AccountsView({
           groupId: formData.groupId || null,
           activityIds: formData.selectedActivityIds,
         };
+        if (formData.password.trim()) {
+          payload.password = formData.password.trim();
+        }
 
         const res = await updateAccount(payload);
         if (!res.success) {
@@ -223,6 +270,7 @@ export function AccountsView({
         const res: any = await createAccount({
           nickname: formData.nickname,
           username: formData.username,
+          password: formData.password.trim() || undefined,
           server: formData.server,
           job: formData.job,
           level: formData.level,
@@ -376,6 +424,12 @@ export function AccountsView({
                   Character Nickname
                 </TableHead>
                 <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                  Username
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
+                  Password
+                </TableHead>
+                <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
                   Job / Class
                 </TableHead>
                 <TableHead className="text-[11px] font-bold text-[#5a4c3a] uppercase tracking-wider py-3 font-pixel">
@@ -397,7 +451,7 @@ export function AccountsView({
               {filteredAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={8}
                     className="h-32 text-center text-xs text-slate-400 py-8"
                   >
                     No accounts found.
@@ -417,10 +471,62 @@ export function AccountsView({
                             {acc.nickname}
                           </Link>
                           <span className="text-[10px] text-slate-400 font-mono">
-                            {acc.username}
+                            Lv.{acc.level}
                           </span>
                         </div>
                       </div>
+                    </TableCell>
+
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-xs font-semibold text-slate-800">
+                          {acc.username}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(acc.username, "Username", `acc-user-${acc.id}`)}
+                          className="p-1 rounded-xs hover:bg-[#ebd7b2]/50 text-[#8a7b68] hover:text-[#231b12] cursor-pointer transition-colors"
+                          title="Copy Username"
+                        >
+                          {copiedField === `acc-user-${acc.id}` ? (
+                            <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
+                          ) : (
+                            <Copy className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="py-3">
+                      {acc.password ? (
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-xs text-slate-600 tracking-wider">
+                            {visiblePasswords[acc.id] ? acc.password : "••••••"}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility(acc.id)}
+                            className="p-1 rounded-xs hover:bg-[#ebd7b2]/50 text-[#8a7b68] hover:text-[#231b12] cursor-pointer"
+                            title={visiblePasswords[acc.id] ? "Hide Password" : "Show Password"}
+                          >
+                            {visiblePasswords[acc.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(acc.password || "", "Password", `acc-pass-${acc.id}`)}
+                            className="p-1 rounded-xs hover:bg-[#ebd7b2]/50 text-[#8a7b68] hover:text-[#231b12] cursor-pointer"
+                            title="Copy Password"
+                          >
+                            {copiedField === `acc-pass-${acc.id}` ? (
+                              <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-300 italic">—</span>
+                      )}
                     </TableCell>
 
                     <TableCell className="text-xs text-slate-600">
@@ -467,7 +573,18 @@ export function AccountsView({
                             <span className="sr-only">Actions</span>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuContent align="end" className="w-44">
+                          <DropdownMenuItem onClick={() => handleCopy(acc.username, "Username", `acc-user-${acc.id}`)}>
+                            <Copy className="w-3.5 h-3.5 mr-2" />
+                            <span>Copy Username</span>
+                          </DropdownMenuItem>
+                          {acc.password && (
+                            <DropdownMenuItem onClick={() => handleCopy(acc.password || "", "Password", `acc-pass-${acc.id}`)}>
+                              <KeyRound className="w-3.5 h-3.5 mr-2" />
+                              <span>Copy Password</span>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => handleOpenEdit(acc)}>
                             <Edit2 className="w-3.5 h-3.5 mr-2" />
                             <span>Edit Account</span>
@@ -561,6 +678,33 @@ export function AccountsView({
                 error={formErrors.username}
                 placeholder="Game username"
               />
+              <div className="relative">
+                <Input
+                  label="Password (Optional)"
+                  type={showFormPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  placeholder={
+                    editingAccount
+                      ? "Leave blank to keep existing password"
+                      : "Optional account password"
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowFormPassword(!showFormPassword)}
+                  className="absolute right-2.5 top-[27px] p-1 text-slate-400 hover:text-slate-700 cursor-pointer"
+                  title={showFormPassword ? "Hide password" : "Show password"}
+                >
+                  {showFormPassword ? (
+                    <EyeOff className="w-3.5 h-3.5" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
               <Input
                 label="Job / Class *"
                 value={formData.job}

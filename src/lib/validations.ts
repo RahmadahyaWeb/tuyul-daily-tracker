@@ -41,6 +41,7 @@ export const activitySchema = z.object({
 export const accountSchema = z.object({
   nickname: z.string().trim().min(1, "Nickname is required"),
   username: z.string().trim().min(1, "Login username is required"),
+  password: z.string().optional().nullable(),
   server: z.string().trim().min(1, "Server is required"),
   job: z.string().trim().min(1, "Job / Class is required"),
   level: z.coerce.number().int().min(1).max(999).default(1),

@@ -52,6 +52,10 @@ import {
   CheckCheck,
   MoreHorizontal,
   ExternalLink,
+  Copy,
+  Eye,
+  EyeOff,
+  KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -103,6 +107,44 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  // Copy & credentials state
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
+  const handleCopy = async (text: string, label: string, key: string) => {
+    if (!text) {
+      toast.info(`${label} is empty`);
+      return;
+    }
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      setCopiedField(key);
+      toast.success(`${label} copied to clipboard!`);
+      setTimeout(() => setCopiedField((curr) => (curr === key ? null : curr)), 2000);
+    } catch {
+      toast.error(`Failed to copy ${label}`);
+    }
+  };
+
+  const togglePasswordVisibility = (accountId: string) => {
+    setVisiblePasswords((prev) => ({
+      ...prev,
+      [accountId]: !prev[accountId],
+    }));
+  };
 
   // Date Navigation
   const handleDateChange = (newDate: string) => {
@@ -535,8 +577,14 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <Table>
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[180px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                <TableHead className="w-[170px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
                   ACCOUNT
+                </TableHead>
+                <TableHead className="w-[130px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                  USERNAME
+                </TableHead>
+                <TableHead className="w-[130px] font-bold text-xs text-[#5a4c3a] font-pixel tracking-wider">
+                  PASSWORD
                 </TableHead>
                 {initialData.activities.map((act) => {
                   const isWeekly = act.activityType === "WEEKLY";
@@ -573,7 +621,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               {sortedAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={initialData.activities.length + 3}
+                    colSpan={initialData.activities.length + 5}
                     className="text-center py-12 text-xs text-[#8a7b68]"
                   >
                     No accounts found matching current filters.
@@ -606,6 +654,72 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                             {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
                           </p>
                         </div>
+                      </TableCell>
+
+                      {/* Username Column */}
+                      <TableCell className="py-3">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="font-mono text-xs font-semibold text-[#2c261e] truncate max-w-[85px] select-all"
+                            title={acc.username}
+                          >
+                            {acc.username}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(acc.username, "Username", `user-${acc.id}`)}
+                            className="p-1 rounded-xs hover:bg-[#ebd7b2]/50 text-[#8a7b68] hover:text-[#231b12] cursor-pointer transition-colors shrink-0"
+                            title="Copy Username"
+                          >
+                            {copiedField === `user-${acc.id}` ? (
+                              <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
+                            ) : (
+                              <Copy className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        </div>
+                      </TableCell>
+
+                      {/* Password Column */}
+                      <TableCell className="py-3">
+                        {acc.password ? (
+                          <div className="flex items-center gap-1">
+                            <span
+                              className="font-mono text-xs text-[#5a4c3a] tracking-wider truncate max-w-[65px] select-none"
+                              title={visiblePasswords[acc.id] ? acc.password : undefined}
+                            >
+                              {visiblePasswords[acc.id] ? acc.password : "••••••"}
+                            </span>
+                            <div className="flex items-center shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => togglePasswordVisibility(acc.id)}
+                                className="p-1 rounded-xs hover:bg-[#ebd7b2]/50 text-[#8a7b68] hover:text-[#231b12] cursor-pointer transition-colors"
+                                title={visiblePasswords[acc.id] ? "Hide Password" : "Show Password"}
+                              >
+                                {visiblePasswords[acc.id] ? (
+                                  <EyeOff className="w-3 h-3" />
+                                ) : (
+                                  <Eye className="w-3 h-3" />
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleCopy(acc.password || "", "Password", `pass-${acc.id}`)}
+                                className="p-1 rounded-xs hover:bg-[#ebd7b2]/50 text-[#8a7b68] hover:text-[#231b12] cursor-pointer transition-colors"
+                                title="Copy Password"
+                              >
+                                {copiedField === `pass-${acc.id}` ? (
+                                  <Check className="w-3.5 h-3.5 text-[#1E5D2F]" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-[#a89b88] italic select-none pl-1">—</span>
+                        )}
                       </TableCell>
 
                       {/* Activity Checkboxes */}
@@ -661,6 +775,22 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-40 text-xs rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[3px_3px_0px_#baa892]">
+                            <DropdownMenuItem
+                              onClick={() => handleCopy(acc.username, "Username", `user-${acc.id}`)}
+                              className="cursor-pointer text-[#2c261e] hover:bg-[#F3ECE0]"
+                            >
+                              <Copy className="w-3.5 h-3.5 mr-2 text-[#736350]" />
+                              <span>Copy Username</span>
+                            </DropdownMenuItem>
+                            {acc.password && (
+                              <DropdownMenuItem
+                                onClick={() => handleCopy(acc.password || "", "Password", `pass-${acc.id}`)}
+                                className="cursor-pointer text-[#2c261e] hover:bg-[#F3ECE0]"
+                              >
+                                <KeyRound className="w-3.5 h-3.5 mr-2 text-[#736350]" />
+                                <span>Copy Password</span>
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               onClick={() => handleCompleteAccount(acc)}
                               className="cursor-pointer text-[#1E5D2F] hover:bg-[#F2FAF4]"
@@ -752,6 +882,56 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Mobile Credentials Row */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+                  <div className="inline-flex items-center gap-1 bg-[#FAF6F0] px-2 py-0.5 rounded-xs border border-[#cfbeaa]">
+                    <span className="text-[10px] text-[#736350] font-medium font-pixel">USER:</span>
+                    <span className="font-mono text-xs font-semibold text-[#2c261e]">{acc.username}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(acc.username, "Username", `m-user-${acc.id}`)}
+                      className="p-0.5 text-[#8a7b68] hover:text-[#231b12]"
+                      title="Copy Username"
+                    >
+                      {copiedField === `m-user-${acc.id}` ? (
+                        <Check className="w-3 h-3 text-[#1E5D2F]" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
+                    </button>
+                  </div>
+                  {acc.password ? (
+                    <div className="inline-flex items-center gap-1 bg-[#FAF6F0] px-2 py-0.5 rounded-xs border border-[#cfbeaa]">
+                      <span className="text-[10px] text-[#736350] font-pixel">PASS:</span>
+                      <span className="font-mono text-xs text-[#5a4c3a]">
+                        {visiblePasswords[acc.id] ? acc.password : "••••••"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => togglePasswordVisibility(acc.id)}
+                        className="p-0.5 text-[#8a7b68] hover:text-[#231b12]"
+                        title="Toggle Visibility"
+                      >
+                        {visiblePasswords[acc.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(acc.password || "", "Password", `m-pass-${acc.id}`)}
+                        className="p-0.5 text-[#8a7b68] hover:text-[#231b12]"
+                        title="Copy Password"
+                      >
+                        {copiedField === `m-pass-${acc.id}` ? (
+                          <Check className="w-3 h-3 text-[#1E5D2F]" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-[10px] text-[#a89b88] italic px-1">No password</span>
+                  )}
                 </div>
 
                 {/* Vertical Activities Checklist */}

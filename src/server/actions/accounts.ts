@@ -10,6 +10,7 @@ import crypto from "crypto";
 export async function createAccount(data: {
   nickname: string;
   username: string;
+  password?: string | null;
   server: string;
   job: string;
   level: number;
@@ -45,10 +46,13 @@ export async function createAccount(data: {
     const status = parsed.data.status || "Active";
     const notes = parsed.data.notes || null;
     const groupId = parsed.data.groupId || null;
+    const password = parsed.data.password && parsed.data.password.trim()
+      ? encryptPassword(parsed.data.password.trim())
+      : "";
 
     await sql`
       INSERT INTO accounts (id, user_id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id)
-      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, '', ${parsed.data.server}, '', ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
+      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, ${password}, ${parsed.data.server}, '', ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
     `;
 
     if (parsed.data.activityIds && parsed.data.activityIds.length > 0) {
@@ -79,6 +83,7 @@ export async function updateAccount(data: {
   id: string;
   nickname?: string;
   username?: string;
+  password?: string | null;
   server?: string;
   job?: string;
   level?: number;
@@ -105,6 +110,14 @@ export async function updateAccount(data: {
 
     const nickname = parsed.data.nickname ?? acc.nickname;
     const username = parsed.data.username ?? acc.username;
+    let password = acc.password;
+    if (parsed.data.password !== undefined) {
+      if (parsed.data.password && parsed.data.password.trim()) {
+        password = encryptPassword(parsed.data.password.trim());
+      } else if (parsed.data.password === "") {
+        password = "";
+      }
+    }
     const server = parsed.data.server ?? acc.server;
     const job = parsed.data.job ?? acc.job;
     const level = parsed.data.level ?? acc.level;
@@ -119,6 +132,7 @@ export async function updateAccount(data: {
       UPDATE accounts
       SET nickname = ${nickname},
           username = ${username},
+          password = ${password},
           server = ${server},
           job = ${job},
           level = ${level},

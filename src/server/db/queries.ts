@@ -1,6 +1,7 @@
 import { sql } from "@/lib/db";
 import { getTodayMakassar, getWeekDays, getLastNDays } from "@/lib/date-utils";
 import { getSession } from "@/lib/auth";
+import { decryptPassword } from "@/lib/encryption";
 
 async function resolveUserId(explicitUserId?: string): Promise<string> {
   if (explicitUserId) return explicitUserId;
@@ -176,6 +177,7 @@ export interface TrackerAccountRow {
   id: string;
   nickname: string;
   username: string;
+  password?: string;
   server: string;
   owner: string;
   job: string;
@@ -218,7 +220,7 @@ export async function getTrackerData(
   const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
     sql`SELECT id, name, code, activity_type, sort_order FROM activities WHERE user_id = ${userId} AND is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
     sql`
-      SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
+      SELECT a.id, a.nickname, a.username, a.password, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
       WHERE a.user_id = ${userId}
@@ -320,6 +322,7 @@ export async function getTrackerData(
       id: accId,
       nickname: String(acc.nickname),
       username: String(acc.username),
+      password: acc.password ? decryptPassword(String(acc.password)) : "",
       server: String(acc.server),
       owner: String(acc.owner),
       job: String(acc.job),
@@ -493,7 +496,7 @@ export async function getAccountsList(explicitUserId?: string) {
 
   const [accountsRaw, activitiesRaw] = await (sql as any).transaction([
     sql`
-      SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.created_at, a.updated_at, g.name as group_name
+      SELECT a.id, a.nickname, a.username, a.password, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.created_at, a.updated_at, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
       WHERE a.user_id = ${userId}
@@ -524,6 +527,7 @@ export async function getAccountsList(explicitUserId?: string) {
     id: String(acc.id),
     nickname: String(acc.nickname),
     username: String(acc.username),
+    password: acc.password ? decryptPassword(String(acc.password)) : "",
     server: String(acc.server),
     owner: String(acc.owner),
     job: String(acc.job),
@@ -575,6 +579,7 @@ export async function getAccountDetail(id: string, explicitUserId?: string) {
       id: String(acc.id),
       nickname: String(acc.nickname),
       username: String(acc.username),
+      password: acc.password ? decryptPassword(String(acc.password)) : "",
       server: String(acc.server),
       owner: String(acc.owner),
       job: String(acc.job),
