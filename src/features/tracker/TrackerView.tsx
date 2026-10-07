@@ -11,6 +11,7 @@ import {
   completeAllDaily,
   resetAllDaily,
 } from "@/server/actions/tracker";
+import { updateAccountZeny } from "@/server/actions/accounts";
 import {
   addDays,
   formatDateDisplay,
@@ -54,8 +55,14 @@ import {
   Eye,
   EyeOff,
   KeyRound,
+  Coins,
+  Users,
+  CheckCircle2,
+  FolderKanban,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatZeny, formatZenyCompact } from "@/lib/utils";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { AppPage } from "@/components/shared/AppPage";
 import { PageHeader } from "@/components/shared/PageHeader";
@@ -68,8 +75,12 @@ interface TrackerViewProps {
 }
 
 type SortOption =
+  | "username-asc"
+  | "username-desc"
   | "name-asc"
   | "name-desc"
+  | "zeny-desc"
+  | "zeny-asc"
   | "least-progress"
   | "most-progress"
   | "group";
@@ -99,11 +110,16 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>("Active");
   const [completionFilter, setCompletionFilter] =
     useState<CompletionFilter>("all");
-  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [sortBy, setSortBy] = useState<SortOption>("username-asc");
 
   // Reset confirmation dialog
   const [confirmResetAllOpen, setConfirmResetAllOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Quick Zeny Update Modal State
+  const [zenyModalAccount, setZenyModalAccount] = useState<TrackerAccountRow | null>(null);
+  const [zenyInputValue, setZenyInputValue] = useState<number>(0);
+  const [isSavingZeny, setIsSavingZeny] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -145,6 +161,42 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       ...prev,
       [accountId]: !prev[accountId],
     }));
+  };
+
+  const handleOpenZenyModal = (account: TrackerAccountRow) => {
+    setZenyModalAccount(account);
+    setZenyInputValue(account.zeny || 0);
+  };
+
+  const handleSaveZeny = async () => {
+    if (!zenyModalAccount) return;
+    const accountId = zenyModalAccount.id;
+    const targetNickname = zenyModalAccount.nickname;
+    const newZeny = Math.max(0, Math.floor(Number(zenyInputValue) || 0));
+    const prevZeny = zenyModalAccount.zeny || 0;
+
+    // Optimistic update locally
+    setAccounts((prev) =>
+      prev.map((a) => (a.id === accountId ? { ...a, zeny: newZeny } : a))
+    );
+    setIsSavingZeny(true);
+
+    try {
+      const res = await updateAccountZeny(accountId, newZeny);
+      if (!res.success) {
+        throw new Error(res.error || "Gagal memperbarui zeny");
+      }
+      toast.success(`Zeny untuk "${targetNickname}" diperbarui (${formatZeny(newZeny)})`);
+      setZenyModalAccount(null);
+    } catch (err: any) {
+      // Rollback on failure
+      setAccounts((prev) =>
+        prev.map((a) => (a.id === accountId ? { ...a, zeny: prevZeny } : a))
+      );
+      toast.error(err.message || "Gagal menyimpan zeny");
+    } finally {
+      setIsSavingZeny(false);
+    }
   };
 
   // Date Navigation
@@ -376,28 +428,38 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const sortedAccounts = useMemo(() => {
     const list = [...filteredAccounts];
     switch (sortBy) {
+      case "username-asc":
+        return list.sort((a, b) => a.username.localeCompare(b.username));
+      case "username-desc":
+        return list.sort((a, b) => b.username.localeCompare(a.username));
       case "name-asc":
         return list.sort((a, b) => a.nickname.localeCompare(b.nickname));
       case "name-desc":
         return list.sort((a, b) => b.nickname.localeCompare(a.nickname));
+      case "zeny-desc":
+        return list.sort((a, b) => (b.zeny || 0) - (a.zeny || 0));
+      case "zeny-asc":
+        return list.sort((a, b) => (a.zeny || 0) - (b.zeny || 0));
       case "least-progress":
         return list.sort((a, b) => {
           if (a.progressPercent !== b.progressPercent) {
             return a.progressPercent - b.progressPercent;
           }
-          return a.nickname.localeCompare(b.nickname);
+          return a.username.localeCompare(b.username);
         });
       case "most-progress":
         return list.sort((a, b) => {
           if (a.progressPercent !== b.progressPercent) {
             return b.progressPercent - a.progressPercent;
           }
-          return a.nickname.localeCompare(b.nickname);
+          return a.username.localeCompare(b.username);
         });
       case "group":
-        return list.sort((a, b) =>
-          (a.groupName || "").localeCompare(b.groupName || "")
-        );
+        return list.sort((a, b) => {
+          const groupComp = (a.groupName || "").localeCompare(b.groupName || "");
+          if (groupComp !== 0) return groupComp;
+          return a.username.localeCompare(b.username);
+        });
       default:
         return list;
     }
@@ -422,6 +484,62 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     (a) => a.totalAssigned > 0 && a.completedCount === a.totalAssigned
   ).length;
 
+  // Group Summary Calculation (for the summary card above filters)
+  const groupStats = useMemo(() => {
+    let groupAccounts = accounts;
+    let groupName = "Semua Group (All Accounts)";
+
+    if (selectedGroup === "ungrouped") {
+      groupAccounts = accounts.filter((a) => !a.groupId);
+      groupName = "Tanpa Group (Ungrouped)";
+    } else if (selectedGroup !== "all") {
+      groupAccounts = accounts.filter((a) => a.groupId === selectedGroup);
+      const match = initialData.groups.find((g) => g.id === selectedGroup);
+      groupName = match ? match.name : "Group";
+    }
+
+    const totalInGroup = groupAccounts.length;
+    const activeInGroup = groupAccounts.filter((a) => a.status === "Active");
+    const pausedInGroup = groupAccounts.filter((a) => a.status === "Paused").length;
+    const finishedInGroup = groupAccounts.filter((a) => a.status === "Finished").length;
+
+    // Total Zeny in this group
+    const totalZeny = groupAccounts.reduce((sum, a) => sum + (Number(a.zeny) || 0), 0);
+    const avgZeny = totalInGroup > 0 ? Math.round(totalZeny / totalInGroup) : 0;
+
+    // Task completions in this group today
+    const totalAssignedTasks = activeInGroup.reduce((sum, a) => sum + a.totalAssigned, 0);
+    const completedTasks = activeInGroup.reduce((sum, a) => sum + a.completedCount, 0);
+    const overallProgress =
+      totalAssignedTasks > 0 ? Math.round((completedTasks / totalAssignedTasks) * 100) : 0;
+
+    const completedAccounts = activeInGroup.filter(
+      (a) => a.totalAssigned > 0 && a.completedCount === a.totalAssigned
+    ).length;
+    const inProgressAccounts = activeInGroup.filter(
+      (a) => a.totalAssigned > 0 && a.completedCount > 0 && a.completedCount < a.totalAssigned
+    ).length;
+    const notStartedAccounts = activeInGroup.filter(
+      (a) => a.totalAssigned > 0 && a.completedCount === 0
+    ).length;
+
+    return {
+      groupName,
+      totalInGroup,
+      activeCount: activeInGroup.length,
+      pausedCount: pausedInGroup,
+      finishedCount: finishedInGroup,
+      totalZeny,
+      avgZeny,
+      totalAssignedTasks,
+      completedTasks,
+      overallProgress,
+      completedAccounts,
+      inProgressAccounts,
+      notStartedAccounts,
+    };
+  }, [accounts, selectedGroup, initialData.groups]);
+
   return (
     <AppPage>
       {/* Unified Page Header with Date Navigator */}
@@ -440,6 +558,158 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           />
         }
       />
+
+      {/* Group Summary Card Above Filters */}
+      <div className="bg-[#FCFAF7] border border-[#cfbeaa] rounded-xs p-4 sm:p-5 shadow-[2px_2px_0px_#cfbeaa] space-y-4">
+        {/* Panel Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#ebd7b2] pb-3">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28]">
+              Ringkasan Group
+            </span>
+            <h2 className="text-sm sm:text-base font-bold text-[#231b12] flex items-center gap-1.5 truncate">
+              <FolderKanban className="w-4 h-4 text-[#3B6EA8] shrink-0" />
+              <span className="truncate">{groupStats.groupName}</span>
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <span className="text-xs text-[#8a7b68] font-medium hidden sm:inline">Pilih Group:</span>
+            <select
+              value={selectedGroup}
+              onChange={(e) => setSelectedGroup(e.target.value)}
+              className="h-7 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#2c261e] font-semibold focus:outline-none focus:border-[#3B6EA8] cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
+            >
+              <option value="all">Semua Group ({accounts.length})</option>
+              {initialData.groups.map((g) => {
+                const count = accounts.filter((a) => a.groupId === g.id).length;
+                return (
+                  <option key={g.id} value={g.id}>
+                    {g.name} ({count})
+                  </option>
+                );
+              })}
+              <option value="ungrouped">
+                Tanpa Group ({accounts.filter((a) => !a.groupId).length})
+              </option>
+            </select>
+          </div>
+        </div>
+
+        {/* 4 Metric Columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* 1. Total Zeny Card */}
+          <div className="bg-gradient-to-br from-[#FFFDF7] to-[#FFF8E7] border border-[#e8d7ba] rounded-xs p-3.5 shadow-[1px_1px_0px_#ebd7b2] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#8C580B] flex items-center gap-1.5 uppercase tracking-wide">
+                <Coins className="w-4 h-4 text-[#8C580B]" />
+                Total Zeny
+              </span>
+              <span className="text-[10px] font-mono font-bold text-[#8C580B] bg-[#FAF2E1] border border-[#ebd7b2] px-1.5 py-0.5 rounded-2xs">
+                RO GOLD
+              </span>
+            </div>
+            <div className="mt-2.5">
+              <span className="text-2xl sm:text-3xl font-extrabold text-[#8C580B] font-mono tracking-tight block">
+                {formatZeny(groupStats.totalZeny)}
+              </span>
+              <div className="flex items-center justify-between text-[11px] text-[#8a7b68] mt-1 pt-1.5 border-t border-[#f2e6d2]">
+                <span>Rata-rata / tuyul:</span>
+                <span className="font-mono font-semibold text-[#664b28]">
+                  ~{formatZenyCompact(groupStats.avgZeny)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Total Tuyul */}
+          <div className="bg-white border border-[#ded5c5] rounded-xs p-3.5 shadow-[1px_1px_0px_#e5ddd0] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#5c4e3b] flex items-center gap-1.5 uppercase tracking-wide">
+                <Users className="w-4 h-4 text-[#3B6EA8]" />
+                Total Tuyul
+              </span>
+              <span className="text-[10px] font-mono font-medium text-[#8a7b68]">
+                {groupStats.totalInGroup} akun
+              </span>
+            </div>
+            <div className="mt-2.5">
+              <span className="text-2xl sm:text-3xl font-bold text-[#231b12] tracking-tight block">
+                {groupStats.totalInGroup}{" "}
+                <span className="text-sm font-normal text-[#8a7b68]">tuyul</span>
+              </span>
+              <div className="flex items-center justify-between text-[11px] text-[#8a7b68] mt-1 pt-1.5 border-t border-[#eee7dc]">
+                <span>Status tuyul:</span>
+                <span className="font-medium text-[#2c261e]">
+                  {groupStats.activeCount} Aktif{groupStats.pausedCount > 0 ? ` · ${groupStats.pausedCount} Paused` : ""}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Progress Hari Ini */}
+          <div className="bg-white border border-[#ded5c5] rounded-xs p-3.5 shadow-[1px_1px_0px_#e5ddd0] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#1E5D2F] flex items-center gap-1.5 uppercase tracking-wide">
+                <CheckCircle2 className="w-4 h-4 text-[#1E5D2F]" />
+                Tuyul Selesai
+              </span>
+              <span className="text-xs font-bold font-mono text-[#1E5D2F]">
+                {groupStats.completedAccounts} / {groupStats.activeCount}
+              </span>
+            </div>
+            <div className="mt-2.5">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl sm:text-3xl font-bold text-[#1E5D2F] font-mono tracking-tight">
+                  {groupStats.completedAccounts}
+                </span>
+                <span className="text-xs text-[#8a7b68]">
+                  dari {groupStats.activeCount} tuyul aktif
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-[#8a7b68] mt-1 pt-1.5 border-t border-[#eee7dc]">
+                <span>Tugas selesai:</span>
+                <span className="font-mono font-semibold text-[#2c261e]">
+                  {groupStats.completedTasks} / {groupStats.totalAssignedTasks} task
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Completion Bar & Breakdown */}
+          <div className="bg-white border border-[#ded5c5] rounded-xs p-3.5 shadow-[1px_1px_0px_#e5ddd0] flex flex-col justify-between space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[#5c4e3b] uppercase tracking-wide">
+                Progress Grup
+              </span>
+              <span className="text-xs font-bold font-mono text-[#3B6EA8]">
+                {groupStats.overallProgress}%
+              </span>
+            </div>
+
+            <Progress
+              value={groupStats.overallProgress}
+              className="h-2 bg-[#f0eae1]"
+              indicatorColor={groupStats.overallProgress === 100 ? "bg-[#347A46]" : "bg-[#3B6EA8]"}
+            />
+
+            <div className="grid grid-cols-3 gap-1 pt-1 border-t border-[#eee7dc] text-center text-[10px]">
+              <div className="bg-[#F2FAF4] p-1 rounded-2xs border border-[#c2e4cc]">
+                <span className="block text-[#1E5D2F] font-bold font-mono">{groupStats.completedAccounts}</span>
+                <span className="text-[9px] text-[#1E5D2F]">Selesai</span>
+              </div>
+              <div className="bg-[#FFF8EB] p-1 rounded-2xs border border-[#ebd7b2]">
+                <span className="block text-[#8C580B] font-bold font-mono">{groupStats.inProgressAccounts}</span>
+                <span className="text-[9px] text-[#8C580B]">Berjalan</span>
+              </div>
+              <div className="bg-[#F6F3EE] p-1 rounded-2xs border border-[#e0d6c8]">
+                <span className="block text-[#5c4e3b] font-bold font-mono">{groupStats.notStartedAccounts}</span>
+                <span className="text-[9px] text-[#7a6b57]">Belum</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Unified Page Toolbar */}
       <PageToolbar>
@@ -503,7 +773,12 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               className="w-full sm:w-auto h-8 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#3d3326] focus:outline-none cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
             >
-              <option value="name-asc">Name (A-Z)</option>
+              <option value="username-asc">Username (A-Z)</option>
+              <option value="username-desc">Username (Z-A)</option>
+              <option value="name-asc">Nickname (A-Z)</option>
+              <option value="name-desc">Nickname (Z-A)</option>
+              <option value="zeny-desc">Zeny Terbanyak</option>
+              <option value="zeny-asc">Zeny Tersedikit</option>
               <option value="least-progress">Least Progress</option>
               <option value="most-progress">Most Progress</option>
               <option value="group">Group</option>
@@ -621,9 +896,20 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                           >
                             {acc.nickname}
                           </Link>
-                          <p className="text-[10px] text-[#8a7b68] truncate leading-tight mt-0.5">
-                            {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
-                          </p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[10px] text-[#8a7b68] truncate leading-tight">
+                              {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenZenyModal(acc)}
+                              className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#8C580B] bg-[#FFF8EB] hover:bg-[#FCECC9] border border-[#ebd7b2] px-1 py-0.2 rounded-2xs cursor-pointer transition-colors"
+                              title={`Zeny: ${formatZeny(acc.zeny || 0)} (Klik untuk edit)`}
+                            >
+                              <Coins className="w-2.5 h-2.5 text-[#8C580B]" />
+                              {formatZenyCompact(acc.zeny || 0)}
+                            </button>
+                          </div>
                         </div>
                       </TableCell>
 
@@ -763,6 +1049,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem
+                              onClick={() => handleOpenZenyModal(acc)}
+                              className="cursor-pointer text-[#8C580B] hover:bg-[#FFF8EB]"
+                            >
+                              <Coins className="w-3.5 h-3.5 mr-2 text-[#8C580B]" />
+                              <span>Update Zeny</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => handleCompleteAccount(acc)}
                               className="cursor-pointer text-[#1E5D2F] hover:bg-[#F2FAF4]"
                             >
@@ -836,9 +1129,20 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                     >
                       {acc.nickname}
                     </Link>
-                    <p className="text-[11px] text-[#8a7b68] mt-0.5 truncate">
-                      {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
-                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-[11px] text-[#8a7b68] truncate">
+                        {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenZenyModal(acc)}
+                        className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#8C580B] bg-[#FFF8EB] hover:bg-[#FCECC9] border border-[#ebd7b2] px-1.5 py-0.5 rounded-2xs cursor-pointer transition-colors"
+                        title={`Zeny: ${formatZeny(acc.zeny || 0)} (Klik untuk edit)`}
+                      >
+                        <Coins className="w-3 h-3 text-[#8C580B]" />
+                        {formatZenyCompact(acc.zeny || 0)}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
@@ -878,6 +1182,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                             <span>Copy Password</span>
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem
+                          onClick={() => handleOpenZenyModal(acc)}
+                          className="cursor-pointer text-[#8C580B] hover:bg-[#FFF8EB]"
+                        >
+                          <Coins className="w-3.5 h-3.5 mr-2 text-[#8C580B]" />
+                          <span>Update Zeny</span>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleCompleteAccount(acc)}
                           className="cursor-pointer text-[#1E5D2F] hover:bg-[#F2FAF4]"
@@ -1039,6 +1350,101 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Quick Update Zeny Modal */}
+      <Modal
+        isOpen={Boolean(zenyModalAccount)}
+        onClose={() => setZenyModalAccount(null)}
+        title={`Update Zeny — ${zenyModalAccount?.nickname || ""}`}
+        description="Perbarui jumlah zeny (mata uang Ragnarok) pada tuyul ini."
+        maxWidth="sm"
+      >
+        <div className="space-y-4 text-xs pt-1">
+          <div className="p-3 rounded-xs bg-[#FFF8EB] border border-[#ebd7b2] space-y-1">
+            <div className="flex items-center justify-between text-[#8C580B]">
+              <span className="font-semibold flex items-center gap-1">
+                <Coins className="w-3.5 h-3.5" /> Karakter:
+              </span>
+              <span className="font-bold text-[#231b12] text-sm">
+                {zenyModalAccount?.nickname} ({zenyModalAccount?.job})
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-[#8a7b68]">
+              <span>Zeny Saat Ini:</span>
+              <span className="font-mono font-bold text-[#8C580B]">
+                {formatZeny(zenyModalAccount?.zeny || 0)}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#2c261e] flex items-center justify-between">
+              <span>Nominal Zeny Baru</span>
+              <span className="font-mono text-xs text-[#8C580B] font-bold">
+                {formatZeny(zenyInputValue || 0)}
+              </span>
+            </label>
+            <Input
+              type="number"
+              min={0}
+              value={zenyInputValue === 0 ? "" : zenyInputValue}
+              onChange={(e) =>
+                setZenyInputValue(Math.max(0, parseInt(e.target.value) || 0))
+              }
+              placeholder="0"
+              autoFocus
+            />
+            <p className="text-[10px] text-[#8a7b68]">
+              Ketik nominal zeny terbaru yang dimiliki tuyul ini.
+            </p>
+          </div>
+
+          {/* Quick preset increment buttons */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] text-[#8a7b68] font-medium block">Tambah Cepat:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {[100_000, 500_000, 1_000_000, 5_000_000, 10_000_000].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setZenyInputValue((prev) => prev + amt)}
+                  className="px-2 py-0.5 text-[10px] font-mono bg-white border border-[#cfbeaa] hover:border-[#8C580B] hover:bg-[#FFF8EB] text-[#664b28] rounded-2xs cursor-pointer transition-colors shadow-2xs font-semibold"
+                >
+                  +{formatZenyCompact(amt)}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setZenyInputValue(0)}
+                className="px-2 py-0.5 text-[10px] font-mono bg-white border border-[#cfbeaa] hover:border-rose-400 text-rose-600 rounded-2xs cursor-pointer transition-colors shadow-2xs"
+              >
+                Reset 0
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#ebd7b2]">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setZenyModalAccount(null)}
+              className="h-8 text-xs"
+            >
+              Batal
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveZeny}
+              disabled={isSavingZeny}
+              className="h-8 text-xs font-semibold"
+            >
+              {isSavingZeny ? "Menyimpan..." : "Simpan Zeny"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </AppPage>
   );
 }

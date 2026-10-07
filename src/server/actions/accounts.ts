@@ -18,6 +18,7 @@ export async function createAccount(data: {
   status?: "Active" | "Paused" | "Finished";
   notes?: string | null;
   groupId?: string | null;
+  zeny?: number;
   activityIds: string[];
 }) {
   const session = await getSession();
@@ -46,13 +47,14 @@ export async function createAccount(data: {
     const status = parsed.data.status || "Active";
     const notes = parsed.data.notes || null;
     const groupId = parsed.data.groupId || null;
+    const zeny = parsed.data.zeny ? Math.max(0, Math.floor(parsed.data.zeny)) : 0;
     const password = parsed.data.password && parsed.data.password.trim()
       ? encryptPassword(parsed.data.password.trim())
       : "";
 
     await sql`
-      INSERT INTO accounts (id, user_id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id)
-      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, ${password}, ${parsed.data.server}, '', ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId});
+      INSERT INTO accounts (id, user_id, nickname, username, password, server, owner, job, level, start_date, status, notes, group_id, zeny)
+      VALUES (${id}, ${session.id}, ${parsed.data.nickname}, ${parsed.data.username}, ${password}, ${parsed.data.server}, '', ${parsed.data.job}, ${parsed.data.level}, ${startDate}, ${status}, ${notes}, ${groupId}, ${zeny});
     `;
 
     if (parsed.data.activityIds && parsed.data.activityIds.length > 0) {
@@ -91,6 +93,7 @@ export async function updateAccount(data: {
   status?: "Active" | "Paused" | "Finished";
   notes?: string | null;
   groupId?: string | null;
+  zeny?: number;
   activityIds?: string[];
 }) {
   const session = await getSession();
@@ -127,6 +130,9 @@ export async function updateAccount(data: {
     const status = parsed.data.status ?? acc.status;
     const notes = parsed.data.notes !== undefined ? parsed.data.notes : acc.notes;
     const groupId = parsed.data.groupId !== undefined ? (parsed.data.groupId || null) : acc.group_id;
+    const zeny = parsed.data.zeny !== undefined 
+      ? Math.max(0, Math.floor(parsed.data.zeny)) 
+      : (acc.zeny ? Number(acc.zeny) : 0);
 
     await sql`
       UPDATE accounts
@@ -140,6 +146,7 @@ export async function updateAccount(data: {
           status = ${status},
           notes = ${notes},
           group_id = ${groupId},
+          zeny = ${zeny},
           updated_at = NOW()
       WHERE id = ${parsed.data.id} AND user_id = ${session.id};
     `;
@@ -167,6 +174,24 @@ export async function updateAccount(data: {
   } catch (error) {
     console.error("Failed to update account:", error);
     return { success: false, error: "Failed to update account." };
+  }
+}
+
+export async function updateAccountZeny(id: string, zeny: number) {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  try {
+    const validZeny = Math.max(0, Math.floor(Number(zeny) || 0));
+    await sql`UPDATE accounts SET zeny = ${validZeny}, updated_at = NOW() WHERE id = ${id} AND user_id = ${session.id};`;
+    revalidatePath("/tracker");
+    revalidatePath("/accounts");
+    revalidatePath(`/accounts/${id}`);
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update zeny:", error);
+    return { success: false, error: "Failed to update zeny." };
   }
 }
 

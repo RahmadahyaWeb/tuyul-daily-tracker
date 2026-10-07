@@ -39,7 +39,7 @@ export async function getDashboardStats(
   const sundayStr = weekDays[6].dateStr;
 
   const [accountsRaw, masterActivitiesRaw, assignedRaw, todayLogsRaw] = await (sql as any).transaction([
-    sql`SELECT id, nickname, owner, job, server, status FROM accounts WHERE user_id = ${userId} ORDER BY nickname ASC;`,
+    sql`SELECT id, nickname, username, owner, job, server, status FROM accounts WHERE user_id = ${userId} ORDER BY username ASC, nickname ASC;`,
     sql`SELECT id FROM activities WHERE user_id = ${userId} AND is_active = TRUE;`,
     sql`
       SELECT aa.account_id, aa.activity_id
@@ -183,6 +183,7 @@ export interface TrackerAccountRow {
   job: string;
   level: number;
   status: "Active" | "Paused" | "Finished";
+  zeny: number;
   groupId: string | null;
   groupName: string | null;
   assignedActivityIds: string[];
@@ -220,11 +221,11 @@ export async function getTrackerData(
   const [activitiesRaw, accountsRaw, groupsRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
     sql`SELECT id, name, code, activity_type, sort_order FROM activities WHERE user_id = ${userId} AND is_active = TRUE ORDER BY sort_order ASC, created_at ASC;`,
     sql`
-      SELECT a.id, a.nickname, a.username, a.password, a.server, a.owner, a.job, a.level, a.status, a.group_id, g.name as group_name
+      SELECT a.id, a.nickname, a.username, a.password, a.server, a.owner, a.job, a.level, a.status, a.group_id, a.zeny, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
       WHERE a.user_id = ${userId}
-      ORDER BY a.nickname ASC;
+      ORDER BY a.username ASC, a.nickname ASC;
     `,
     sql`SELECT id, name FROM groups WHERE user_id = ${userId} ORDER BY name ASC;`,
     sql`
@@ -328,6 +329,7 @@ export async function getTrackerData(
       job: String(acc.job),
       level: Number(acc.level),
       status: status as "Active" | "Paused" | "Finished",
+      zeny: Number(acc.zeny || 0),
       groupId: acc.group_id ? String(acc.group_id) : null,
       groupName: acc.group_name ? String(acc.group_name) : null,
       assignedActivityIds,
@@ -388,11 +390,11 @@ export async function getWeeklyData(
 
   const [accountsRaw, masterActivitiesRaw, assignedRaw, logsRaw] = await (sql as any).transaction([
     sql`
-      SELECT a.id, a.nickname, a.server, a.owner, a.job, a.status, g.name as group_name
+      SELECT a.id, a.nickname, a.username, a.server, a.owner, a.job, a.status, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
       WHERE a.user_id = ${userId}
-      ORDER BY a.nickname ASC;
+      ORDER BY a.username ASC, a.nickname ASC;
     `,
     sql`SELECT id FROM activities WHERE user_id = ${userId} AND is_active = TRUE;`,
     sql`
@@ -496,11 +498,11 @@ export async function getAccountsList(explicitUserId?: string) {
 
   const [accountsRaw, activitiesRaw] = await (sql as any).transaction([
     sql`
-      SELECT a.id, a.nickname, a.username, a.password, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.created_at, a.updated_at, g.name as group_name
+      SELECT a.id, a.nickname, a.username, a.password, a.server, a.owner, a.job, a.level, a.start_date, a.status, a.notes, a.group_id, a.zeny, a.created_at, a.updated_at, g.name as group_name
       FROM accounts a
       LEFT JOIN groups g ON a.group_id = g.id
       WHERE a.user_id = ${userId}
-      ORDER BY a.nickname ASC;
+      ORDER BY a.username ASC, a.nickname ASC;
     `,
     sql`
       SELECT aa.account_id, aa.activity_id, act.name, act.code
@@ -536,6 +538,7 @@ export async function getAccountsList(explicitUserId?: string) {
     status: String(acc.status) as "Active" | "Paused" | "Finished",
     notes: acc.notes ? String(acc.notes) : null,
     groupId: acc.group_id ? String(acc.group_id) : null,
+    zeny: Number(acc.zeny || 0),
     group: acc.group_id ? { id: String(acc.group_id), name: String(acc.group_name || "") } : null,
     createdAt: new Date(acc.created_at),
     updatedAt: new Date(acc.updated_at),
@@ -588,6 +591,7 @@ export async function getAccountDetail(id: string, explicitUserId?: string) {
       status: String(acc.status) as "Active" | "Paused" | "Finished",
       notes: acc.notes ? String(acc.notes) : null,
       groupId: acc.group_id ? String(acc.group_id) : null,
+      zeny: Number(acc.zeny || 0),
       group: grpList.length > 0 ? { id: String(grpList[0].id), name: String(grpList[0].name) } : null,
       accountActivities: actList.map((aa) => ({
         id: String(aa.id),

@@ -38,8 +38,9 @@ import {
   UserCheck,
   Eye,
   EyeOff,
+  Coins,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatZeny } from "@/lib/utils";
 import { toast } from "sonner";
 import { AppPage } from "@/components/shared/AppPage";
 import { SectionHeader } from "@/components/shared/SectionHeader";
@@ -58,6 +59,7 @@ interface AccountDetailProps {
       level: number;
       startDate: Date;
       status: "Active" | "Paused" | "Finished";
+      zeny: number;
       notes: string | null;
       groupId: string | null;
       group?: { id: string; name: string } | null;
@@ -214,6 +216,11 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                     </span>
                   </>
                 )}
+                <span>·</span>
+                <span className="inline-flex items-center gap-1 font-mono font-bold text-[#8C580B] text-xs bg-[#FFF8EB] border border-[#ebd7b2] px-2 py-0.5 rounded-2xs">
+                  <Coins className="w-3 h-3 text-[#8C580B]" />
+                  {formatZeny(account.zeny || 0)}
+                </span>
               </div>
             </div>
           </div>
@@ -272,6 +279,16 @@ export function AccountDetailView({ data }: AccountDetailProps) {
           <div className="text-xs font-bold uppercase tracking-wider text-[#8a7b68] flex items-center gap-1.5 border-b border-[#eee7dc] pb-2">
             <UserCheck className="w-3.5 h-3.5 text-[#3B6EA8]" />
             Account Details
+          </div>
+
+          <div className="flex items-center justify-between p-2 rounded-xs bg-[#FFF8EB] border border-[#ebd7b2]">
+            <span className="text-[#8C580B] font-semibold flex items-center gap-1.5">
+              <Coins className="w-3.5 h-3.5 text-[#8C580B]" />
+              Zeny (Ragnarok Gold):
+            </span>
+            <span className="font-mono font-bold text-[#8C580B] text-sm">
+              {formatZeny(account.zeny || 0)}
+            </span>
           </div>
 
           <div className="flex items-center justify-between p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">

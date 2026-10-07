@@ -93,6 +93,7 @@ async function init() {
       status TEXT DEFAULT 'Active',
       notes TEXT,
       group_id TEXT REFERENCES groups(id) ON DELETE SET NULL,
+      zeny BIGINT DEFAULT 0,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );

@@ -46,8 +46,9 @@ import {
   Eye,
   EyeOff,
   Users,
+  Coins,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatZeny, formatZenyCompact } from "@/lib/utils";
 import { PlanLimitDialog } from "@/components/shared/PlanLimitDialog";
 import { toast } from "sonner";
 import { AppPage } from "@/components/shared/AppPage";
@@ -66,6 +67,7 @@ interface AccountItem {
   level: number;
   startDate: Date;
   status: "Active" | "Paused" | "Finished";
+  zeny: number;
   notes: string | null;
   groupId: string | null;
   group?: { id: string; name: string } | null;
@@ -128,6 +130,7 @@ export function AccountsView({
     level: 1,
     startDate: new Date().toISOString().split("T")[0],
     status: "Active" as "Active" | "Paused" | "Finished",
+    zeny: 0,
     notes: "",
     groupId: "",
     selectedActivityIds: activities.map((a) => a.id),
@@ -186,6 +189,7 @@ export function AccountsView({
       level: 1,
       startDate: new Date().toISOString().split("T")[0],
       status: "Active",
+      zeny: 0,
       notes: "",
       groupId: "",
       selectedActivityIds: activities.map((a) => a.id),
@@ -206,6 +210,7 @@ export function AccountsView({
       level: acc.level,
       startDate: new Date(acc.startDate).toISOString().split("T")[0],
       status: acc.status,
+      zeny: acc.zeny || 0,
       notes: acc.notes || "",
       groupId: acc.groupId || "",
       selectedActivityIds: acc.accountActivities.map((aa) => aa.activityId),
@@ -253,6 +258,7 @@ export function AccountsView({
           level: formData.level,
           startDate: formData.startDate,
           status: formData.status,
+          zeny: formData.zeny,
           notes: formData.notes,
           groupId: formData.groupId || null,
           activityIds: formData.selectedActivityIds,
@@ -279,6 +285,7 @@ export function AccountsView({
           level: formData.level,
           startDate: formData.startDate,
           status: formData.status,
+          zeny: formData.zeny,
           notes: formData.notes,
           groupId: formData.groupId || null,
           activityIds: formData.selectedActivityIds,
@@ -440,6 +447,9 @@ export function AccountsView({
                 <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Group
                 </TableHead>
+                <TableHead className="text-right text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
+                  Zeny
+                </TableHead>
                 <TableHead className="text-center text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Status
                 </TableHead>
@@ -453,7 +463,7 @@ export function AccountsView({
               {filteredAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={9}
                     className="h-32 text-center text-xs text-slate-400 py-8"
                   >
                     No accounts found.
@@ -550,6 +560,10 @@ export function AccountsView({
                       ) : (
                         <span className="text-slate-300">—</span>
                       )}
+                    </TableCell>
+
+                    <TableCell className="text-right py-3 font-mono font-bold text-xs text-[#8C580B]">
+                      {formatZenyCompact(acc.zeny || 0)}
                     </TableCell>
 
                     <TableCell className="text-center">
@@ -742,17 +756,23 @@ export function AccountsView({
                 </div>
               </div>
 
-              {/* Server & Group Meta */}
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#736350] pt-1 border-t border-[#eee7dc]">
-                <span className="font-medium text-[#2c261e]">Server: {acc.server}</span>
-                {acc.group?.name && (
-                  <>
-                    <span>·</span>
-                    <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
-                      {acc.group.name}
-                    </Badge>
-                  </>
-                )}
+              {/* Server, Group & Zeny Meta */}
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#736350] pt-1 border-t border-[#eee7dc]">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-[#2c261e]">Server: {acc.server}</span>
+                  {acc.group?.name && (
+                    <>
+                      <span>·</span>
+                      <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
+                        {acc.group.name}
+                      </Badge>
+                    </>
+                  )}
+                </div>
+                <span className="inline-flex items-center gap-1 font-mono font-bold text-[#8C580B] text-xs bg-[#FFF8EB] border border-[#ebd7b2] px-1.5 py-0.5 rounded-2xs">
+                  <Coins className="w-3 h-3 text-[#8C580B]" />
+                  {formatZeny(acc.zeny || 0)}
+                </span>
               </div>
 
               {/* Credentials Row */}
@@ -955,6 +975,28 @@ export function AccountsView({
                   <option value="Paused">Paused</option>
                   <option value="Finished">Finished</option>
                 </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
+                  <span className="flex items-center gap-1">
+                    <Coins className="w-3.5 h-3.5 text-[#8C580B]" /> Zeny (Ragnarok Gold)
+                  </span>
+                  <span className="text-[10px] text-[#8C580B] font-mono font-medium">
+                    {formatZeny(formData.zeny || 0)}
+                  </span>
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={formData.zeny || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      zeny: Math.max(0, parseInt(e.target.value) || 0),
+                    })
+                  }
+                  placeholder="0"
+                />
               </div>
             </div>
           </div>

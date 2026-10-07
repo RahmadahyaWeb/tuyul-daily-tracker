@@ -49,6 +49,7 @@ export const accountSchema = z.object({
   status: z.enum(["Active", "Paused", "Finished"]).default("Active"),
   notes: z.string().optional().nullable(),
   groupId: z.string().optional().nullable(),
+  zeny: z.coerce.number().min(0).default(0),
   activityIds: z.array(z.string()).min(1, "Select at least 1 assigned activity"),
 });
 
