@@ -390,8 +390,8 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                   </TableCell>
 
                   <TableCell className="py-3 text-xs text-slate-500">
-                    <span title={new Date(u.createdAt).toLocaleString("id-ID")}>
-                      {new Date(u.createdAt).toLocaleDateString("id-ID", {
+                    <span title={new Date(u.createdAt).toLocaleString("en-US")}>
+                      {new Date(u.createdAt).toLocaleDateString("en-US", {
                         dateStyle: "medium",
                       })}
                     </span>

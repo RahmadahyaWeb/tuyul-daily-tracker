@@ -258,8 +258,8 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
                   </TableCell>
 
                   <TableCell className="py-3 text-xs text-slate-500">
-                    <span title={new Date(req.createdAt).toLocaleString("id-ID")}>
-                      {new Date(req.createdAt).toLocaleDateString("id-ID", {
+                    <span title={new Date(req.createdAt).toLocaleString("en-US")}>
+                      {new Date(req.createdAt).toLocaleDateString("en-US", {
                         dateStyle: "medium",
                       })}
                     </span>

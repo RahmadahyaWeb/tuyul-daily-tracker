@@ -57,21 +57,21 @@ export function DatePicker({
   }, [value, open]);
 
   const monthNames = [
-    "Januari",
-    "Februari",
-    "Maret",
+    "January",
+    "February",
+    "March",
     "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
+    "May",
+    "June",
+    "July",
+    "August",
     "September",
-    "Oktober",
+    "October",
     "November",
-    "Desember",
+    "December",
   ];
 
-  const dayHeaders = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+  const dayHeaders = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   const handlePrevMonth = () => {
     if (viewMonth === 1) {
@@ -190,7 +190,7 @@ export function DatePicker({
           className={`inline-flex items-center gap-2 text-xs font-semibold text-[#3d3326] bg-white hover:bg-[#FAF7F2] border border-[#cfc3b0] px-3 py-1.5 rounded-xs shadow-[1px_1px_0px_#e5ddd0] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
         >
           <CalendarIcon className="w-3.5 h-3.5 text-[#3B6EA8]" />
-          <span>{formatDateDisplay(value, "id-ID")}</span>
+          <span>{formatDateDisplay(value, "en-US")}</span>
         </button>
       </PopoverTrigger>
 
@@ -205,7 +205,7 @@ export function DatePicker({
               type="button"
               onClick={handlePrevYear}
               className="p-1 rounded-xs text-[#8a7b68] hover:text-[#231b12] hover:bg-[#F3ECE0] transition-colors cursor-pointer"
-              title="Tahun Sebelumnya"
+              title="Previous Year"
             >
               <ChevronsLeft className="w-3.5 h-3.5" />
             </button>
@@ -213,7 +213,7 @@ export function DatePicker({
               type="button"
               onClick={handlePrevMonth}
               className="p-1 rounded-xs text-[#8a7b68] hover:text-[#231b12] hover:bg-[#F3ECE0] transition-colors cursor-pointer"
-              title="Bulan Sebelumnya"
+              title="Previous Month"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -228,7 +228,7 @@ export function DatePicker({
               type="button"
               onClick={handleNextMonth}
               className="p-1 rounded-xs text-[#8a7b68] hover:text-[#231b12] hover:bg-[#F3ECE0] transition-colors cursor-pointer"
-              title="Bulan Berikutnya"
+              title="Next Month"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -236,7 +236,7 @@ export function DatePicker({
               type="button"
               onClick={handleNextYear}
               className="p-1 rounded-xs text-[#8a7b68] hover:text-[#231b12] hover:bg-[#F3ECE0] transition-colors cursor-pointer"
-              title="Tahun Berikutnya"
+              title="Next Year"
             >
               <ChevronsRight className="w-3.5 h-3.5" />
             </button>
@@ -295,7 +295,7 @@ export function DatePicker({
               className="text-[11px] font-bold text-[#3B6EA8] hover:underline cursor-pointer flex items-center gap-1 font-pixel uppercase"
             >
               <Clock className="w-3 h-3" />
-              Hari Ini
+              Today
             </button>
             <span className="text-[#cfc3b0]">•</span>
             <button
@@ -303,7 +303,7 @@ export function DatePicker({
               onClick={() => handleSelectDate(addDays(todayStr, -1))}
               className="text-[11px] font-medium text-[#736350] hover:text-[#231b12] cursor-pointer"
             >
-              Kemarin
+              Yesterday
             </button>
           </div>
 
@@ -314,7 +314,7 @@ export function DatePicker({
             onClick={() => setOpen(false)}
             className="h-6 px-2 text-[11px] text-[#8a7b68] hover:text-[#231b12]"
           >
-            Tutup
+            Close
           </Button>
         </div>
       </PopoverContent>

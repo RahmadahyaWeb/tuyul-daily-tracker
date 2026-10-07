@@ -284,7 +284,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
           <div className="flex items-center justify-between p-2 rounded-xs bg-[#FFF8EB] border border-[#ebd7b2]">
             <span className="text-[#8C580B] font-semibold flex items-center gap-1.5">
               <Coins className="w-3.5 h-3.5 text-[#8C580B]" />
-              Zeny (Ragnarok Gold):
+              Zeny:
             </span>
             <span className="font-mono font-bold text-[#8C580B] text-sm">
               {formatZeny(account.zeny || 0)}
@@ -365,7 +365,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
           <div className="flex items-center justify-between p-2 rounded-xs bg-[#FAF6F0] border border-[#cfbeaa]">
             <span className="text-[#736350]">Start Date:</span>
             <span className="font-medium text-[#231b12]">
-              {new Date(account.startDate).toLocaleDateString("id-ID", { dateStyle: "medium" })}
+              {new Date(account.startDate).toLocaleDateString("en-US", { dateStyle: "medium" })}
             </span>
           </div>
         </div>
@@ -404,7 +404,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
           <SectionHeader title="30-Day Activity History" />
           <span className="text-[11px] text-[#8a7b68] sm:hidden font-medium">
-            ← Geser tabel ke samping untuk melihat seluruh 30 hari →
+            ← Scroll horizontally to view all 30 days →
           </span>
         </div>
 

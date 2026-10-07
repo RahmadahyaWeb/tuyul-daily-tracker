@@ -184,16 +184,16 @@ export function TrackerView({ initialData }: TrackerViewProps) {
     try {
       const res = await updateAccountZeny(accountId, newZeny);
       if (!res.success) {
-        throw new Error(res.error || "Gagal memperbarui zeny");
+        throw new Error(res.error || "Failed to update zeny");
       }
-      toast.success(`Zeny untuk "${targetNickname}" diperbarui (${formatZeny(newZeny)})`);
+      toast.success(`Zeny updated for "${targetNickname}" (${formatZeny(newZeny)})`);
       setZenyModalAccount(null);
     } catch (err: any) {
       // Rollback on failure
       setAccounts((prev) =>
         prev.map((a) => (a.id === accountId ? { ...a, zeny: prevZeny } : a))
       );
-      toast.error(err.message || "Gagal menyimpan zeny");
+      toast.error(err.message || "Failed to save zeny");
     } finally {
       setIsSavingZeny(false);
     }
@@ -487,11 +487,11 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   // Group Summary Calculation (for the summary card above filters)
   const groupStats = useMemo(() => {
     let groupAccounts = accounts;
-    let groupName = "Semua Group (All Accounts)";
+    let groupName = "All Groups";
 
     if (selectedGroup === "ungrouped") {
       groupAccounts = accounts.filter((a) => !a.groupId);
-      groupName = "Tanpa Group (Ungrouped)";
+      groupName = "Ungrouped";
     } else if (selectedGroup !== "all") {
       groupAccounts = accounts.filter((a) => a.groupId === selectedGroup);
       const match = initialData.groups.find((g) => g.id === selectedGroup);
@@ -565,7 +565,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#ebd7b2] pb-3">
           <div className="flex items-center gap-2">
             <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#FAF2E1] border border-[#cfbeaa] text-[#664b28]">
-              Ringkasan Group
+              Group Summary
             </span>
             <h2 className="text-sm sm:text-base font-bold text-[#231b12] flex items-center gap-1.5 truncate">
               <FolderKanban className="w-4 h-4 text-[#3B6EA8] shrink-0" />
@@ -574,13 +574,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
-            <span className="text-xs text-[#8a7b68] font-medium hidden sm:inline">Pilih Group:</span>
+            <span className="text-xs text-[#8a7b68] font-medium hidden sm:inline">Select Group:</span>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
               className="h-7 px-2.5 text-xs bg-white border border-[#cfc3b0] rounded-xs text-[#2c261e] font-semibold focus:outline-none focus:border-[#3B6EA8] cursor-pointer shadow-[1px_1px_0px_#e5ddd0]"
             >
-              <option value="all">Semua Group ({accounts.length})</option>
+              <option value="all">All Groups ({accounts.length})</option>
               {initialData.groups.map((g) => {
                 const count = accounts.filter((a) => a.groupId === g.id).length;
                 return (
@@ -590,7 +590,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 );
               })}
               <option value="ungrouped">
-                Tanpa Group ({accounts.filter((a) => !a.groupId).length})
+                Ungrouped ({accounts.filter((a) => !a.groupId).length})
               </option>
             </select>
           </div>
@@ -606,7 +606,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 Total Zeny
               </span>
               <span className="text-[10px] font-mono font-bold text-[#8C580B] bg-[#FAF2E1] border border-[#ebd7b2] px-1.5 py-0.5 rounded-2xs">
-                RO GOLD
+                ZENY
               </span>
             </div>
             <div className="mt-2.5">
@@ -614,7 +614,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 {formatZeny(groupStats.totalZeny)}
               </span>
               <div className="flex items-center justify-between text-[11px] text-[#8a7b68] mt-1 pt-1.5 border-t border-[#f2e6d2]">
-                <span>Rata-rata / tuyul:</span>
+                <span>Average per account:</span>
                 <span className="font-mono font-semibold text-[#664b28]">
                   ~{formatZenyCompact(groupStats.avgZeny)}
                 </span>
@@ -622,37 +622,37 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             </div>
           </div>
 
-          {/* 2. Total Tuyul */}
+          {/* 2. Total Accounts */}
           <div className="bg-white border border-[#ded5c5] rounded-xs p-3.5 shadow-[1px_1px_0px_#e5ddd0] flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#5c4e3b] flex items-center gap-1.5 uppercase tracking-wide">
                 <Users className="w-4 h-4 text-[#3B6EA8]" />
-                Total Tuyul
+                Total Accounts
               </span>
               <span className="text-[10px] font-mono font-medium text-[#8a7b68]">
-                {groupStats.totalInGroup} akun
+                {groupStats.totalInGroup} accounts
               </span>
             </div>
             <div className="mt-2.5">
               <span className="text-2xl sm:text-3xl font-bold text-[#231b12] tracking-tight block">
                 {groupStats.totalInGroup}{" "}
-                <span className="text-sm font-normal text-[#8a7b68]">tuyul</span>
+                <span className="text-sm font-normal text-[#8a7b68]">accounts</span>
               </span>
               <div className="flex items-center justify-between text-[11px] text-[#8a7b68] mt-1 pt-1.5 border-t border-[#eee7dc]">
-                <span>Status tuyul:</span>
+                <span>Account status:</span>
                 <span className="font-medium text-[#2c261e]">
-                  {groupStats.activeCount} Aktif{groupStats.pausedCount > 0 ? ` · ${groupStats.pausedCount} Paused` : ""}
+                  {groupStats.activeCount} Active{groupStats.pausedCount > 0 ? ` · ${groupStats.pausedCount} Paused` : ""}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* 3. Progress Hari Ini */}
+          {/* 3. Completed Accounts */}
           <div className="bg-white border border-[#ded5c5] rounded-xs p-3.5 shadow-[1px_1px_0px_#e5ddd0] flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#1E5D2F] flex items-center gap-1.5 uppercase tracking-wide">
                 <CheckCircle2 className="w-4 h-4 text-[#1E5D2F]" />
-                Tuyul Selesai
+                Accounts Completed
               </span>
               <span className="text-xs font-bold font-mono text-[#1E5D2F]">
                 {groupStats.completedAccounts} / {groupStats.activeCount}
@@ -664,13 +664,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                   {groupStats.completedAccounts}
                 </span>
                 <span className="text-xs text-[#8a7b68]">
-                  dari {groupStats.activeCount} tuyul aktif
+                  of {groupStats.activeCount} active accounts
                 </span>
               </div>
               <div className="flex items-center justify-between text-[11px] text-[#8a7b68] mt-1 pt-1.5 border-t border-[#eee7dc]">
-                <span>Tugas selesai:</span>
+                <span>Tasks completed:</span>
                 <span className="font-mono font-semibold text-[#2c261e]">
-                  {groupStats.completedTasks} / {groupStats.totalAssignedTasks} task
+                  {groupStats.completedTasks} / {groupStats.totalAssignedTasks} tasks
                 </span>
               </div>
             </div>
@@ -680,7 +680,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
           <div className="bg-white border border-[#ded5c5] rounded-xs p-3.5 shadow-[1px_1px_0px_#e5ddd0] flex flex-col justify-between space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-[#5c4e3b] uppercase tracking-wide">
-                Progress Grup
+                Group Progress
               </span>
               <span className="text-xs font-bold font-mono text-[#3B6EA8]">
                 {groupStats.overallProgress}%
@@ -696,15 +696,15 @@ export function TrackerView({ initialData }: TrackerViewProps) {
             <div className="grid grid-cols-3 gap-1 pt-1 border-t border-[#eee7dc] text-center text-[10px]">
               <div className="bg-[#F2FAF4] p-1 rounded-2xs border border-[#c2e4cc]">
                 <span className="block text-[#1E5D2F] font-bold font-mono">{groupStats.completedAccounts}</span>
-                <span className="text-[9px] text-[#1E5D2F]">Selesai</span>
+                <span className="text-[9px] text-[#1E5D2F]">Completed</span>
               </div>
               <div className="bg-[#FFF8EB] p-1 rounded-2xs border border-[#ebd7b2]">
                 <span className="block text-[#8C580B] font-bold font-mono">{groupStats.inProgressAccounts}</span>
-                <span className="text-[9px] text-[#8C580B]">Berjalan</span>
+                <span className="text-[9px] text-[#8C580B]">In Progress</span>
               </div>
               <div className="bg-[#F6F3EE] p-1 rounded-2xs border border-[#e0d6c8]">
                 <span className="block text-[#5c4e3b] font-bold font-mono">{groupStats.notStartedAccounts}</span>
-                <span className="text-[9px] text-[#7a6b57]">Belum</span>
+                <span className="text-[9px] text-[#7a6b57]">Not Started</span>
               </div>
             </div>
           </div>
@@ -777,8 +777,8 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               <option value="username-desc">Username (Z-A)</option>
               <option value="name-asc">Nickname (A-Z)</option>
               <option value="name-desc">Nickname (Z-A)</option>
-              <option value="zeny-desc">Zeny Terbanyak</option>
-              <option value="zeny-asc">Zeny Tersedikit</option>
+              <option value="zeny-desc">Highest Zeny</option>
+              <option value="zeny-asc">Lowest Zeny</option>
               <option value="least-progress">Least Progress</option>
               <option value="most-progress">Most Progress</option>
               <option value="group">Group</option>
@@ -904,7 +904,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                               type="button"
                               onClick={() => handleOpenZenyModal(acc)}
                               className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#8C580B] bg-[#FFF8EB] hover:bg-[#FCECC9] border border-[#ebd7b2] px-1 py-0.2 rounded-2xs cursor-pointer transition-colors"
-                              title={`Zeny: ${formatZeny(acc.zeny || 0)} (Klik untuk edit)`}
+                              title={`Zeny: ${formatZeny(acc.zeny || 0)} (Click to edit)`}
                             >
                               <Coins className="w-2.5 h-2.5 text-[#8C580B]" />
                               {formatZenyCompact(acc.zeny || 0)}
@@ -1137,7 +1137,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                         type="button"
                         onClick={() => handleOpenZenyModal(acc)}
                         className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#8C580B] bg-[#FFF8EB] hover:bg-[#FCECC9] border border-[#ebd7b2] px-1.5 py-0.5 rounded-2xs cursor-pointer transition-colors"
-                        title={`Zeny: ${formatZeny(acc.zeny || 0)} (Klik untuk edit)`}
+                        title={`Zeny: ${formatZeny(acc.zeny || 0)} (Click to edit)`}
                       >
                         <Coins className="w-3 h-3 text-[#8C580B]" />
                         {formatZenyCompact(acc.zeny || 0)}
@@ -1356,21 +1356,21 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         isOpen={Boolean(zenyModalAccount)}
         onClose={() => setZenyModalAccount(null)}
         title={`Update Zeny — ${zenyModalAccount?.nickname || ""}`}
-        description="Perbarui jumlah zeny (mata uang Ragnarok) pada tuyul ini."
+        description="Update zeny balance for this account."
         maxWidth="sm"
       >
         <div className="space-y-4 text-xs pt-1">
           <div className="p-3 rounded-xs bg-[#FFF8EB] border border-[#ebd7b2] space-y-1">
             <div className="flex items-center justify-between text-[#8C580B]">
               <span className="font-semibold flex items-center gap-1">
-                <Coins className="w-3.5 h-3.5" /> Karakter:
+                <Coins className="w-3.5 h-3.5" /> Account:
               </span>
               <span className="font-bold text-[#231b12] text-sm">
                 {zenyModalAccount?.nickname} ({zenyModalAccount?.job})
               </span>
             </div>
             <div className="flex items-center justify-between text-[11px] text-[#8a7b68]">
-              <span>Zeny Saat Ini:</span>
+              <span>Current Zeny:</span>
               <span className="font-mono font-bold text-[#8C580B]">
                 {formatZeny(zenyModalAccount?.zeny || 0)}
               </span>
@@ -1379,7 +1379,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-[#2c261e] flex items-center justify-between">
-              <span>Nominal Zeny Baru</span>
+              <span>New Zeny Amount</span>
               <span className="font-mono text-xs text-[#8C580B] font-bold">
                 {formatZeny(zenyInputValue || 0)}
               </span>
@@ -1395,13 +1395,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               autoFocus
             />
             <p className="text-[10px] text-[#8a7b68]">
-              Ketik nominal zeny terbaru yang dimiliki tuyul ini.
+              Enter the updated zeny balance for this account.
             </p>
           </div>
 
           {/* Quick preset increment buttons */}
           <div className="space-y-1.5">
-            <span className="text-[10px] text-[#8a7b68] font-medium block">Tambah Cepat:</span>
+            <span className="text-[10px] text-[#8a7b68] font-medium block">Quick Add:</span>
             <div className="flex flex-wrap gap-1.5">
               {[100_000, 500_000, 1_000_000, 5_000_000, 10_000_000].map((amt) => (
                 <button
@@ -1431,7 +1431,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               onClick={() => setZenyModalAccount(null)}
               className="h-8 text-xs"
             >
-              Batal
+              Cancel
             </Button>
             <Button
               type="button"
@@ -1440,7 +1440,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               disabled={isSavingZeny}
               className="h-8 text-xs font-semibold"
             >
-              {isSavingZeny ? "Menyimpan..." : "Simpan Zeny"}
+              {isSavingZeny ? "Saving..." : "Save Zeny"}
             </Button>
           </div>
         </div>

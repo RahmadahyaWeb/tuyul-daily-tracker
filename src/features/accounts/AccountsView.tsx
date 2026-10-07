@@ -979,7 +979,7 @@ export function AccountsView({
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
                   <span className="flex items-center gap-1">
-                    <Coins className="w-3.5 h-3.5 text-[#8C580B]" /> Zeny (Ragnarok Gold)
+                    <Coins className="w-3.5 h-3.5 text-[#8C580B]" /> Zeny
                   </span>
                   <span className="text-[10px] text-[#8C580B] font-mono font-medium">
                     {formatZeny(formData.zeny || 0)}
