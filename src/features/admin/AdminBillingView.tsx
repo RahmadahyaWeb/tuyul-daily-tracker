@@ -200,33 +200,33 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
           <Table className="min-w-[700px]">
           <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
             <TableRow>
-              <TableHead className="py-2.5 pl-4 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 pl-4 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 User
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 Requested Plan
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 Notes / Proof
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 Date Requested
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] text-center font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider text-center font-sans">
                 Status
               </TableHead>
-              <TableHead className="py-2.5 pr-4 text-xs font-bold text-[#5a4c3a] text-right font-pixel">
+              <TableHead className="py-2.5 pr-4 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider text-right font-sans">
                 Decision
               </TableHead>
             </TableRow>
           </TableHeader>
 
-          <TableBody className="divide-y divide-slate-100">
+          <TableBody className="divide-y divide-[#eee7dc]">
             {filteredRequests.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={6}
-                  className="h-32 text-center text-xs text-slate-400 py-8"
+                  className="h-32 text-center text-xs text-[#8a7b68] py-8"
                 >
                   No billing upgrade requests found.
                 </TableCell>
@@ -235,20 +235,20 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
               paginatedRequests.map((req) => (
                 <TableRow
                   key={req.id}
-                  className="hover:bg-slate-50/60 transition-colors"
+                  className="hover:bg-[#FAF6F0] transition-colors"
                 >
                   <TableCell className="py-3 pl-4">
-                    <span className="font-semibold text-xs text-slate-900 block">
+                    <span className="font-semibold text-xs text-[#231b12] block">
                       @{req.username}
                     </span>
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-[#8a7b68]">
                       Current: {req.currentUserPlan}
                     </span>
                   </TableCell>
 
                   <TableCell className="py-3">
-                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
-                      <Sparkles className="w-2.5 h-2.5 mr-1 text-indigo-600" />
+                    <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-none bg-[#3B6EA8] text-white border border-[#2a5082] shadow-[1px_1px_0px_#1e3b60]">
+                      <Sparkles className="w-2.5 h-2.5 mr-1 text-[#FDEECA]" />
                       {req.plan} PLAN ($9/mo)
                     </span>
                   </TableCell>
@@ -296,7 +296,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
                           size="sm"
                           onClick={() => handleApprove(req.id, req.username)}
                           disabled={isPending}
-                          className="h-7 text-xs px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white gap-1"
+                          className="h-7 text-xs px-2.5 gap-1 bg-[#1E5D2F] hover:bg-[#164422] border-[#133c1d] shadow-[1px_1px_0px_#0e2d16]"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Approve</span>
@@ -306,7 +306,7 @@ export function AdminBillingView({ initialRequests }: AdminBillingViewProps) {
                           size="sm"
                           onClick={() => handleReject(req.id, req.username)}
                           disabled={isPending}
-                          className="h-7 text-xs px-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 border-rose-200"
+                          className="h-7 text-xs px-2 text-[#A82A1E] hover:text-[#8f2419] hover:bg-[#FDECEB] border-[#f5c6cb]"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           <span>Reject</span>

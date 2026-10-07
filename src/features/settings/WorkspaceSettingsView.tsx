@@ -112,7 +112,7 @@ export function WorkspaceSettingsView({ workspace }: WorkspaceSettingsViewProps)
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription className="text-xs text-[#736350]">
-                  This will permanently delete your workspace, all {workspace.accountCount} character accounts, and associated activity history.
+                  This will permanently delete your workspace, all {workspace.accountCount} accounts, and associated activity history.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -246,7 +246,7 @@ export default async function LandingPage() {
               Account Groups & Categories
             </h3>
             <p className="text-xs leading-relaxed text-[#685744]">
-              Group accounts by server, character job class, level brackets, and role without messy spreadsheet formulas.
+              Group accounts by server, job class, level brackets, and role without messy spreadsheet formulas.
             </p>
           </div>
 

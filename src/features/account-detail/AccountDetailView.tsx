@@ -139,7 +139,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
     try {
       await updateAccountNotes(account.id, notes);
       setNotesSaved(true);
-      toast.success("Character notes saved successfully!");
+      toast.success("Account notes saved successfully!");
       setTimeout(() => setNotesSaved(false), 2000);
     } catch {
       toast.error("Failed to save notes");
@@ -376,7 +376,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
         <div className="flex items-center justify-between border-b border-[#eee7dc] pb-2">
           <div className="text-xs font-bold uppercase tracking-wider text-[#8a7b68] flex items-center gap-1.5">
             <FileText className="w-3.5 h-3.5 text-[#3B6EA8]" />
-            Character Notes & Instructions
+            Account Notes & Instructions
           </div>
           <Button
             size="sm"
@@ -392,7 +392,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
           <Textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Type any character settings, farm target, level targets, or equipment gear setups here..."
+            placeholder="Type any account settings, farm targets, or notes here..."
             rows={3}
             className="text-xs bg-[#FAF6F0]/60 border-[#cfbeaa]"
           />
@@ -443,7 +443,7 @@ export function AccountDetailView({ data }: AccountDetailProps) {
                       colSpan={last30Days.length + 1}
                       className="h-28 text-center text-xs text-[#8a7b68] py-6"
                     >
-                      No activities assigned to this character.
+                      No activities assigned to this account.
                     </TableCell>
                   </TableRow>
                 ) : (

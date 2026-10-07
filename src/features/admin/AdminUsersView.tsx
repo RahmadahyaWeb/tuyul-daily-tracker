@@ -183,8 +183,8 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
               Admin Console
             </Badge>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Monitor registered users, character account counts, and subscription plans
+          <p className="text-xs text-[#736350] mt-0.5">
+            Monitor registered users, account counts, and subscription plans
           </p>
         </div>
 
@@ -195,10 +195,10 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
               size="sm"
               className="text-xs h-8 gap-1.5 relative"
             >
-              <CreditCard className="w-3.5 h-3.5 text-indigo-600" />
+              <CreditCard className="w-3.5 h-3.5 text-[#3B6EA8]" />
               <span>Billing Approvals</span>
               {stats.pendingBilling > 0 && (
-                <span className="ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                <span className="ml-1 px-1.5 py-0.5 rounded-none bg-[#B57C1E] text-white text-[10px] font-bold">
                   {stats.pendingBilling}
                 </span>
               )}
@@ -222,7 +222,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
         <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892] space-y-1">
           <div className="flex items-center justify-between text-[#8a7b68]">
             <span className="text-[11px] font-bold uppercase tracking-wider font-pixel">
-              Total Characters
+              Total Accounts
             </span>
             <Bot className="w-4 h-4 text-[#8a7b68]" />
           </div>
@@ -232,7 +232,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
         <div className="p-4 rounded-xs border-2 border-[#cfbeaa] bg-[#FCFAF7] shadow-[2px_2px_0px_#baa892] space-y-1">
           <div className="flex items-center justify-between text-[#8a7b68]">
             <span className="text-[11px] font-bold uppercase tracking-wider font-pixel">
-              Pro Guilds
+              Pro Workspaces
             </span>
             <Sparkles className="w-4 h-4 text-[#3B6EA8]" />
           </div>
@@ -289,9 +289,9 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
           </select>
         </div>
 
-        <div className="text-xs text-[#736350] font-pixel pt-1 sm:pt-0 sm:ml-auto text-left sm:text-right border-t sm:border-t-0 border-[#ebd7b2]">
-          SHOWING <strong>{filteredUsers.length}</strong> OF{" "}
-          <strong>{users.length}</strong> USERS
+        <div className="text-xs text-[#736350] font-sans font-medium pt-1 sm:pt-0 sm:ml-auto text-left sm:text-right border-t sm:border-t-0 border-[#ebd7b2]">
+          Showing <strong>{filteredUsers.length}</strong> of{" "}
+          <strong>{users.length}</strong> accounts
         </div>
       </div>
 
@@ -301,28 +301,28 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
           <Table className="min-w-[650px]">
           <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
             <TableRow>
-              <TableHead className="py-2.5 pl-4 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 pl-4 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 User
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 Role
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 Plan
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] text-center font-pixel">
-                Characters
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider text-center font-sans">
+                Accounts
               </TableHead>
-              <TableHead className="py-2.5 text-xs font-bold text-[#5a4c3a] font-pixel">
+              <TableHead className="py-2.5 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider font-sans">
                 Registered
               </TableHead>
-              <TableHead className="py-2.5 pr-4 text-xs font-bold text-[#5a4c3a] text-right font-pixel">
+              <TableHead className="py-2.5 pr-4 text-[11px] font-bold text-[#2c261e] uppercase tracking-wider text-right font-sans">
                 Actions
               </TableHead>
             </TableRow>
           </TableHeader>
 
-          <TableBody className="divide-y divide-slate-100">
+          <TableBody className="divide-y divide-[#eee7dc]">
             {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell
@@ -366,15 +366,15 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
 
                   <TableCell className="py-3">
                     <span
-                      className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-none ${
                         u.plan === "PRO" || u.role === "ADMIN"
-                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200/60"
-                          : "bg-slate-100 text-slate-600 border border-slate-200"
+                          ? "bg-[#3B6EA8] text-white border border-[#2a5082] shadow-[1px_1px_0px_#1e3b60]"
+                          : "bg-[#f4efe6] text-[#5c4e3b] border border-[#ded4c4]"
                       }`}
                     >
                       {u.plan === "PRO" || u.role === "ADMIN" ? (
                         <>
-                          <Sparkles className="w-2.5 h-2.5 mr-1 text-indigo-600" />
+                          <Sparkles className="w-2.5 h-2.5 mr-1 text-[#FDEECA]" />
                           PRO
                         </>
                       ) : (
@@ -504,15 +504,15 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200">
-                <KeyRound className="w-5 h-5" />
+              <div className="p-2 rounded-xs bg-[#FAF2E1] text-[#8C580B] border border-[#cfbeaa]">
+                <KeyRound className="w-4 h-4" />
               </div>
               <div>
-                <DialogTitle className="text-base font-bold text-slate-900">
+                <DialogTitle className="text-base font-bold text-[#231b12]">
                   Reset User Password
                 </DialogTitle>
-                <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                  Set a new password for <strong className="text-slate-800">@{resetModalUser?.username}</strong>
+                <DialogDescription className="text-xs text-[#736350] mt-0.5">
+                  Set a new password for <strong className="text-[#231b12]">@{resetModalUser?.username}</strong>
                 </DialogDescription>
               </div>
             </div>
@@ -521,13 +521,13 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
           <form onSubmit={handleResetPassword} className="space-y-4 pt-2">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-[#2c261e]">
                   New Password
                 </label>
                 <button
                   type="button"
                   onClick={generateRandomPassword}
-                  className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer transition-colors"
+                  className="text-[11px] font-semibold text-[#3B6EA8] hover:text-[#2A5280] flex items-center gap-1 cursor-pointer transition-colors"
                 >
                   <RefreshCw className="w-3 h-3" />
                   Generate Random
@@ -539,7 +539,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter at least 6 characters..."
-                  className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 pr-10 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 shadow-2xs font-mono"
+                  className="w-full h-9 rounded-xs border border-[#cfc3b0] bg-white px-3 pr-10 text-xs text-[#2c261e] placeholder:text-[#9c8e7b] focus:outline-none focus:border-[#3B6EA8] shadow-[1px_1px_0px_#e5ddd0] font-mono"
                   autoFocus
                   required
                   minLength={6}
@@ -547,7 +547,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8a7b68] hover:text-[#231b12] cursor-pointer"
                   tabIndex={-1}
                 >
                   {showPassword ? (
@@ -557,12 +557,12 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                   )}
                 </button>
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-[#8a7b68]">
                 User @{resetModalUser?.username} will immediately be able to log in with this new password.
               </p>
             </div>
 
-            <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-slate-100">
+            <DialogFooter className="gap-2 sm:gap-0 pt-3 border-t border-[#ebd7b2]">
               <Button
                 type="button"
                 variant="outline"
@@ -577,7 +577,7 @@ export function AdminUsersView({ initialUsers, stats }: AdminUsersViewProps) {
                 type="submit"
                 size="sm"
                 disabled={isResetting || !newPassword || newPassword.length < 6}
-                className="text-xs h-8 bg-amber-600 hover:bg-amber-700 text-white font-medium"
+                className="text-xs h-8"
               >
                 {isResetting ? "Updating..." : "Reset Password"}
               </Button>

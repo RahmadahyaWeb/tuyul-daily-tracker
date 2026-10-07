@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Dashboard — Dituyulin",
-  description: "Overview of daily character activity and quest progress",
+  description: "Overview of daily account activity and progress",
 };
 
 export const dynamic = "force-dynamic";

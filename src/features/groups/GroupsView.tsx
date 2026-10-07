@@ -134,7 +134,7 @@ export function GroupsView({ initialGroups }: GroupsViewProps) {
                   Group Category Name
                 </TableHead>
                 <TableHead className="text-center text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
-                  Characters
+                  Accounts
                 </TableHead>
                 <TableHead className="w-24 text-right text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 pr-4 font-sans">
                   Actions

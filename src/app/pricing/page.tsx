@@ -44,7 +44,7 @@ export default async function PricingPage() {
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="text-center space-y-3 mb-12">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] text-[11px] font-bold text-[#664b28] font-pixel uppercase shadow-[1px_1px_0px_#baa892]">
-            GUILD MEMBERSHIP TIERS
+            MEMBERSHIP PLANS
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#231b12]">
             Simple, transparent pricing

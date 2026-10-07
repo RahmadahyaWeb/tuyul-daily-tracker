@@ -152,3 +152,15 @@
 .checkbox-interactive:active {
   transform: scale(0.92);
 }
+
+/* MMORPG EXP Bar Subtle Segmented Pattern */
+.pixel-segmented-bar {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 7px,
+    rgba(0, 0, 0, 0.12) 7px,
+    rgba(0, 0, 0, 0.12) 8px
+  );
+}
+

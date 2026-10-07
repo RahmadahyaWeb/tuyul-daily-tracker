@@ -81,7 +81,7 @@ export function BillingSettingsView({
               Upgrade Request Pending Approval
             </h4>
             <p className="text-xs text-[#8C580B] leading-relaxed">
-              Your request to upgrade to the <strong>Pro Plan ($9/mo)</strong> has been submitted to the administrator. Once approved, your account limit will be automatically unlocked to 100 character accounts.
+              Your request to upgrade to the <strong>Pro Plan ($9/mo)</strong> has been submitted to the administrator. Once approved, your account limit will be automatically unlocked to 100 accounts.
             </p>
           </div>
         </div>
@@ -135,7 +135,7 @@ export function BillingSettingsView({
         {!isPro && (
           <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-xs text-[#736350]">
-              Need to manage more characters? Upgrade to unlock 100 accounts.
+              Need to manage more accounts? Upgrade to unlock 100 accounts.
             </span>
             <Button
               onClick={() => setUpgradeModalOpen(true)}
@@ -177,7 +177,7 @@ export function BillingSettingsView({
             </div>
             <DialogTitle className="text-lg font-bold text-[#231b12]">Upgrade to Pro Plan</DialogTitle>
             <DialogDescription className="text-xs text-[#736350]">
-              Unlock up to 100 accounts, priority cloud sync, and enhanced character monitoring.
+              Unlock up to 100 accounts, priority cloud sync, and enhanced activity monitoring.
             </DialogDescription>
           </DialogHeader>
 

@@ -32,9 +32,9 @@ export function ProgressBar({
           className={sizeClasses[size]}
           indicatorColor={
             clampedProgress === 100
-              ? "bg-emerald-600"
+              ? "bg-[#347A46]"
               : clampedProgress > 0
-              ? "bg-blue-600"
+              ? "bg-[#3B6EA8]"
               : "bg-transparent"
           }
         />

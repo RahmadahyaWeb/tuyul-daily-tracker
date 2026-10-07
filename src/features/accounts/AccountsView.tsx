@@ -274,7 +274,7 @@ export function AccountsView({
           toast.error(errMsg);
           return;
         }
-        toast.success(`Character "${formData.nickname}" updated successfully!`);
+        toast.success(`Account "${formData.nickname}" updated successfully!`);
       } else {
         const res: any = await createAccount({
           nickname: formData.nickname,
@@ -302,7 +302,7 @@ export function AccountsView({
           toast.error(errMsg);
           return;
         }
-        toast.success(`Character "${formData.nickname}" created successfully!`);
+        toast.success(`Account "${formData.nickname}" created successfully!`);
       }
 
       setFormModalOpen(false);
@@ -328,9 +328,9 @@ export function AccountsView({
     try {
       const res = await deleteAccount(deleteDialog.accountId);
       if (res && res.success) {
-        toast.success(`Character "${deleteDialog.nickname || ""}" deleted.`);
+        toast.success(`Account "${deleteDialog.nickname || ""}" deleted.`);
       } else {
-        toast.error("Failed to delete character");
+        toast.error("Failed to delete account");
       }
     } finally {
       setDeleteDialog({ isOpen: false });
@@ -430,7 +430,7 @@ export function AccountsView({
             <TableHeader className="bg-[#F4EFE6] border-b border-[#ded4c4]">
               <TableRow className="hover:bg-transparent">
                 <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 pl-4 font-sans">
-                  Character Nickname
+                  Nickname
                 </TableHead>
                 <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Username
@@ -863,8 +863,8 @@ export function AccountsView({
 
           {/* Section 1: Account Information */}
           <div className="space-y-2.5">
-            <h3 className="font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-              Character Information
+            <h3 className="font-bold text-[#231b12] text-[11px] uppercase tracking-wider">
+              Account Information
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Input

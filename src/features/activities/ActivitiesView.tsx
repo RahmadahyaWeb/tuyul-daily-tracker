@@ -232,7 +232,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                   Type
                 </TableHead>
                 <TableHead className="text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
-                  Assigned Characters
+                  Assigned Accounts
                 </TableHead>
                 <TableHead className="text-center text-[11px] font-bold text-[#2c261e] uppercase tracking-wider py-3 font-sans">
                   Status
@@ -243,12 +243,12 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-slate-100">
+            <TableBody className="divide-y divide-[#eee7dc]">
               {activities.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className="h-28 text-center text-xs text-slate-400 py-6"
+                    className="h-28 text-center text-xs text-[#8a7b68] py-6"
                   >
                     No activities configured yet. Click &quot;Add Activity&quot; to create one.
                   </TableCell>
@@ -310,7 +310,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
                     </TableCell>
 
                     <TableCell className="text-xs text-[#736350] py-2.5">
-                      {act._count?.accountActivities || 0} characters
+                      {act._count?.accountActivities || 0} accounts
                     </TableCell>
 
                     <TableCell className="text-center py-2.5">
@@ -433,7 +433,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
 
                   <div className="flex items-center justify-between pt-2 border-t border-[#eee7dc] text-xs">
                     <span className="text-[11px] text-[#736350]">
-                      {act._count?.accountActivities || 0} characters assigned
+                      {act._count?.accountActivities || 0} accounts assigned
                     </span>
 
                     <div className="flex items-center gap-1">
@@ -598,7 +598,7 @@ export function ActivitiesView({ initialActivities }: ActivitiesViewProps) {
       <ConfirmDialog
         isOpen={deleteDialog.isOpen}
         title={`Delete "${deleteDialog.activityName}"?`}
-        description="Are you sure you want to delete this activity? It will be removed from all character checklists and past activity records."
+        description="Are you sure you want to delete this activity? It will be removed from all account checklists and past activity records."
         confirmLabel="Delete Activity"
         confirmVariant="destructive"
         onConfirm={handleConfirmDelete}

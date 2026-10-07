@@ -53,7 +53,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
   const handleNextStep2 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname.trim() || !accountUsername.trim()) {
-      toast.error("Please fill in character nickname and username");
+      toast.error("Please fill in nickname and username");
       return;
     }
     setStep(3);
@@ -77,7 +77,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
     try {
       const res = await completeOnboardingAction(formData);
       if (res && res.success) {
-        toast.success("Character created successfully! Welcome to Dituyulin.");
+        toast.success("Account created successfully! Welcome to Dituyulin.");
         router.push("/tracker");
         router.refresh();
       } else {
@@ -97,7 +97,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#8a7b68]">
-              Setup Workspace & First Character
+              Setup Workspace & First Account
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-[#8a7b68] font-medium font-mono">
@@ -137,7 +137,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   Name your workspace
                 </h2>
                 <p className="text-xs text-[#736350]">
-                  A workspace is where your character accounts, teams, and daily activities live.
+                  A workspace is where your accounts, groups, and daily activities live.
                 </p>
               </div>
 
@@ -169,17 +169,17 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   <UserPlus className="w-4 h-4" />
                 </div>
                 <h2 className="text-lg font-bold tracking-tight text-[#231b12]">
-                  Add your first character account
+                  Add your first account
                 </h2>
                 <p className="text-xs text-[#736350]">
-                  Enter your character information to start your daily tracking list.
+                  Enter your account details to start your daily tracking list.
                 </p>
               </div>
 
               <div className="space-y-3 pt-2">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Input
-                    label="Character Nickname"
+                    label="Nickname"
                     id="nickname"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
@@ -222,11 +222,11 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   type="button"
                   variant="ghost"
                   onClick={() => setStep(1)}
-                  className="text-xs text-slate-600"
+                  className="text-xs text-[#736350] hover:text-[#231b12]"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back
                 </Button>
-                <Button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white text-xs">
+                <Button type="submit" size="sm">
                   Continue <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
               </div>
@@ -237,14 +237,14 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
           {step === 3 && (
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-900 mb-2">
+                <div className="w-9 h-9 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] flex items-center justify-center text-[#5A4122] mb-2">
                   <ListChecks className="w-4 h-4" />
                 </div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900">
+                <h2 className="text-lg font-bold tracking-tight text-[#231b12]">
                   Choose daily activities
                 </h2>
-                <p className="text-xs text-slate-500">
-                  Select activities to automatically assign to this character. You can edit or add more anytime.
+                <p className="text-xs text-[#736350]">
+                  Select activities to automatically assign to this account. You can edit or add more anytime.
                 </p>
               </div>
 
@@ -255,10 +255,10 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                     <div
                       key={act.id}
                       onClick={() => toggleActivity(act.id)}
-                      className={`flex items-center justify-between p-3 rounded-lg border text-xs cursor-pointer transition-colors ${
+                      className={`flex items-center justify-between p-3 rounded-xs border text-xs cursor-pointer transition-colors ${
                         isChecked
-                          ? "bg-slate-50 border-slate-900/40 text-slate-900 font-medium"
-                          : "border-slate-200 text-slate-600 hover:bg-slate-50/50"
+                          ? "bg-[#FAF7F2] border-[#3B6EA8] text-[#231b12] font-medium shadow-[1px_1px_0px_#baa892]"
+                          : "bg-white border-[#cfc3b0] text-[#5c4e3b] hover:bg-[#FAF6F0]"
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                         />
                         <span>{act.name}</span>
                       </div>
-                      <span className="text-[10px] font-mono uppercase text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-mono uppercase text-[#736350] bg-[#FAF2E1] border border-[#cfbeaa] px-1.5 py-0.5 rounded-none">
                         {act.code}
                       </span>
                     </div>
@@ -281,7 +281,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   type="button"
                   variant="ghost"
                   onClick={() => setStep(2)}
-                  className="text-xs text-slate-600"
+                  className="text-xs text-[#736350] hover:text-[#231b12]"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back
                 </Button>
@@ -289,7 +289,7 @@ export function OnboardingView({ username, activities }: OnboardingViewProps) {
                   type="button"
                   onClick={handleSubmit}
                   isLoading={isSubmitting}
-                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium"
+                  size="sm"
                 >
                   Complete Setup <Check className="w-3.5 h-3.5 ml-1.5" />
                 </Button>

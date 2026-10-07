@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | Dituyulin",
   },
   description:
-    "Track daily quest progress, manage multiple game accounts, and keep character activities organized in a fantasy pixel workspace.",
+    "Track daily quest progress, manage multiple game accounts, and keep account activities organized in a fantasy pixel workspace.",
 };
 
 export default function RootLayout({

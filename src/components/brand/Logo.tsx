@@ -80,7 +80,7 @@ export function Logo({
 
   const content = (
     <div className={cn("inline-flex items-center gap-2 select-none", className)}>
-      <div className="p-1 rounded-sm bg-amber-50/80 border border-amber-200/80 shadow-[1px_1px_0px_#d97706] flex items-center justify-center">
+      <div className="p-1 rounded-xs bg-[#FAF2E1] border border-[#cfbeaa] shadow-[1px_1px_0px_#baa892] flex items-center justify-center">
         <LogoIcon size={iconSizes[size]} />
       </div>
 
@@ -89,7 +89,7 @@ export function Logo({
           <div className="flex items-center">
             <span
               className={cn(
-                "font-pixel font-bold tracking-tight text-slate-900 leading-none",
+                "font-pixel font-bold tracking-tight text-[#231b12] leading-none",
                 textSizes[size]
               )}
             >
@@ -97,7 +97,7 @@ export function Logo({
             </span>
           </div>
           {withTagline && (
-            <span className="text-[10px] text-slate-500 font-sans tracking-normal mt-0.5">
+            <span className="text-[10px] text-[#736350] font-sans tracking-normal mt-0.5">
               Track every account, the pixel way.
             </span>
           )}

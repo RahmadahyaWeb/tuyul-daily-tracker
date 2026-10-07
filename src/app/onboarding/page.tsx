@@ -7,7 +7,7 @@ import crypto from "crypto";
 
 export const metadata: Metadata = {
   title: "Onboarding — Dituyulin",
-  description: "Setup your workspace and first character to get started",
+  description: "Setup your workspace and first account to get started",
 };
 
 export const dynamic = "force-dynamic";

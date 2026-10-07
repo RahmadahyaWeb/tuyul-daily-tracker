@@ -39,7 +39,7 @@ export default function TermsPage() {
 
           <h2 className="text-sm font-semibold text-[#231b12] pt-3">3. USAGE LIMITS & PLANS</h2>
           <p>
-            Free tier accounts are limited to 5 managed character accounts. Upgrading to Pro unlocks additional quota and priority capabilities in accordance with our pricing schedule.
+            Free tier accounts are limited to 5 managed accounts. Upgrading to Pro unlocks additional quota and priority capabilities in accordance with our pricing schedule.
           </p>
 
           <h2 className="text-sm font-semibold text-[#231b12] pt-3">4. LIMITATION OF LIABILITY</h2>

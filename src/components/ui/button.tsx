@@ -10,21 +10,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-[#3B6EA8] text-white border border-[#234c7a] shadow-[1px_1px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#3B6EA8] text-white border border-[#234c7a] shadow-[2px_2px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
         primary:
-          "bg-[#3B6EA8] text-white border border-[#234c7a] shadow-[1px_1px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#3B6EA8] text-white border border-[#234c7a] shadow-[2px_2px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
         destructive:
-          "bg-[#A82A1E] text-white border border-[#7a1e15] shadow-[1px_1px_0px_#591610] hover:bg-[#8f2419] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#A82A1E] text-white border border-[#7a1e15] shadow-[2px_2px_0px_#591610] hover:bg-[#8f2419] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
         outline:
-          "border border-[#cfbeaa] bg-white text-[#2c261e] shadow-[1px_1px_0px_#e5ddd0] hover:bg-[#FAF6F0] hover:border-[#b5a38f] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "border border-[#cfbeaa] bg-white text-[#2c261e] shadow-[2px_2px_0px_#ded5c5] hover:bg-[#FAF6F0] hover:border-[#b5a38f] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
         secondary:
-          "bg-[#F4EEE7] text-[#2c261e] border border-[#cfbeaa] shadow-[1px_1px_0px_#e5ddd0] hover:bg-[#EAE2D8] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
-        ghost: "hover:bg-[#F3ECE0] text-[#5c4e3b] hover:text-[#231b12]",
+          "bg-[#F4EEE7] text-[#2c261e] border border-[#cfbeaa] shadow-[2px_2px_0px_#ded5c5] hover:bg-[#EAE2D8] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
+        ghost: "hover:bg-[#F3ECE0] text-[#5c4e3b] hover:text-[#231b12] active:bg-[#EAE1D3]",
         link: "text-[#3B6EA8] underline-offset-4 hover:underline",
         rpg:
-          "bg-[#3B6EA8] text-white font-bold border border-[#234c7a] shadow-[1px_1px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[0.5px] active:translate-y-[0.5px] active:shadow-none",
+          "bg-[#3B6EA8] text-white font-bold border border-[#234c7a] shadow-[2px_2px_0px_#1e3b60] hover:bg-[#325d90] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none",
         "ghost-danger":
-          "text-[#736350] hover:text-[#A82A1E] hover:bg-[#FDECEB]",
+          "text-[#736350] hover:text-[#A82A1E] hover:bg-[#FDECEB] active:bg-[#fbdad7]",
       },
       size: {
         default: "h-9 px-4 py-2",
