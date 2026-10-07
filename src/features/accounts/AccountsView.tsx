@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition, useMemo } from "react";
 import Link from "next/link";
 import {
   createAccount,
@@ -337,23 +337,30 @@ export function AccountsView({
     }
   };
 
-  const filteredAccounts = initialAccounts.filter((acc) => {
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      const match =
-        acc.nickname.toLowerCase().includes(q) ||
-        acc.username.toLowerCase().includes(q) ||
-        (acc.group?.name && acc.group.name.toLowerCase().includes(q)) ||
-        acc.job.toLowerCase().includes(q) ||
-        acc.server.toLowerCase().includes(q);
-      if (!match) return false;
-    }
+  const filteredAccounts = useMemo(() => {
+    return initialAccounts
+      .filter((acc) => {
+        if (search.trim()) {
+          const q = search.toLowerCase();
+          const match =
+            acc.nickname.toLowerCase().includes(q) ||
+            acc.username.toLowerCase().includes(q) ||
+            (acc.group?.name && acc.group.name.toLowerCase().includes(q)) ||
+            acc.job.toLowerCase().includes(q) ||
+            acc.server.toLowerCase().includes(q);
+          if (!match) return false;
+        }
 
-    if (statusFilter !== "all" && acc.status !== statusFilter) return false;
-    if (groupFilter !== "all" && acc.groupId !== groupFilter) return false;
+        if (statusFilter !== "all" && acc.status !== statusFilter) return false;
+        if (groupFilter !== "all" && acc.groupId !== groupFilter) return false;
 
-    return true;
-  });
+        return true;
+      })
+      .sort((a, b) =>
+        a.username.localeCompare(b.username, undefined, { numeric: true, sensitivity: "base" }) ||
+        a.nickname.localeCompare(b.nickname, undefined, { numeric: true, sensitivity: "base" })
+      );
+  }, [initialAccounts, search, statusFilter, groupFilter]);
 
   useEffect(() => {
     setCurrentPage(1);

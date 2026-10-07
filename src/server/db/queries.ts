@@ -62,7 +62,9 @@ export async function getDashboardStats(
     `,
   ]);
 
-  const accounts = accountsRaw as { id: string; nickname: string; owner: string; job: string; server: string; status: string }[];
+  const accounts = (accountsRaw as { id: string; nickname: string; username?: string; owner: string; job: string; server: string; status: string }[]).sort((a, b) =>
+    (a.username || a.nickname).localeCompare(b.username || b.nickname, undefined, { numeric: true, sensitivity: "base" })
+  );
   const masterActivities = masterActivitiesRaw as { id: string }[];
   const assignedActivities = assignedRaw as { account_id: string; activity_id: string }[];
   const todayLogs = todayLogsRaw as { account_id: string; activity_id: string }[];
@@ -338,7 +340,10 @@ export async function getTrackerData(
       completedCount,
       progressPercent,
     };
-  });
+  }).sort((a, b) =>
+    a.username.localeCompare(b.username, undefined, { numeric: true, sensitivity: "base" }) ||
+    a.nickname.localeCompare(b.nickname, undefined, { numeric: true, sensitivity: "base" })
+  );
 
   const overallProgress =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
@@ -363,6 +368,7 @@ export async function getTrackerData(
 export interface WeeklyAccountRow {
   id: string;
   nickname: string;
+  username: string;
   server: string;
   owner: string;
   job: string;
@@ -478,6 +484,7 @@ export async function getWeeklyData(
     return {
       id: accId,
       nickname: String(acc.nickname),
+      username: String(acc.username),
       server: String(acc.server),
       owner: String(acc.owner),
       job: String(acc.job),
@@ -485,7 +492,10 @@ export async function getWeeklyData(
       groupName: acc.group_name ? String(acc.group_name) : null,
       dailyStatus,
     };
-  });
+  }).sort((a, b) =>
+    a.username.localeCompare(b.username, undefined, { numeric: true, sensitivity: "base" }) ||
+    a.nickname.localeCompare(b.nickname, undefined, { numeric: true, sensitivity: "base" })
+  );
 
   return {
     weekDays,
@@ -525,25 +535,30 @@ export async function getAccountsList(explicitUserId?: string) {
     });
   }
 
-  return (accountsRaw as any[]).map((acc) => ({
-    id: String(acc.id),
-    nickname: String(acc.nickname),
-    username: String(acc.username),
-    password: acc.password ? decryptPassword(String(acc.password)) : "",
-    server: String(acc.server),
-    owner: String(acc.owner),
-    job: String(acc.job),
-    level: Number(acc.level),
-    startDate: new Date(acc.start_date),
-    status: String(acc.status) as "Active" | "Paused" | "Finished",
-    notes: acc.notes ? String(acc.notes) : null,
-    groupId: acc.group_id ? String(acc.group_id) : null,
-    zeny: Number(acc.zeny || 0),
-    group: acc.group_id ? { id: String(acc.group_id), name: String(acc.group_name || "") } : null,
-    createdAt: new Date(acc.created_at),
-    updatedAt: new Date(acc.updated_at),
-    accountActivities: activitiesMap.get(String(acc.id)) || [],
-  }));
+  return (accountsRaw as any[])
+    .map((acc) => ({
+      id: String(acc.id),
+      nickname: String(acc.nickname),
+      username: String(acc.username),
+      password: acc.password ? decryptPassword(String(acc.password)) : "",
+      server: String(acc.server),
+      owner: String(acc.owner),
+      job: String(acc.job),
+      level: Number(acc.level),
+      startDate: new Date(acc.start_date),
+      status: String(acc.status) as "Active" | "Paused" | "Finished",
+      notes: acc.notes ? String(acc.notes) : null,
+      groupId: acc.group_id ? String(acc.group_id) : null,
+      zeny: Number(acc.zeny || 0),
+      group: acc.group_id ? { id: String(acc.group_id), name: String(acc.group_name || "") } : null,
+      createdAt: new Date(acc.created_at),
+      updatedAt: new Date(acc.updated_at),
+      accountActivities: activitiesMap.get(String(acc.id)) || [],
+    }))
+    .sort((a, b) =>
+      a.username.localeCompare(b.username, undefined, { numeric: true, sensitivity: "base" }) ||
+      a.nickname.localeCompare(b.nickname, undefined, { numeric: true, sensitivity: "base" })
+    );
 }
 
 export async function getAccountDetail(id: string, explicitUserId?: string) {

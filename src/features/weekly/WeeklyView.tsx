@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { WeeklyAccountRow } from "@/server/db/queries";
@@ -59,15 +59,23 @@ export function WeeklyView({
     });
   };
 
-  const filteredAccounts = initialAccounts.filter((acc) => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      acc.nickname.toLowerCase().includes(q) ||
-      acc.job.toLowerCase().includes(q) ||
-      (acc.groupName && acc.groupName.toLowerCase().includes(q))
-    );
-  });
+  const filteredAccounts = useMemo(() => {
+    return initialAccounts
+      .filter((acc) => {
+        if (!search.trim()) return true;
+        const q = search.toLowerCase();
+        return (
+          acc.nickname.toLowerCase().includes(q) ||
+          (acc.username && acc.username.toLowerCase().includes(q)) ||
+          acc.job.toLowerCase().includes(q) ||
+          (acc.groupName && acc.groupName.toLowerCase().includes(q))
+        );
+      })
+      .sort((a, b) =>
+        (a.username || a.nickname).localeCompare(b.username || b.nickname, undefined, { numeric: true, sensitivity: "base" }) ||
+        a.nickname.localeCompare(b.nickname, undefined, { numeric: true, sensitivity: "base" })
+      );
+  }, [initialAccounts, search]);
 
   useEffect(() => {
     setCurrentPage(1);

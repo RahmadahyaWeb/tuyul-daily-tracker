@@ -427,38 +427,41 @@ export function TrackerView({ initialData }: TrackerViewProps) {
 
   const sortedAccounts = useMemo(() => {
     const list = [...filteredAccounts];
+    const naturalCompare = (strA: string, strB: string) =>
+      (strA || "").localeCompare(strB || "", undefined, { numeric: true, sensitivity: "base" });
+
     switch (sortBy) {
       case "username-asc":
-        return list.sort((a, b) => a.username.localeCompare(b.username));
+        return list.sort((a, b) => naturalCompare(a.username, b.username) || naturalCompare(a.nickname, b.nickname));
       case "username-desc":
-        return list.sort((a, b) => b.username.localeCompare(a.username));
+        return list.sort((a, b) => naturalCompare(b.username, a.username) || naturalCompare(b.nickname, a.nickname));
       case "name-asc":
-        return list.sort((a, b) => a.nickname.localeCompare(b.nickname));
+        return list.sort((a, b) => naturalCompare(a.nickname, b.nickname) || naturalCompare(a.username, b.username));
       case "name-desc":
-        return list.sort((a, b) => b.nickname.localeCompare(a.nickname));
+        return list.sort((a, b) => naturalCompare(b.nickname, a.nickname) || naturalCompare(b.username, a.username));
       case "zeny-desc":
-        return list.sort((a, b) => (b.zeny || 0) - (a.zeny || 0));
+        return list.sort((a, b) => (b.zeny || 0) - (a.zeny || 0) || naturalCompare(a.username, b.username));
       case "zeny-asc":
-        return list.sort((a, b) => (a.zeny || 0) - (b.zeny || 0));
+        return list.sort((a, b) => (a.zeny || 0) - (b.zeny || 0) || naturalCompare(a.username, b.username));
       case "least-progress":
         return list.sort((a, b) => {
           if (a.progressPercent !== b.progressPercent) {
             return a.progressPercent - b.progressPercent;
           }
-          return a.username.localeCompare(b.username);
+          return naturalCompare(a.username, b.username);
         });
       case "most-progress":
         return list.sort((a, b) => {
           if (a.progressPercent !== b.progressPercent) {
             return b.progressPercent - a.progressPercent;
           }
-          return a.username.localeCompare(b.username);
+          return naturalCompare(a.username, b.username);
         });
       case "group":
         return list.sort((a, b) => {
-          const groupComp = (a.groupName || "").localeCompare(b.groupName || "");
+          const groupComp = naturalCompare(a.groupName || "", b.groupName || "");
           if (groupComp !== 0) return groupComp;
-          return a.username.localeCompare(b.username);
+          return naturalCompare(a.username, b.username);
         });
       default:
         return list;
