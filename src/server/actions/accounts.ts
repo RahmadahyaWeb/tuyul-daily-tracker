@@ -195,6 +195,24 @@ export async function updateAccountZeny(id: string, zeny: number) {
   }
 }
 
+export async function updateAccountLevel(id: string, level: number) {
+  const session = await getSession();
+  if (!session) return { success: false, error: "Unauthorized" };
+
+  try {
+    const validLevel = Math.max(1, Math.min(999, Math.floor(Number(level) || 1)));
+    await sql`UPDATE accounts SET level = ${validLevel}, updated_at = NOW() WHERE id = ${id} AND user_id = ${session.id};`;
+    revalidatePath("/tracker");
+    revalidatePath("/accounts");
+    revalidatePath(`/accounts/${id}`);
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update level:", error);
+    return { success: false, error: "Failed to update level." };
+  }
+}
+
 export async function updateAccountNotes(id: string, notes: string) {
   const session = await getSession();
   if (!session) return { success: false, error: "Unauthorized" };

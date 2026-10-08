@@ -11,7 +11,7 @@ import {
   completeAllDaily,
   resetAllDaily,
 } from "@/server/actions/tracker";
-import { updateAccountZeny } from "@/server/actions/accounts";
+import { updateAccountZeny, updateAccountLevel } from "@/server/actions/accounts";
 import {
   addDays,
   formatDateDisplay,
@@ -59,6 +59,8 @@ import {
   Users,
   CheckCircle2,
   FolderKanban,
+  Shield,
+  Filter,
 } from "lucide-react";
 import { cn, formatZeny, formatZenyCompact } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
@@ -79,6 +81,8 @@ type SortOption =
   | "username-desc"
   | "name-asc"
   | "name-desc"
+  | "level-desc"
+  | "level-asc"
   | "zeny-desc"
   | "zeny-asc"
   | "least-progress"
@@ -120,6 +124,14 @@ export function TrackerView({ initialData }: TrackerViewProps) {
   const [zenyModalAccount, setZenyModalAccount] = useState<TrackerAccountRow | null>(null);
   const [zenyInputValue, setZenyInputValue] = useState<number>(0);
   const [isSavingZeny, setIsSavingZeny] = useState(false);
+
+  // Quick Level Update Modal State
+  const [levelModalAccount, setLevelModalAccount] = useState<TrackerAccountRow | null>(null);
+  const [levelInputValue, setLevelInputValue] = useState<number>(1);
+  const [isSavingLevel, setIsSavingLevel] = useState(false);
+
+  // Toggle for unassigned activity columns (default: true -> hides activity columns with 0 assigned accounts)
+  const [hideUnassignedActivities, setHideUnassignedActivities] = useState<boolean>(true);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -196,6 +208,42 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       toast.error(err.message || "Failed to save zeny");
     } finally {
       setIsSavingZeny(false);
+    }
+  };
+
+  const handleOpenLevelModal = (account: TrackerAccountRow) => {
+    setLevelModalAccount(account);
+    setLevelInputValue(account.level || 1);
+  };
+
+  const handleSaveLevel = async () => {
+    if (!levelModalAccount) return;
+    const accountId = levelModalAccount.id;
+    const targetNickname = levelModalAccount.nickname;
+    const newLevel = Math.max(1, Math.min(999, Math.floor(Number(levelInputValue)) || 1));
+    const prevLevel = levelModalAccount.level || 1;
+
+    // Optimistic update locally
+    setAccounts((prev) =>
+      prev.map((a) => (a.id === accountId ? { ...a, level: newLevel } : a))
+    );
+    setIsSavingLevel(true);
+
+    try {
+      const res = await updateAccountLevel(accountId, newLevel);
+      if (!res.success) {
+        throw new Error(res.error || "Failed to update level");
+      }
+      toast.success(`Level updated for "${targetNickname}" (Lv. ${newLevel})`);
+      setLevelModalAccount(null);
+    } catch (err: any) {
+      // Rollback on failure
+      setAccounts((prev) =>
+        prev.map((a) => (a.id === accountId ? { ...a, level: prevLevel } : a))
+      );
+      toast.error(err.message || "Failed to save level");
+    } finally {
+      setIsSavingLevel(false);
     }
   };
 
@@ -439,6 +487,10 @@ export function TrackerView({ initialData }: TrackerViewProps) {
         return list.sort((a, b) => naturalCompare(a.nickname, b.nickname) || naturalCompare(a.username, b.username));
       case "name-desc":
         return list.sort((a, b) => naturalCompare(b.nickname, a.nickname) || naturalCompare(b.username, a.username));
+      case "level-desc":
+        return list.sort((a, b) => (b.level || 1) - (a.level || 1) || naturalCompare(a.username, b.username));
+      case "level-asc":
+        return list.sort((a, b) => (a.level || 1) - (b.level || 1) || naturalCompare(a.username, b.username));
       case "zeny-desc":
         return list.sort((a, b) => (b.zeny || 0) - (a.zeny || 0) || naturalCompare(a.username, b.username));
       case "zeny-asc":
@@ -479,6 +531,18 @@ export function TrackerView({ initialData }: TrackerViewProps) {
       currentPage * pageSize
     );
   }, [sortedAccounts, currentPage, pageSize]);
+
+  // Visible activities columns in Tracker Matrix table
+  // If hideUnassignedActivities is true, only show activities that are assigned to at least 1 account in view
+  const visibleActivities = useMemo(() => {
+    if (!hideUnassignedActivities) {
+      return initialData.activities;
+    }
+    const targetAccounts = filteredAccounts.length > 0 ? filteredAccounts : accounts;
+    return initialData.activities.filter((act) =>
+      targetAccounts.some((acc) => acc.assignedActivityIds && acc.assignedActivityIds.includes(act.id))
+    );
+  }, [initialData.activities, filteredAccounts, accounts, hideUnassignedActivities]);
 
   // Live Metrics
   const activeList = accounts.filter((a) => a.status === "Active");
@@ -780,12 +844,43 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               <option value="username-desc">Username (Z-A)</option>
               <option value="name-asc">Nickname (A-Z)</option>
               <option value="name-desc">Nickname (Z-A)</option>
+              <option value="level-desc">Highest Level</option>
+              <option value="level-asc">Lowest Level</option>
               <option value="zeny-desc">Highest Zeny</option>
               <option value="zeny-asc">Lowest Zeny</option>
               <option value="least-progress">Least Progress</option>
               <option value="most-progress">Most Progress</option>
               <option value="group">Group</option>
             </select>
+
+            {/* Toggle Unassigned Activity Columns */}
+            {initialData.activities.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setHideUnassignedActivities(!hideUnassignedActivities)}
+                className={cn(
+                  "h-8 px-2.5 text-xs rounded-xs border font-medium flex items-center gap-1.5 transition-colors cursor-pointer shadow-[1px_1px_0px_#e5ddd0]",
+                  hideUnassignedActivities
+                    ? "bg-[#FAF2E1] border-[#cfbeaa] text-[#664b28] hover:bg-[#F5E8CE]"
+                    : "bg-white border-[#cfc3b0] text-[#5c4e3b] hover:bg-[#FAF6F0]"
+                )}
+                title={
+                  hideUnassignedActivities
+                    ? "Hiding tasks with 0 accounts in view (click to show all columns)"
+                    : "Showing all task columns (click to hide unassigned)"
+                }
+              >
+                <Filter className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">
+                  {hideUnassignedActivities ? "Assigned Only" : "All Tasks"}
+                </span>
+                {hideUnassignedActivities && visibleActivities.length < initialData.activities.length && (
+                  <span className="text-[10px] bg-[#664b28] text-white px-1 py-0.2 rounded-full font-mono leading-none">
+                    {visibleActivities.length}/{initialData.activities.length}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
 
@@ -833,7 +928,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                 <TableHead className="w-[130px] font-bold text-xs text-[#2c261e] tracking-wider uppercase font-sans">
                   PASSWORD
                 </TableHead>
-                {initialData.activities.map((act) => {
+                {visibleActivities.map((act) => {
                   const isWeekly = act.activityType === "WEEKLY";
                   return (
                     <TableHead
@@ -870,7 +965,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               {sortedAccounts.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={initialData.activities.length + 5}
+                    colSpan={visibleActivities.length + 5}
                     className="text-center py-12 text-xs text-[#8a7b68]"
                   >
                     No accounts found matching current filters.
@@ -899,10 +994,19 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                           >
                             {acc.nickname}
                           </Link>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                             <span className="text-[10px] text-[#8a7b68] truncate leading-tight">
                               {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
                             </span>
+                            <button
+                              type="button"
+                              onClick={() => handleOpenLevelModal(acc)}
+                              className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#204E79] bg-[#EEF4FB] hover:bg-[#DCE8F7] border border-[#BACDE2] px-1 py-0.2 rounded-2xs cursor-pointer transition-colors"
+                              title={`Level: ${acc.level || 1} (Click to edit)`}
+                            >
+                              <Shield className="w-2.5 h-2.5 text-[#204E79]" />
+                              Lv.{acc.level || 1}
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleOpenZenyModal(acc)}
@@ -983,7 +1087,7 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                       </TableCell>
 
                       {/* Activity Checkboxes */}
-                      {initialData.activities.map((act) => {
+                      {visibleActivities.map((act) => {
                         const isAssigned = acc.assignedActivityIds.includes(act.id);
                         const isCompleted = acc.completedActivityIds.includes(act.id);
 
@@ -1051,6 +1155,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                                 <span>Copy Password</span>
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuItem
+                              onClick={() => handleOpenLevelModal(acc)}
+                              className="cursor-pointer text-[#204E79] hover:bg-[#EEF4FB]"
+                            >
+                              <Shield className="w-3.5 h-3.5 mr-2 text-[#204E79]" />
+                              <span>Update Level</span>
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleOpenZenyModal(acc)}
                               className="cursor-pointer text-[#8C580B] hover:bg-[#FFF8EB]"
@@ -1132,10 +1243,19 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                     >
                       {acc.nickname}
                     </Link>
-                    <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                       <span className="text-[11px] text-[#8a7b68] truncate">
                         {acc.job} {acc.groupName ? `· ${acc.groupName}` : ""}
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenLevelModal(acc)}
+                        className="inline-flex items-center gap-0.5 font-mono text-[10px] font-bold text-[#204E79] bg-[#EEF4FB] hover:bg-[#DCE8F7] border border-[#BACDE2] px-1.5 py-0.5 rounded-2xs cursor-pointer transition-colors"
+                        title={`Level: ${acc.level || 1} (Click to edit)`}
+                      >
+                        <Shield className="w-3 h-3 text-[#204E79]" />
+                        Lv.{acc.level || 1}
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleOpenZenyModal(acc)}
@@ -1185,6 +1305,13 @@ export function TrackerView({ initialData }: TrackerViewProps) {
                             <span>Copy Password</span>
                           </DropdownMenuItem>
                         )}
+                        <DropdownMenuItem
+                          onClick={() => handleOpenLevelModal(acc)}
+                          className="cursor-pointer text-[#204E79] hover:bg-[#EEF4FB]"
+                        >
+                          <Shield className="w-3.5 h-3.5 mr-2 text-[#204E79]" />
+                          <span>Update Level</span>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleOpenZenyModal(acc)}
                           className="cursor-pointer text-[#8C580B] hover:bg-[#FFF8EB]"
@@ -1444,6 +1571,122 @@ export function TrackerView({ initialData }: TrackerViewProps) {
               className="h-8 text-xs font-semibold"
             >
               {isSavingZeny ? "Saving..." : "Save Zeny"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Quick Update Level Modal */}
+      <Modal
+        isOpen={Boolean(levelModalAccount)}
+        onClose={() => setLevelModalAccount(null)}
+        title={`Update Level — ${levelModalAccount?.nickname || ""}`}
+        description="Update character level for this account."
+        maxWidth="sm"
+      >
+        <div className="space-y-4 text-xs pt-1">
+          <div className="p-3 rounded-xs bg-[#EEF4FB] border border-[#BACDE2] space-y-1">
+            <div className="flex items-center justify-between text-[#204E79]">
+              <span className="font-semibold flex items-center gap-1">
+                <Shield className="w-3.5 h-3.5" /> Account:
+              </span>
+              <span className="font-bold text-[#231b12] text-sm">
+                {levelModalAccount?.nickname} ({levelModalAccount?.job})
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-[#486b91]">
+              <span>Current Level:</span>
+              <span className="font-mono font-bold text-[#204E79] text-sm">
+                Lv. {levelModalAccount?.level || 1}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#2c261e] flex items-center justify-between">
+              <span>New Level</span>
+              <span className="font-mono text-xs text-[#204E79] font-bold">
+                Lv. {levelInputValue || 1}
+              </span>
+            </label>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setLevelInputValue((prev) => Math.max(1, prev - 1))}
+                className="h-9 w-9 p-0 shrink-0 font-bold text-xs"
+              >
+                -1
+              </Button>
+              <Input
+                type="number"
+                min={1}
+                max={999}
+                value={levelInputValue || ""}
+                onChange={(e) =>
+                  setLevelInputValue(Math.max(1, parseInt(e.target.value) || 1))
+                }
+                className="text-center font-bold font-mono text-sm h-9"
+                autoFocus
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setLevelInputValue((prev) => Math.min(999, prev + 1))}
+                className="h-9 w-9 p-0 shrink-0 font-bold text-xs"
+              >
+                +1
+              </Button>
+            </div>
+            <p className="text-[10px] text-[#8a7b68]">
+              Enter character level (1 – 999).
+            </p>
+          </div>
+
+          {/* Quick preset adjust buttons */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] text-[#8a7b68] font-medium block">Quick Adjust:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {[1, 2, 5, 10].map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setLevelInputValue((prev) => Math.min(999, prev + amt))}
+                  className="px-2.5 py-1 text-[11px] font-mono bg-white border border-[#cfbeaa] hover:border-[#3B6EA8] hover:bg-[#EEF4FB] text-[#204E79] rounded-2xs cursor-pointer transition-colors shadow-2xs font-semibold"
+                >
+                  +{amt}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setLevelInputValue(levelModalAccount?.level || 1)}
+                className="px-2.5 py-1 text-[11px] font-mono bg-white border border-[#cfbeaa] hover:border-slate-400 text-slate-600 rounded-2xs cursor-pointer transition-colors shadow-2xs"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-[#ebd7b2]">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setLevelModalAccount(null)}
+              className="h-8 text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveLevel}
+              disabled={isSavingLevel}
+              className="h-8 text-xs font-semibold bg-[#3B6EA8] hover:bg-[#204E79] text-white"
+            >
+              {isSavingLevel ? "Saving..." : "Save Level"}
             </Button>
           </div>
         </div>
